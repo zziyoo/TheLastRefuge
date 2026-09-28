@@ -7,9 +7,14 @@ namespace LastRefuge.UI
 {
     public class UISetup : MonoBehaviour
     {
+        private static TMP_FontAsset cjkFont;
+        private static Sprite buttonSprite;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void SetupUI()
         {
+            InitializeResources();
+
             // Check if we already have a fully initialized UI
             var existingCanvas = GameObject.Find("MainCanvas");
             if (existingCanvas != null)
@@ -59,8 +64,49 @@ namespace LastRefuge.UI
             uiMgr.resourceDetailPanel = CreateSubPanel("ResourceDetailPanel", gamePanel.transform);
             uiMgr.logPanel = CreateSubPanel("LogPanel", gamePanel.transform);
             uiMgr.saveLoadGamePanel = CreateSubPanel("SaveLoadGamePanel", gamePanel.transform);
+
+            // Create UI prefabs for resource and character items
+            CreateResourceItemPrefab(uiMgr);
+            CreateCharacterItemPrefab(uiMgr);
         }
-        
+
+        private static void InitializeResources()
+        {
+            // Load CJK font from TMP Settings
+            cjkFont = TMP_Settings.defaultFontAsset;
+            if (cjkFont == null)
+            {
+                cjkFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+            }
+
+            // Create a simple button background sprite (procedural)
+            buttonSprite = CreateButtonSprite();
+        }
+
+        private static Sprite CreateButtonSprite()
+        {
+            // Create a simple 16x16 texture for button background
+            var tex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+            Color[] colors = new Color[256];
+            Color borderColor = new Color(0.3f, 0.4f, 0.5f, 1f);
+            Color centerColor = new Color(0.2f, 0.3f, 0.4f, 0.95f);
+            
+            for (int y = 0; y < 16; y++)
+            {
+                for (int x = 0; x < 16; x++)
+                {
+                    bool isBorder = x == 0 || x == 15 || y == 0 || y == 15;
+                    colors[y * 16 + x] = isBorder ? borderColor : centerColor;
+                }
+            }
+            
+            tex.SetPixels(colors);
+            tex.Apply();
+            tex.filterMode = FilterMode.Bilinear;
+            
+            return Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16, 0, SpriteMeshType.FullRect, new Vector4(4, 4, 4, 4));
+        }
+
         private static GameObject CreatePanel(string name, Transform parent)
         {
             var go = new GameObject(name);
@@ -219,6 +265,10 @@ namespace LastRefuge.UI
             tmp.fontStyle = style;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;
+            if (cjkFont != null)
+            {
+                tmp.font = cjkFont;
+            }
             return go;
         }
         
@@ -231,16 +281,95 @@ namespace LastRefuge.UI
             rt.sizeDelta = new Vector2(width, height);
             
             var image = go.AddComponent<Image>();
-            image.color = new Color(0.2f, 0.3f, 0.4f, 0.9f);
+            image.sprite = buttonSprite;
+            image.type = Image.Type.Sliced;
+            image.color = new Color(0.2f, 0.3f, 0.4f, 0.95f);
             
             var button = go.AddComponent<Button>();
             button.targetGraphic = image;
             button.onClick.AddListener(() => onClick?.Invoke());
             
+            // Add hover/pressed colors
+            var colors = button.colors;
+            colors.normalColor = new Color(0.2f, 0.3f, 0.4f, 0.95f);
+            colors.highlightedColor = new Color(0.3f, 0.4f, 0.5f, 1f);
+            colors.pressedColor = new Color(0.15f, 0.25f, 0.35f, 1f);
+            colors.selectedColor = new Color(0.25f, 0.35f, 0.45f, 1f);
+            colors.disabledColor = new Color(0.1f, 0.15f, 0.2f, 0.5f);
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.1f;
+            button.colors = colors;
+            
             var tmp = CreateText(go.transform, text, 20, FontStyles.Bold);
             tmp.GetComponent<RectTransform>().sizeDelta = new Vector2(width - 20, height - 10);
             
             return button;
+        }
+
+        private static void CreateResourceItemPrefab(UIManager uiManager)
+        {
+            var go = new GameObject("ResourceItemPrefab");
+            go.SetActive(false);
+            go.transform.SetParent(uiManager.transform);
+            
+            var rt = go.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0, 40);
+            
+            var layout = go.AddComponent<HorizontalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.spacing = 10;
+            layout.padding = new RectOffset(10, 10, 5, 5);
+            
+            var nameText = CreateText(go.transform, "Resource", 18);
+            nameText.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 30);
+            
+            var amountText = CreateText(go.transform, "0 / 0", 18);
+            amountText.GetComponent<RectTransform>().sizeDelta = new Vector2(80, 30);
+            
+            var changeText = CreateText(go.transform, "+0/天", 16);
+            changeText.GetComponent<RectTransform>().sizeDelta = new Vector2(70, 30);
+            
+            var daysText = CreateText(go.transform, "∞", 16);
+            daysText.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 30);
+            
+            var itemUI = go.AddComponent<ResourceItemUI>();
+            itemUI.nameText = nameText.GetComponent<TextMeshProUGUI>();
+            itemUI.amountText = amountText.GetComponent<TextMeshProUGUI>();
+            itemUI.changeText = changeText.GetComponent<TextMeshProUGUI>();
+            itemUI.daysRemainingText = daysText.GetComponent<TextMeshProUGUI>();
+            
+            uiManager.resourceItemPrefab = go;
+        }
+
+        private static void CreateCharacterItemPrefab(UIManager uiManager)
+        {
+            var go = new GameObject("CharacterItemPrefab");
+            go.SetActive(false);
+            go.transform.SetParent(uiManager.transform);
+            
+            var rt = go.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0, 80);
+            
+            var layout = go.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.spacing = 5;
+            layout.padding = new RectOffset(10, 10, 5, 5);
+            
+            var nameText = CreateText(go.transform, "Name (Profession)", 18, FontStyles.Bold);
+            nameText.GetComponent<RectTransform>().sizeDelta = new Vector2(300, 25);
+            
+            var statusText = CreateText(go.transform, "HP:100 饥饿:0 压力:0 疲劳:0", 16);
+            statusText.GetComponent<RectTransform>().sizeDelta = new Vector2(300, 20);
+            
+            var workText = CreateText(go.transform, "工作: 待机", 16);
+            workText.GetComponent<RectTransform>().sizeDelta = new Vector2(300, 20);
+            
+            var itemUI = go.AddComponent<CharacterItemUI>();
+            itemUI.nameText = nameText.GetComponent<TextMeshProUGUI>();
+            itemUI.statusText = statusText.GetComponent<TextMeshProUGUI>();
+            itemUI.workText = workText.GetComponent<TextMeshProUGUI>();
+            
+            uiManager.characterItemPrefab = go;
         }
     }
 }

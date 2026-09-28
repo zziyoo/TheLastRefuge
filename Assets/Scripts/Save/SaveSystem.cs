@@ -150,7 +150,13 @@ namespace LastRefuge.Save
                 
                 MigrateSave(saveData);
                 
-                gameState.gameSeed = saveData.gameSeed;
+                // Handle null/empty gameSeed - Unity JsonUtility serializes null as empty string
+                string loadedSeed = saveData.gameSeed;
+                if (string.IsNullOrEmpty(loadedSeed))
+                {
+                    loadedSeed = null;
+                }
+                gameState.gameSeed = loadedSeed;
                 gameState.currentDay = saveData.gameState.currentDay;
                 gameState.currentTimeSlot = saveData.gameState.currentTimeSlot;
                 gameState.gameplayState = saveData.gameState.gameplayState;
