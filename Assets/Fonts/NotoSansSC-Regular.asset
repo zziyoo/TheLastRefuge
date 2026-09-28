@@ -53,8 +53,8 @@ MonoBehaviour:
   m_FreeGlyphRects:
   - m_X: 0
     m_Y: 0
-    m_Width: 4
-    m_Height: -1
+    m_Width: 2047
+    m_Height: 2047
   m_fontInfo:
     Name: 
     PointSize: 0
@@ -78,9 +78,9 @@ MonoBehaviour:
     AtlasWidth: 0
     AtlasHeight: 0
   atlas: {fileID: 0}
-  m_AtlasWidth: 5
-  m_AtlasHeight: 0
-  m_AtlasPadding: 2048
+  m_AtlasWidth: 2048
+  m_AtlasHeight: 2048
+  m_AtlasPadding: 5
   m_AtlasRenderMode: 4165
   m_glyphInfoList: []
   m_KerningTable:

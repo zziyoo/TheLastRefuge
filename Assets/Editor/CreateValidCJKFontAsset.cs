@@ -28,16 +28,17 @@ namespace LastRefuge.Editor
 
             string assetPath = "Assets/Fonts/NotoSansSC-Regular.asset";
 
-            // Use the Font Asset Creator API with Dynamic mode (7-argument version for this TMP version)
-            // CreateFontAsset(Font sourceFontFile, int samplingPointSize, int atlasWidth, GlyphRenderMode renderMode, int atlasPadding, int characterSetSelection, AtlasPopulationMode populationMode)
+            // Use the Font Asset Creator API with correct parameter order
+            // CreateFontAsset(Font font, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, AtlasPopulationMode atlasPopulationMode, bool enableMultiAtlasSupport)
             var fontAsset = TMP_FontAsset.CreateFontAsset(
                 sourceFont,
-                90,                    // sampling point size
-                2048,                  // atlas width
-                GlyphRenderMode.SDFAA,  // render mode
-                5,                     // atlas padding
-                0,                     // character set selection (0 = Unicode range)
-                AtlasPopulationMode.Dynamic
+                90,                         // samplingPointSize
+                5,                          // atlasPadding
+                GlyphRenderMode.SDFAA,      // renderMode
+                2048,                       // atlasWidth
+                2048,                       // atlasHeight
+                AtlasPopulationMode.Dynamic,
+                true                        // enableMultiAtlasSupport
             );
 
             if (fontAsset != null)
