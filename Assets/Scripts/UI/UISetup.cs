@@ -514,61 +514,12 @@ private static void CreateCharacterItemPrefab(UIManager uiManager)
             var statusText = CreateText(statusRow.transform, "HP:100 饥饿:0 压力:0 疲劳:0", 14);
             statusText.GetComponent<RectTransform>().sizeDelta = new Vector2(250, 20);
             
-            // Health bar
-            var healthBarObj = CreateUIObject("HealthBar", statusRow.transform);
-            var healthBarRT = healthBarObj.GetComponent<RectTransform>();
-            healthBarRT.sizeDelta = new Vector2(80, 16);
-            var healthBarBg = healthBarObj.AddComponent<Image>();
-            healthBarBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-            healthBarBg.type = Image.Type.Filled;
-            healthBarBg.fillMethod = Image.FillMethod.Horizontal;
-            var healthBar = healthBarObj.AddComponent<Image>();
-            healthBar.color = Color.green;
-            healthBar.type = Image.Type.Filled;
-            healthBar.fillMethod = Image.FillMethod.Horizontal;
-            healthBar.fillAmount = 1f;
-            
-            // Hunger bar
-            var hungerBarObj = CreateUIObject("HungerBar", statusRow.transform);
-            var hungerBarRT = hungerBarObj.GetComponent<RectTransform>();
-            hungerBarRT.sizeDelta = new Vector2(80, 16);
-            var hungerBarBg = hungerBarObj.AddComponent<Image>();
-            hungerBarBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-            hungerBarBg.type = Image.Type.Filled;
-            hungerBarBg.fillMethod = Image.FillMethod.Horizontal;
-            var hungerBar = hungerBarObj.AddComponent<Image>();
-            hungerBar.color = Color.green;
-            hungerBar.type = Image.Type.Filled;
-            hungerBar.fillMethod = Image.FillMethod.Horizontal;
-            hungerBar.fillAmount = 0f;
-            
-            // Stress bar
-            var stressBarObj = CreateUIObject("StressBar", statusRow.transform);
-            var stressBarRT = stressBarObj.GetComponent<RectTransform>();
-            stressBarRT.sizeDelta = new Vector2(80, 16);
-            var stressBarBg = stressBarObj.AddComponent<Image>();
-            stressBarBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-            stressBarBg.type = Image.Type.Filled;
-            stressBarBg.fillMethod = Image.FillMethod.Horizontal;
-            var stressBar = stressBarObj.AddComponent<Image>();
-            stressBar.color = Color.green;
-            stressBar.type = Image.Type.Filled;
-            stressBar.fillMethod = Image.FillMethod.Horizontal;
-            stressBar.fillAmount = 0f;
-            
-            // Fatigue bar
-            var fatigueBarObj = CreateUIObject("FatigueBar", statusRow.transform);
-            var fatigueBarRT = fatigueBarObj.GetComponent<RectTransform>();
-            fatigueBarRT.sizeDelta = new Vector2(80, 16);
-            var fatigueBarBg = fatigueBarObj.AddComponent<Image>();
-            fatigueBarBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-            fatigueBarBg.type = Image.Type.Filled;
-            fatigueBarBg.fillMethod = Image.FillMethod.Horizontal;
-            var fatigueBar = fatigueBarObj.AddComponent<Image>();
-            fatigueBar.color = Color.green;
-            fatigueBar.type = Image.Type.Filled;
-            fatigueBar.fillMethod = Image.FillMethod.Horizontal;
-            fatigueBar.fillAmount = 0f;
+            // Status bars: one Image for the background and one for the fill.
+            // A GameObject can only hold a single Graphic, so the fill is a child object.
+            var healthBar = CreateStatusBar(statusRow.transform, "HealthBar", Color.green, 1f);
+            var hungerBar = CreateStatusBar(statusRow.transform, "HungerBar", Color.green, 0f);
+            var stressBar = CreateStatusBar(statusRow.transform, "StressBar", Color.green, 0f);
+            var fatigueBar = CreateStatusBar(statusRow.transform, "FatigueBar", Color.green, 0f);
             
             // Work row
             var workRow = CreateUIObject("WorkRow", go.transform);
@@ -615,6 +566,34 @@ private static void CreateCharacterItemPrefab(UIManager uiManager)
             itemUI.workButtons = workButtons.ToArray();
             
             uiManager.characterItemPrefab = go;
+        }
+        
+        /// <summary>
+        /// Creates a status bar made of a background Image and a filled child Image.
+        /// The returned Image is the fill, CharacterItemUI drives it with fillAmount.
+        /// </summary>
+        private static Image CreateStatusBar(Transform parent, string barName, Color fillColor, float fillAmount)
+        {
+            var barObj = CreateUIObject(barName, parent);
+            barObj.GetComponent<RectTransform>().sizeDelta = new Vector2(80, 16);
+            
+            var background = barObj.AddComponent<Image>();
+            background.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            
+            var fillObj = CreateUIObject("Fill", barObj.transform);
+            var fillRT = fillObj.GetComponent<RectTransform>();
+            fillRT.anchorMin = Vector2.zero;
+            fillRT.anchorMax = Vector2.one;
+            fillRT.offsetMin = Vector2.zero;
+            fillRT.offsetMax = Vector2.zero;
+            
+            var fill = fillObj.AddComponent<Image>();
+            fill.color = fillColor;
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillAmount = fillAmount;
+            
+            return fill;
         }
         
         private static void SetupSaveLoadPanel(GameObject panel, UIManager uiManager)

@@ -27,3 +27,6 @@ sysinfo.txt
 
 # ===================== Tooling data (not project source) =====================
 .workbuddy/
+
+# ===================== Local test / log output =====================
+unity_*.log

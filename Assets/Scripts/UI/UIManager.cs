@@ -134,7 +134,24 @@ namespace LastRefuge.UI
         public GameObject logPanel;
         public GameObject saveLoadGamePanel;
         
-        private GameManager gameManager;
+        private GameManager _gameManager;
+        
+        /// <summary>
+        /// Resolved lazily: the GameManager can be created after this UI, so caching it once
+        /// in Start() would leave every button dead for the rest of the session.
+        /// </summary>
+        private GameManager gameManager
+        {
+            get
+            {
+                if (_gameManager == null)
+                {
+                    _gameManager = GameManager.Instance;
+                }
+                return _gameManager;
+            }
+        }
+        
         private bool isGamePanelActive = false;
         
         private void Awake()
@@ -150,7 +167,7 @@ namespace LastRefuge.UI
         private void Start()
         {
             UnityEngine.Debug.Log("UIManager.Start() called");
-            gameManager = GameManager.Instance;
+            _gameManager = GameManager.Instance;
             UnityEngine.Debug.Log("GameManager.Instance: " + (gameManager != null ? "found" : "NULL"));
             
             // Setup button listeners
@@ -440,23 +457,28 @@ namespace LastRefuge.UI
                 var bg = buildingRow.AddComponent<Image>();
                 bg.color = new Color(0.2f, 0.2f, 0.25f, 0.8f);
                 
-                var infoText = CreateText(buildingRow.transform, $"{building.name} (Lv.{building.maxLevel})", 20);
-                infoText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
-                
-                var costText = CreateText(buildingRow.transform, $"消耗: {building.GetCostString()}", 16);
-                costText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
-                
-                var canBuild = gameManager.buildingSystem.CanBuild(building.id);
-                var buildBtn = CreateButton(buildingRow.transform, canBuild ? "建造" : "资源不足", () => 
-                {
-                    if (canBuild)
+                    var infoText = CreateText(buildingRow.transform, $"{building.name} (Lv.1)", 20);
+                    infoText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                    
+                    var costText = CreateText(buildingRow.transform, $"消耗: {building.GetCostString()}", 16);
+                    costText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                    
+                    var countText = CreateText(buildingRow.transform,
+                        building.maxCount > 0 ? $"数量上限: {gameManager.buildingSystem.GetBuildingsByDefinition(building.id).Length}/{building.maxCount}" : "可重复建造",
+                        16);
+                    countText.GetComponent<RectTransform>().sizeDelta = new Vector2(150, 40);
+                    
+                    bool canBuild = gameManager.buildingSystem.CanBuild(building.id);
+                    var buildBtn = CreateButton(buildingRow.transform, canBuild ? "建造" : "资源不足", () => 
                     {
-                        gameManager.BuildBuilding(building.id);
-                        RefreshBuildingPanel();
-                        RefreshResources();
-                    }
-                }, 100, 40);
-                buildBtn.interactable = canBuild;
+                        if (canBuild)
+                        {
+                            gameManager.BuildBuilding(building.id);
+                            RefreshBuildingPanel();
+                            RefreshResources();
+                        }
+                    }, 100, 40);
+                    buildBtn.interactable = canBuild;
             }
             
             // Existing buildings
@@ -467,6 +489,7 @@ namespace LastRefuge.UI
                 
                 foreach (var building in existingBuildings)
                 {
+                    var def = gameManager.buildingSystem.GetBuildingDefinition(building.definitionId);
                     var buildingRow = CreateUIObject("Built_" + building.buildingId, buildingPanel.transform);
                     var rowLayout = buildingRow.AddComponent<HorizontalLayoutGroup>();
                     rowLayout.childAlignment = TextAnchor.MiddleLeft;
@@ -476,11 +499,18 @@ namespace LastRefuge.UI
                     var bg = buildingRow.AddComponent<Image>();
                     bg.color = new Color(0.15f, 0.2f, 0.25f, 0.8f);
                     
-                    var infoText = CreateText(buildingRow.transform, $"{building.definitionId} (Lv.{building.level})", 20);
+                    var infoText = CreateText(buildingRow.transform, $"{def?.name ?? building.definitionId} (Lv.{building.level})", 20);
                     infoText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
                     
-                    var statusText = CreateText(buildingRow.transform, building.enabled ? "运行中" : "已停用", 16);
-                    statusText.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 40);
+                    var workerText = CreateText(buildingRow.transform,
+                        $"工人: {building.assignedWorkers?.Length ?? 0}/{def?.workerSlots ?? 0}", 16);
+                    workerText.GetComponent<RectTransform>().sizeDelta = new Vector2(120, 40);
+                    
+                    var statusText = CreateText(buildingRow.transform, GetBuildingStatusText(building), 16);
+                    statusText.GetComponent<RectTransform>().sizeDelta = new Vector2(180, 40);
+                    
+                    var productionText = CreateText(buildingRow.transform, $"昨日产出: {building.currentProduction}", 16);
+                    productionText.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 40);
                     
                     var upgradeBtn = CreateButton(buildingRow.transform, "升级", () => 
                     {
@@ -491,6 +521,32 @@ namespace LastRefuge.UI
                     upgradeBtn.interactable = gameManager.buildingSystem.CanUpgrade(building.buildingId);
                 }
             }
+        }
+        
+        /// <summary>
+        /// Status is derived from BuildingSystem, the UI does not evaluate upkeep or power itself.
+        /// </summary>
+        private string GetBuildingStatusText(BuildingState building)
+        {
+            if (!building.enabled) return "已停用";
+            if (building.durability <= 0) return "已损坏";
+            
+            if (!gameManager.buildingSystem.CanOperate(building))
+            {
+                var missing = new System.Collections.Generic.List<string>();
+                var cost = gameManager.buildingSystem.CalculateOperationCost(building);
+                foreach (var kvp in cost)
+                {
+                    if (!gameManager.resourceSystem.CanAfford(kvp.Key, kvp.Value))
+                    {
+                        missing.Add($"{kvp.Key.GetDisplayName()}({gameManager.resourceSystem.GetAmount(kvp.Key)}/{kvp.Value})");
+                    }
+                }
+                
+                return missing.Count > 0 ? $"维护不足: {string.Join(",", missing)}" : "维护不足";
+            }
+            
+            return "运行中";
         }
         
         private void RefreshResourceDetailPanel()
@@ -575,13 +631,8 @@ namespace LastRefuge.UI
             UnityEngine.Debug.Log("OnNewGameClicked called");
             if (gameManager == null)
             {
-                UnityEngine.Debug.LogError("gameManager is null! GameManager.Instance: " + (GameManager.Instance != null ? "exists" : "null"));
-                gameManager = GameManager.Instance;
-                if (gameManager == null)
-                {
-                    UnityEngine.Debug.LogError("Failed to get GameManager.Instance");
-                    return;
-                }
+                UnityEngine.Debug.LogError("Failed to get GameManager.Instance");
+                return;
             }
             gameManager.NewGame();
             ShowGame();

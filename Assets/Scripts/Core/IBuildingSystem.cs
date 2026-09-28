@@ -12,12 +12,18 @@ namespace LastRefuge.Core
         BuildingState GetBuilding(string buildingId);
         BuildingState[] GetBuildingsByDefinition(string definitionId);
         bool CanBuild(string definitionId);
+        bool CanBuildCount(string definitionId);
         bool HasBuilding(string definitionId);
         BuildingState Build(string definitionId);
         bool CanUpgrade(string buildingId);
         bool UpgradeBuilding(string buildingId);
         bool AssignWorker(string buildingId, string characterId);
         bool RemoveWorker(string buildingId, string characterId);
+        bool CanOperate(BuildingState building);
+        Dictionary<ResourceType, int> CalculateOperationCost(BuildingState building);
+        Dictionary<ResourceType, int> CalculateProduction(BuildingState building);
+        int GetBuildingDailyProduction(BuildingState building, ResourceType type);
+        void RecalculateAllBuildingEffects();
         void ProcessBuildingProduction();
         int GetTotalHousingCapacity();
         int GetCurrentPopulation();

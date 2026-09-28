@@ -7,9 +7,10 @@ namespace LastRefuge.Core
     public interface IResourceSystem
     {
         void Initialize(GameState state);
-        void Initialize(GameState state, IBuildingSystem buildSys);
+        void Initialize(GameState state, IBuildingSystem buildSys, ICharacterSystem charSys = null);
         int GetAmount(ResourceType type);
         int GetCapacity(ResourceType type);
+        int GetBaseCapacity(ResourceType type);
         bool CanAfford(ResourceType type, int amount);
         bool CanAfford(Dictionary<ResourceType, int> costs);
         bool Add(ResourceType type, int amount, string source = "System");

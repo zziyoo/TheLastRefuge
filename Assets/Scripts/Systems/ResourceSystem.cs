@@ -10,6 +10,7 @@ namespace LastRefuge.Systems
     {
         private GameState gameState;
         private IBuildingSystem buildingSystem;
+        private ICharacterSystem characterSystem;
         
         private Dictionary<ResourceType, ResourceState> resourceMap = new Dictionary<ResourceType, ResourceState>();
         
@@ -17,13 +18,14 @@ namespace LastRefuge.Systems
         
         public void Initialize(GameState state)
         {
-            Initialize(state, null);
+            Initialize(state, null, null);
         }
         
-        public void Initialize(GameState state, IBuildingSystem buildSys)
+        public void Initialize(GameState state, IBuildingSystem buildSys, ICharacterSystem charSys = null)
         {
             gameState = state;
             buildingSystem = buildSys;
+            characterSystem = charSys;
             resourceMap.Clear();
             
             if (gameState.resources != null)
@@ -68,6 +70,15 @@ namespace LastRefuge.Systems
                 ResourceType.Power => 500,
                 _ => 100
             };
+        }
+        
+        /// <summary>
+        /// Storage the colony owns before any building is added. BuildingSystem combines it
+        /// with the current building levels to derive the real capacity.
+        /// </summary>
+        public int GetBaseCapacity(ResourceType type)
+        {
+            return GetDefaultCapacity(type);
         }
         
         public int GetAmount(ResourceType type)
@@ -194,24 +205,29 @@ namespace LastRefuge.Systems
             return (float)res.currentAmount / res.capacity;
         }
         
+        /// <summary>
+        /// Food and water demand is owned by CharacterSystem (it knows about traits),
+        /// so the UI forecast and the daily settlement can never disagree.
+        /// </summary>
         public int GetDailyConsumption(ResourceType type)
         {
-            if (type == ResourceType.Food || type == ResourceType.Water)
+            if (characterSystem == null) return 0;
+            
+            switch (type)
             {
-                int population = gameState.characters?.Length ?? 0;
-                int aliveCount = 0;
-                if (gameState.characters != null)
-                {
-                    foreach (var c in gameState.characters)
-                    {
-                        if (c.alive) aliveCount++;
-                    }
-                }
-                return aliveCount * 2;
+                case ResourceType.Food:
+                    return characterSystem.GetTotalFoodConsumption();
+                case ResourceType.Water:
+                    return characterSystem.GetTotalWaterConsumption();
+                default:
+                    return 0;
             }
-            return 0;
         }
         
+        /// <summary>
+        /// Production is owned by BuildingSystem: the forecast reuses the very same
+        /// CalculateProduction() the daily settlement runs, including upkeep and power checks.
+        /// </summary>
         public int GetDailyProduction(ResourceType type)
         {
             if (buildingSystem == null) return 0;
@@ -221,31 +237,7 @@ namespace LastRefuge.Systems
             
             foreach (var building in buildings)
             {
-                if (!building.enabled || building.durability <= 0) continue;
-                
-                var def = buildingSystem.GetBuildingDefinition(building.definitionId);
-                if (def == null || def.production == null) continue;
-                
-                float totalEfficiency = 0f;
-                if (building.assignedWorkers != null)
-                {
-                    // Need access to characterSystem for efficiency - for now use base amount * worker count
-                    int workerCount = building.assignedWorkers.Length;
-                    totalEfficiency = workerCount > 0 ? workerCount : 0.5f; // minimum 0.5 efficiency if no workers
-                }
-                else
-                {
-                    totalEfficiency = 0.5f; // automated/minimal production
-                }
-                
-                foreach (var prod in def.production)
-                {
-                    if (prod.type == type)
-                    {
-                        int finalAmount = Mathf.RoundToInt(prod.baseAmount * totalEfficiency * prod.efficiencyMultiplier);
-                        totalProduction += Math.Max(0, finalAmount);
-                    }
-                }
+                totalProduction += buildingSystem.GetBuildingDailyProduction(building, type);
             }
             
             return totalProduction;

@@ -44,7 +44,11 @@ namespace LastRefuge.Data
         
         public int housingCapacity = 0;
         public int workerSlots = 1;
+        
+        /// <summary>Electricity drawn per production cycle. Merged with upkeepCost by BuildingSystem so Power is never paid twice.</summary>
         public int powerConsumption = 0;
+        
+        /// <summary>Declared output capability only. Actual electricity is produced through the single 'production' entry, never added on top of it.</summary>
         public int powerProduction = 0;
         
         public string[] prerequisites;

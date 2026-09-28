@@ -9,6 +9,10 @@ namespace LastRefuge.Systems
 {
     public class BuildingSystem : IBuildingSystem
     {
+        // Storage granted per building level, shared by build/upgrade/load so capacity
+        // is always derived, never accumulated.
+        private const int StorageCapacityPerLevel = 100;
+
         private GameState gameState;
         private IResourceSystem resourceSystem;
         private ICharacterSystem characterSystem;
@@ -25,6 +29,7 @@ namespace LastRefuge.Systems
             characterSystem = charSys;
             
             LoadBuildingDefinitions();
+            RecalculateAllBuildingEffects();
         }
         
         private void LoadBuildingDefinitions()
@@ -339,6 +344,8 @@ namespace LastRefuge.Systems
             var def = GetBuildingDefinition(definitionId);
             if (def == null) return false;
             
+            if (!CanBuildCount(definitionId)) return false;
+            
             if (def.prerequisites != null)
             {
                 foreach (var prereq in def.prerequisites)
@@ -356,6 +363,19 @@ namespace LastRefuge.Systems
             return true;
         }
         
+        /// <summary>
+        /// maxCount is enforced here, so the rule also holds for direct Build() calls
+        /// and does not depend on the UI hiding the button.
+        /// </summary>
+        public bool CanBuildCount(string definitionId)
+        {
+            var def = GetBuildingDefinition(definitionId);
+            if (def == null) return false;
+            if (def.maxCount <= 0) return true;
+            
+            return GetBuildingsByDefinition(definitionId).Length < def.maxCount;
+        }
+        
         public bool HasBuilding(string definitionId)
         {
             return GetBuildingsByDefinition(definitionId).Length > 0;
@@ -365,6 +385,9 @@ namespace LastRefuge.Systems
         {
             var def = GetBuildingDefinition(definitionId);
             if (def == null) return null;
+            
+            // Count limit is re-checked here: Build must never rely on CanBuild alone.
+            if (!CanBuildCount(definitionId)) return null;
             
             if (!CanBuild(definitionId)) return null;
             
@@ -391,7 +414,7 @@ namespace LastRefuge.Systems
             list.Add(building);
             gameState.buildings = list.ToArray();
             
-            ApplyBuildingEffects(building, true);
+            RecalculateAllBuildingEffects();
             
             OnBuildingConstructed?.Invoke(buildingId);
             OnBuildingChanged?.Invoke(buildingId);
@@ -425,48 +448,44 @@ namespace LastRefuge.Systems
                 resourceSystem.Remove(cost.type, upgradeCost, $"Upgrade_{buildingId}");
             }
             
-            // Remove old level effects before applying new level
-            ApplyBuildingEffects(building, false);
-            
             building.level++;
             building.durability = 100;
             
-            // Apply new level effects
-            ApplyBuildingEffects(building, true);
+            // Capacity is recomputed from every current building level, never added up.
+            RecalculateAllBuildingEffects();
             
             OnBuildingChanged?.Invoke(buildingId);
             return true;
         }
         
-        private void ApplyBuildingEffects(BuildingState building, bool adding)
+        /// <summary>
+        /// Recomputes every derived value from the current building levels.
+        /// Called after build, upgrade and load so capacities can never accumulate twice.
+        /// </summary>
+        public void RecalculateAllBuildingEffects()
         {
-            var def = GetBuildingDefinition(building.definitionId);
-            if (def == null) return;
+            var bonus = new Dictionary<ResourceType, int>();
             
-            int multiplier = adding ? 1 : -1;
-            
-            if (def.storageCapacity != null)
+            foreach (var building in GetAllBuildings())
             {
+                var def = GetBuildingDefinition(building.definitionId);
+                if (def == null || def.storageCapacity == null) continue;
+                
                 foreach (var resType in def.storageCapacity)
                 {
-                    // Capacity scales with level: base 100 per level
-                    int capacityPerLevel = 100;
-                    int totalCapacity = def.housingCapacity > 0 ? building.level * capacityPerLevel : capacityPerLevel * building.level;
-                    // For adding: add the difference from new level
-                    // For removing: subtract the old level's capacity
-                    int oldLevel = adding ? building.level - 1 : building.level;
-                    int oldCapacity = oldLevel * capacityPerLevel;
-                    int newCapacity = building.level * capacityPerLevel;
-                    int delta = adding ? (newCapacity - oldCapacity) : -oldCapacity;
-                    
-                    resourceSystem.AddCapacity(resType, delta * multiplier);
+                    int contribution = StorageCapacityPerLevel * Math.Max(1, building.level);
+                    if (!bonus.TryGetValue(resType, out int current))
+                    {
+                        current = 0;
+                    }
+                    bonus[resType] = current + contribution;
                 }
             }
             
-            if (def.housingCapacity > 0)
+            foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
             {
-                // Housing capacity is calculated dynamically in GetTotalHousingCapacity
-                // No need to add/remove here, just trigger events
+                int extra = bonus.TryGetValue(type, out int value) ? value : 0;
+                resourceSystem.SetCapacity(type, resourceSystem.GetBaseCapacity(type) + extra);
             }
         }
         
@@ -505,95 +524,168 @@ namespace LastRefuge.Systems
             return true;
         }
         
+        /// <summary>
+        /// The real cost of running the building for one cycle.
+        /// upkeepCost covers maintenance materials (Fuel, Parts...), powerConsumption covers
+        /// running power. When both list Power the stronger of the two is used so electricity
+        /// is never paid twice.
+        /// </summary>
+        public Dictionary<ResourceType, int> CalculateOperationCost(BuildingState building)
+        {
+            var cost = new Dictionary<ResourceType, int>();
+            if (building == null) return cost;
+            
+            var def = GetBuildingDefinition(building.definitionId);
+            if (def == null) return cost;
+            
+            if (def.upkeepCost != null)
+            {
+                foreach (var upkeep in def.upkeepCost)
+                {
+                    if (cost.TryGetValue(upkeep.type, out int current))
+                    {
+                        // Power: keep the requirement only once.
+                        if (upkeep.type == ResourceType.Power)
+                        {
+                            cost[upkeep.type] = Math.Max(current, upkeep.amount);
+                        }
+                        else
+                        {
+                            cost[upkeep.type] = current + upkeep.amount;
+                        }
+                    }
+                    else
+                    {
+                        cost[upkeep.type] = upkeep.amount;
+                    }
+                }
+            }
+            
+            if (def.powerConsumption > 0)
+            {
+                if (cost.TryGetValue(ResourceType.Power, out int powerCost))
+                {
+                    cost[ResourceType.Power] = Math.Max(powerCost, def.powerConsumption);
+                }
+                else
+                {
+                    cost[ResourceType.Power] = def.powerConsumption;
+                }
+            }
+            
+            return cost;
+        }
+        
+        /// <summary>
+        /// Step 1 of the production cycle: enabled, durable and able to pay.
+        /// </summary>
+        public bool CanOperate(BuildingState building)
+        {
+            if (building == null) return false;
+            if (!building.enabled) return false;
+            if (building.durability <= 0) return false;
+            
+            var cost = CalculateOperationCost(building);
+            return resourceSystem.CanAfford(cost);
+        }
+        
+        /// <summary>
+        /// The single production formula. Used by the daily settlement and by the UI forecast,
+        /// so predicted and actual output can never drift apart.
+        /// </summary>
+        public Dictionary<ResourceType, int> CalculateProduction(BuildingState building)
+        {
+            var result = new Dictionary<ResourceType, int>();
+            if (building == null) return result;
+            
+            var def = GetBuildingDefinition(building.definitionId);
+            if (def == null || def.production == null) return result;
+            
+            // A building that cannot pay its cost produces nothing this cycle.
+            if (!CanOperate(building)) return result;
+            
+            float workerEfficiency = 0f;
+            if (building.assignedWorkers != null)
+            {
+                foreach (var workerId in building.assignedWorkers)
+                {
+                    var character = characterSystem.GetCharacter(workerId);
+                    if (character != null && character.alive)
+                    {
+                        workerEfficiency += characterSystem.GetWorkEfficiency(character);
+                    }
+                }
+            }
+            
+            foreach (var prod in def.production)
+            {
+                // Power is generated automatically, it does not need staffed workers.
+                float amount = prod.type == ResourceType.Power
+                    ? prod.baseAmount * prod.efficiencyMultiplier
+                    : prod.baseAmount * workerEfficiency * prod.efficiencyMultiplier;
+                
+                int finalAmount = Mathf.RoundToInt(amount);
+                if (finalAmount <= 0) continue;
+                
+                if (result.TryGetValue(prod.type, out int existing))
+                {
+                    result[prod.type] = existing + finalAmount;
+                }
+                else
+                {
+                    result[prod.type] = finalAmount;
+                }
+            }
+            
+            return result;
+        }
+        
+        public int GetBuildingDailyProduction(BuildingState building, ResourceType type)
+        {
+            var production = CalculateProduction(building);
+            return production.TryGetValue(type, out int amount) ? amount : 0;
+        }
+        
         public void ProcessBuildingProduction()
         {
             if (gameState.buildings == null) return;
             
             foreach (var building in gameState.buildings)
             {
-                if (!building.enabled || building.durability <= 0) continue;
+                if (!building.enabled || building.durability <= 0)
+                {
+                    building.currentProduction = 0;
+                    continue;
+                }
                 
                 var def = GetBuildingDefinition(building.definitionId);
                 if (def == null) continue;
                 
-                // Check if building can operate (upkeep and power)
-                bool canOperate = true;
-                
-                // Check upkeep costs
-                if (def.upkeepCost != null)
+                // CheckOperation -> ConsumeCosts -> Produce. Nothing is produced unless the
+                // whole cost was verified and paid first.
+                var cost = CalculateOperationCost(building);
+                if (!resourceSystem.CanAfford(cost))
                 {
-                    foreach (var cost in def.upkeepCost)
-                    {
-                        if (!resourceSystem.CanAfford(cost.type, cost.amount))
-                        {
-                            canOperate = false;
-                            break;
-                        }
-                    }
-                }
-                
-                // Check power consumption
-                if (canOperate && def.powerConsumption > 0)
-                {
-                    if (!resourceSystem.CanAfford(ResourceType.Power, def.powerConsumption))
-                    {
-                        canOperate = false;
-                    }
-                }
-                
-                float totalEfficiency = 0f;
-                if (building.assignedWorkers != null)
-                {
-                    foreach (var workerId in building.assignedWorkers)
-                    {
-                        var character = characterSystem.GetCharacter(workerId);
-                        if (character != null && character.alive)
-                        {
-                            totalEfficiency += characterSystem.GetWorkEfficiency(character);
-                        }
-                    }
-                }
-                
-                if (canOperate && def.production != null)
-                {
-                    foreach (var prod in def.production)
-                    {
-                        int baseAmount = prod.baseAmount;
-                        int finalAmount = Mathf.RoundToInt(baseAmount * totalEfficiency * prod.efficiencyMultiplier);
-                        
-                        if (finalAmount > 0)
-                        {
-                            resourceSystem.Add(prod.type, finalAmount, $"Building_{building.buildingId}");
-                            building.currentProduction = finalAmount;
-                        }
-                    }
-                    
-                    // Pay upkeep costs after successful production
-                    if (def.upkeepCost != null)
-                    {
-                        foreach (var cost in def.upkeepCost)
-                        {
-                            resourceSystem.Remove(cost.type, cost.amount, $"Upkeep_{building.buildingId}");
-                        }
-                    }
-                    
-                    // Pay power consumption
-                    if (def.powerConsumption > 0)
-                    {
-                        resourceSystem.Remove(ResourceType.Power, def.powerConsumption, $"Power_{building.buildingId}");
-                    }
-                }
-                else if (!canOperate)
-                {
-                    // Building cannot operate due to lack of resources
                     building.currentProduction = 0;
-                    // Optionally: could add a flag to indicate maintenance needed
+                    building.durability = Math.Max(0, building.durability - 1);
+                    continue;
                 }
                 
-                if (def.powerProduction > 0)
+                foreach (var kvp in cost)
                 {
-                    resourceSystem.Add(ResourceType.Power, def.powerProduction, $"Power_{building.buildingId}");
+                    resourceSystem.Remove(kvp.Key, kvp.Value, $"Operation_{building.buildingId}");
                 }
+                
+                var production = CalculateProduction(building);
+                
+                int totalProduced = 0;
+                foreach (var kvp in production)
+                {
+                    resourceSystem.Add(kvp.Key, kvp.Value, $"Building_{building.buildingId}");
+                    totalProduced += kvp.Value;
+                }
+                
+                building.currentProduction = totalProduced;
                 
                 building.durability = Math.Max(0, building.durability - 1);
                 if (building.durability <= 0)

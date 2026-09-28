@@ -56,7 +56,7 @@ namespace LastRefuge.Gameplay
             saveSystem = new SaveSystem();
             
             timeSystem.Initialize(gameState, randomSystem);
-            resourceSystem.Initialize(gameState, buildingSystem);
+            resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
             characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
             buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
             effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
@@ -96,10 +96,12 @@ namespace LastRefuge.Gameplay
         
         private void GenerateInitialState()
         {
+            // Starting stock is sized so the first shelter plus one farm can be built
+            // on day one: farm costs 30 Wood / 10 Stone, shelter costs 20 Wood / 10 Stone.
             resourceSystem.Add(ResourceType.Food, 30, "Initial");
             resourceSystem.Add(ResourceType.Water, 30, "Initial");
-            resourceSystem.Add(ResourceType.Wood, 40, "Initial");
-            resourceSystem.Add(ResourceType.Stone, 20, "Initial");
+            resourceSystem.Add(ResourceType.Wood, 60, "Initial");
+            resourceSystem.Add(ResourceType.Stone, 30, "Initial");
             resourceSystem.Add(ResourceType.Iron, 10, "Initial");
             
             characterSystem.GenerateInitialCharacters(4);
@@ -115,7 +117,7 @@ namespace LastRefuge.Gameplay
             {
                 randomSystem.Initialize(gameState.gameSeed);
                 timeSystem.Initialize(gameState, randomSystem);
-                resourceSystem.Initialize(gameState, buildingSystem);
+                resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
                 characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
                 buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
                 effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
@@ -173,8 +175,10 @@ namespace LastRefuge.Gameplay
         {
             UnityEngine.Debug.Log($"=== Day {gameState.currentDay} Action ===");
             
-            characterSystem.ProcessDailyConsumption();
+            // Action: buildings produce (and pay their running cost), the colony then eats
+            // and drinks from what the day actually produced and what is in storage.
             buildingSystem.ProcessBuildingProduction();
+            characterSystem.ProcessDailyConsumption();
             
             timeSystem.SetGameplayState(GameplayState.Action);
         }
@@ -188,6 +192,7 @@ namespace LastRefuge.Gameplay
         private void ProcessNight()
         {
             UnityEngine.Debug.Log($"=== Day {gameState.currentDay} Night ===");
+            // Night: characters rest, fatigue and stress recover, starvation takes its toll.
             characterSystem.ProcessNightRecovery();
             timeSystem.SetGameplayState(GameplayState.Night);
         }
@@ -195,6 +200,8 @@ namespace LastRefuge.Gameplay
         private void ProcessDayEnd()
         {
             UnityEngine.Debug.Log($"=== Day {gameState.currentDay} End ===");
+            // DayEnd: the day is written to disk, TimeSystem then rolls over to the next morning.
+            buildingSystem.RecalculateAllBuildingEffects();
             
             if (autoSaveOnDayEnd)
             {

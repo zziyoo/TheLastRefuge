@@ -11,6 +11,10 @@ namespace LastRefuge.Core
         CharacterState CreateCharacter(string id, string name, Profession profession, CharacterStats baseStats = null);
         void GenerateInitialCharacters(int count = 4);
         bool AssignWork(string characterId, WorkType workType, string buildingId = null);
+        float GetCharacterFoodConsumption(CharacterState character);
+        float GetCharacterWaterConsumption(CharacterState character);
+        int GetTotalFoodConsumption();
+        int GetTotalWaterConsumption();
         void ProcessDailyConsumption();
         void ProcessNightRecovery();
         float GetWorkEfficiency(CharacterState character);

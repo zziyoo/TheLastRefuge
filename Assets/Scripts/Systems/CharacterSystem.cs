@@ -177,62 +177,70 @@ namespace LastRefuge.Systems
         {
             var character = GetCharacter(characterId);
             if (character == null || !character.alive) return false;
-            
+
             string oldBuildingId = character.assignedBuildingId;
-            WorkType oldWork = character.currentWork;
-            
-            // If changing to Idle, clear building assignment
-            if (workType == WorkType.Idle)
+
+            // Idle never binds a character to a building.
+            string targetBuildingId = workType == WorkType.Idle ? null : buildingId;
+
+            // No building requested for a work type: look for a workplace automatically.
+            if (string.IsNullOrEmpty(targetBuildingId) && workType != WorkType.Idle)
             {
-                buildingId = null;
+                targetBuildingId = FindSuitableBuilding(characterId, workType);
             }
-            
-            // If no building specified but work type requires one, auto-find appropriate building
-            if (string.IsNullOrEmpty(buildingId) && workType != WorkType.Idle)
+
+            // --- Validation phase: no state may be mutated before every check passed ---
+            BuildingState targetBuilding = null;
+            BuildingDefinition targetDef = null;
+            if (!string.IsNullOrEmpty(targetBuildingId))
             {
-                buildingId = FindSuitableBuilding(characterId, workType);
-            }
-            
-            // Validate building if specified
-            if (!string.IsNullOrEmpty(buildingId))
-            {
-                var building = buildingSystem.GetBuilding(buildingId);
-                if (building == null) return false;
-                
-                var def = buildingSystem.GetBuildingDefinition(building.definitionId);
-                if (def != null)
+                targetBuilding = buildingSystem.GetBuilding(targetBuildingId);
+                if (targetBuilding == null) return false;
+
+                targetDef = buildingSystem.GetBuildingDefinition(targetBuilding.definitionId);
+                if (targetDef == null) return false;
+
+                // A character already counted in this building must not block itself.
+                int occupiedSlots = 0;
+                if (targetBuilding.assignedWorkers != null)
                 {
-                    int currentWorkers = building.assignedWorkers?.Length ?? 0;
-                    if (currentWorkers >= def.workerSlots) return false;
+                    foreach (var workerId in targetBuilding.assignedWorkers)
+                    {
+                        if (workerId != characterId) occupiedSlots++;
+                    }
                 }
+
+                if (occupiedSlots >= targetDef.workerSlots) return false;
             }
-            
-            // Remove from old building if changing building
-            if (oldBuildingId != buildingId && !string.IsNullOrEmpty(oldBuildingId))
+
+            bool alreadyInTargetBuilding = targetBuilding != null
+                && targetBuilding.assignedWorkers != null
+                && Array.IndexOf(targetBuilding.assignedWorkers, characterId) >= 0;
+
+            // --- Commit phase: only reached when the assignment cannot fail ---
+            if (oldBuildingId != targetBuildingId && !string.IsNullOrEmpty(oldBuildingId))
             {
                 buildingSystem.RemoveWorker(oldBuildingId, characterId);
             }
-            
-            // Add to new building if specified
-            if (!string.IsNullOrEmpty(buildingId))
+
+            if (!string.IsNullOrEmpty(targetBuildingId) && !alreadyInTargetBuilding)
             {
-                bool added = buildingSystem.AssignWorker(buildingId, characterId);
-                if (!added) return false;
+                buildingSystem.AssignWorker(targetBuildingId, characterId);
             }
-            
+
             character.currentWork = workType;
-            character.assignedBuildingId = buildingId;
-            
+            character.assignedBuildingId = string.IsNullOrEmpty(targetBuildingId) ? null : targetBuildingId;
+
             OnWorkAssigned?.Invoke(characterId, workType);
             OnCharacterChanged?.Invoke(characterId);
-            
+
             EventBus.Publish(new CharacterChangedEvent
             {
                 characterId = characterId,
                 changeType = "WorkAssigned",
-                detail = $"{workType.GetDisplayName()}" + (string.IsNullOrEmpty(buildingId) ? "" : $" @ {buildingId}")
+                detail = $"{workType.GetDisplayName()}" + (string.IsNullOrEmpty(targetBuildingId) ? "" : $" @ {targetBuildingId}")
             });
-            
+
             return true;
         }
         
@@ -286,8 +294,16 @@ namespace LastRefuge.Systems
                 
                 if (matches)
                 {
-                    int currentWorkers = building.assignedWorkers?.Length ?? 0;
-                    if (currentWorkers < def.workerSlots)
+                    int occupiedSlots = 0;
+                    if (building.assignedWorkers != null)
+                    {
+                        foreach (var workerId in building.assignedWorkers)
+                        {
+                            if (workerId != characterId) occupiedSlots++;
+                        }
+                    }
+
+                    if (occupiedSlots < def.workerSlots)
                     {
                         return building.buildingId;
                     }
@@ -297,56 +313,95 @@ namespace LastRefuge.Systems
             return null;
         }
         
+        public float GetCharacterFoodConsumption(CharacterState character)
+        {
+            if (character == null || !character.alive) return 0f;
+
+            float amount = 2f;
+            if (HasTrait(character, "gluttonous")) amount *= 1.5f;
+            if (HasTrait(character, "frugal")) amount *= 0.8f;
+            return amount;
+        }
+
+        public float GetCharacterWaterConsumption(CharacterState character)
+        {
+            if (character == null || !character.alive) return 0f;
+
+            float amount = 2f;
+            if (HasTrait(character, "gluttonous")) amount *= 1.2f;
+            if (HasTrait(character, "frugal")) amount *= 0.9f;
+            return amount;
+        }
+
+        public int GetTotalFoodConsumption()
+        {
+            if (gameState.characters == null) return 0;
+
+            float total = 0f;
+            foreach (var character in gameState.characters)
+            {
+                total += GetCharacterFoodConsumption(character);
+            }
+
+            return Mathf.RoundToInt(total);
+        }
+
+        public int GetTotalWaterConsumption()
+        {
+            if (gameState.characters == null) return 0;
+
+            float total = 0f;
+            foreach (var character in gameState.characters)
+            {
+                total += GetCharacterWaterConsumption(character);
+            }
+
+            return Mathf.RoundToInt(total);
+        }
+
         public void ProcessDailyConsumption()
         {
             if (gameState.characters == null) return;
-            
+
             var aliveCharacters = gameState.characters.Where(c => c.alive).ToArray();
             if (aliveCharacters.Length == 0) return;
-            
-            // Calculate total food and water demand
-            float totalFoodDemand = 0f;
-            float totalWaterDemand = 0f;
-            
-            foreach (var character in aliveCharacters)
+
+            // Demand and consumption share the same helpers used by the UI forecast.
+            int totalFoodDemand = GetTotalFoodConsumption();
+            int totalWaterDemand = GetTotalWaterConsumption();
+
+            int currentFood = resourceSystem.GetAmount(ResourceType.Food);
+            int currentWater = resourceSystem.GetAmount(ResourceType.Water);
+
+            // Only what is actually in storage is spent.
+            int actualFoodConsume = Mathf.Min(currentFood, totalFoodDemand);
+            int actualWaterConsume = Mathf.Min(currentWater, totalWaterDemand);
+
+            if (actualFoodConsume > 0)
             {
-                float foodConsumption = 2f;
-                if (HasTrait(character, "gluttonous")) foodConsumption *= 1.5f;
-                if (HasTrait(character, "frugal")) foodConsumption *= 0.8f;
-                totalFoodDemand += foodConsumption;
-                
-                float waterConsumption = 2f;
-                if (HasTrait(character, "gluttonous")) waterConsumption *= 1.2f;
-                totalWaterDemand += waterConsumption;
+                resourceSystem.Remove(ResourceType.Food, actualFoodConsume, "DailyConsumption");
             }
-            
-            // Remove food and water from resources
-            int foodAvailable = resourceSystem.GetAmount(ResourceType.Food);
-            int waterAvailable = resourceSystem.GetAmount(ResourceType.Water);
-            
-            int foodToRemove = Mathf.RoundToInt(totalFoodDemand);
-            int waterToRemove = Mathf.RoundToInt(totalWaterDemand);
-            
-            float foodSupplyRatio = foodAvailable >= foodToRemove ? 1f : (foodAvailable > 0 ? (float)foodAvailable / foodToRemove : 0f);
-            float waterSupplyRatio = waterAvailable >= waterToRemove ? 1f : (waterAvailable > 0 ? (float)waterAvailable / waterToRemove : 0f);
-            
-            resourceSystem.Remove(ResourceType.Food, foodToRemove, "DailyConsumption");
-            resourceSystem.Remove(ResourceType.Water, waterToRemove, "DailyConsumption");
-            
-            // Apply effects to each character based on supply ratio
+
+            if (actualWaterConsume > 0)
+            {
+                resourceSystem.Remove(ResourceType.Water, actualWaterConsume, "DailyConsumption");
+            }
+
+            float foodSupplyRatio = totalFoodDemand > 0 ? (float)actualFoodConsume / totalFoodDemand : 1f;
+            float waterSupplyRatio = totalWaterDemand > 0 ? (float)actualWaterConsume / totalWaterDemand : 1f;
+
+            float foodShortfall = 1f - foodSupplyRatio;
+            float waterShortfall = 1f - waterSupplyRatio;
+
             foreach (var character in aliveCharacters)
             {
-                float foodConsumption = 2f;
-                if (HasTrait(character, "gluttonous")) foodConsumption *= 1.5f;
-                if (HasTrait(character, "frugal")) foodConsumption *= 0.8f;
-                
-                float waterConsumption = 2f;
-                if (HasTrait(character, "gluttonous")) waterConsumption *= 1.2f;
-                
-                // Apply hunger based on supply ratio
-                character.hunger += foodConsumption * (2f - foodSupplyRatio); // 1x if full, 2x if none
-                
-                // Work fatigue
+                float foodConsumption = GetCharacterFoodConsumption(character);
+                float waterConsumption = GetCharacterWaterConsumption(character);
+
+                // Full supply keeps characters fed; every missing unit feeds the hunger.
+                character.hunger += foodConsumption * 2f * foodShortfall;
+
+                // Work costs energy during the day.
                 if (character.currentWork != WorkType.Idle)
                 {
                     float fatigueGain = 10f;
@@ -354,23 +409,22 @@ namespace LastRefuge.Systems
                     if (HasTrait(character, "lazy")) fatigueGain *= 1.3f;
                     character.fatigue += fatigueGain;
                 }
-                
-                // Stress from hunger/thirst
-                if (character.hunger > 50 || waterSupplyRatio < 1f)
+
+                // Thirst and sustained hunger wear the character down.
+                if (foodShortfall > 0f || waterShortfall > 0f || character.hunger > 50f)
                 {
-                    float stressGain = 0f;
-                    if (character.hunger > 50) stressGain += (character.hunger - 50) * 0.5f;
-                    if (waterSupplyRatio < 1f) stressGain += (1f - waterSupplyRatio) * 20f;
-                    
+                    float stressGain = waterShortfall * 20f;
+                    if (character.hunger > 50f) stressGain += (character.hunger - 50f) * 0.2f;
+
                     if (HasTrait(character, "resilient")) stressGain *= 0.7f;
                     if (HasTrait(character, "pessimistic")) stressGain *= 1.3f;
                     character.stress += stressGain;
                 }
-                
+
                 character.hunger = Math.Clamp(character.hunger, 0, 100);
                 character.stress = Math.Clamp(character.stress, 0, 100);
                 character.fatigue = Math.Clamp(character.fatigue, 0, 100);
-                
+
                 OnCharacterChanged?.Invoke(character.characterId);
             }
         }
@@ -420,24 +474,24 @@ namespace LastRefuge.Systems
         {
             var character = GetCharacter(characterId);
             if (character == null || !character.alive) return;
-            
+
+            // 1) read the binding, 2) detach from the building, 3) only then clear the state.
             string oldBuildingId = character.assignedBuildingId;
-            
-            character.alive = false;
-            character.dayOfDeath = gameState.currentDay;
-            character.deathCause = cause;
-            character.currentWork = WorkType.Idle;
-            character.assignedBuildingId = null;
-            
-            // Remove from building if was assigned
+
             if (!string.IsNullOrEmpty(oldBuildingId))
             {
                 buildingSystem.RemoveWorker(oldBuildingId, characterId);
             }
-            
+
+            character.assignedBuildingId = null;
+            character.currentWork = WorkType.Idle;
+            character.alive = false;
+            character.dayOfDeath = gameState.currentDay;
+            character.deathCause = cause;
+
             OnCharacterDied?.Invoke(characterId);
             OnCharacterChanged?.Invoke(characterId);
-            
+
             EventBus.Publish(new CharacterDiedEvent
             {
                 characterId = characterId,
