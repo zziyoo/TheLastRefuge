@@ -12,6 +12,7 @@ namespace LastRefuge.Core
         void GenerateInitialCharacters(int count = 4);
         bool AssignWork(string characterId, WorkType workType, string buildingId = null);
         void ProcessDailyConsumption();
+        void ProcessNightRecovery();
         float GetWorkEfficiency(CharacterState character);
         void KillCharacter(string characterId, string cause);
         

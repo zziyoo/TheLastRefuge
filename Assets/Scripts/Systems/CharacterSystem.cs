@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using LastRefuge.Data;
 using LastRefuge.Core;
 
@@ -177,6 +178,22 @@ namespace LastRefuge.Systems
             var character = GetCharacter(characterId);
             if (character == null || !character.alive) return false;
             
+            string oldBuildingId = character.assignedBuildingId;
+            WorkType oldWork = character.currentWork;
+            
+            // If changing to Idle, clear building assignment
+            if (workType == WorkType.Idle)
+            {
+                buildingId = null;
+            }
+            
+            // If no building specified but work type requires one, auto-find appropriate building
+            if (string.IsNullOrEmpty(buildingId) && workType != WorkType.Idle)
+            {
+                buildingId = FindSuitableBuilding(characterId, workType);
+            }
+            
+            // Validate building if specified
             if (!string.IsNullOrEmpty(buildingId))
             {
                 var building = buildingSystem.GetBuilding(buildingId);
@@ -188,6 +205,19 @@ namespace LastRefuge.Systems
                     int currentWorkers = building.assignedWorkers?.Length ?? 0;
                     if (currentWorkers >= def.workerSlots) return false;
                 }
+            }
+            
+            // Remove from old building if changing building
+            if (oldBuildingId != buildingId && !string.IsNullOrEmpty(oldBuildingId))
+            {
+                buildingSystem.RemoveWorker(oldBuildingId, characterId);
+            }
+            
+            // Add to new building if specified
+            if (!string.IsNullOrEmpty(buildingId))
+            {
+                bool added = buildingSystem.AssignWorker(buildingId, characterId);
+                if (!added) return false;
             }
             
             character.currentWork = workType;
@@ -206,31 +236,117 @@ namespace LastRefuge.Systems
             return true;
         }
         
+        private string FindSuitableBuilding(string characterId, WorkType workType)
+        {
+            if (gameState.buildings == null) return null;
+            
+            var buildings = buildingSystem.GetAllBuildings();
+            foreach (var building in buildings)
+            {
+                if (!building.enabled) continue;
+                
+                var def = buildingSystem.GetBuildingDefinition(building.definitionId);
+                if (def == null) continue;
+                
+                // Check if building matches work type
+                bool matches = false;
+                if (def.tags != null)
+                {
+                    switch (workType)
+                    {
+                        case WorkType.Farming:
+                            matches = Array.Exists(def.tags, t => t == "farming" || t == "food");
+                            break;
+                        case WorkType.Gathering:
+                            matches = Array.Exists(def.tags, t => t == "gathering" || t == "water" || t == "industry");
+                            break;
+                        case WorkType.Engineering:
+                            matches = Array.Exists(def.tags, t => t == "crafting" || t == "smelting" || t == "industry" || t == "power" || t == "utility");
+                            break;
+                        case WorkType.Researching:
+                            matches = Array.Exists(def.tags, t => t == "research" || t == "technology");
+                            break;
+                        case WorkType.Medical:
+                            matches = Array.Exists(def.tags, t => t == "medical" || t == "healing");
+                            break;
+                        case WorkType.Exploring:
+                            matches = Array.Exists(def.tags, t => t == "exploration" || t == "scouting");
+                            break;
+                        case WorkType.Combat:
+                            matches = Array.Exists(def.tags, t => t == "defense" || t == "combat");
+                            break;
+                        case WorkType.Construction:
+                            matches = Array.Exists(def.tags, t => t == "construction" || t == "industry");
+                            break;
+                        case WorkType.Maintenance:
+                            matches = Array.Exists(def.tags, t => t == "maintenance" || t == "utility");
+                            break;
+                    }
+                }
+                
+                if (matches)
+                {
+                    int currentWorkers = building.assignedWorkers?.Length ?? 0;
+                    if (currentWorkers < def.workerSlots)
+                    {
+                        return building.buildingId;
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
         public void ProcessDailyConsumption()
         {
             if (gameState.characters == null) return;
             
-            foreach (var character in gameState.characters)
+            var aliveCharacters = gameState.characters.Where(c => c.alive).ToArray();
+            if (aliveCharacters.Length == 0) return;
+            
+            // Calculate total food and water demand
+            float totalFoodDemand = 0f;
+            float totalWaterDemand = 0f;
+            
+            foreach (var character in aliveCharacters)
             {
-                if (!character.alive) continue;
+                float foodConsumption = 2f;
+                if (HasTrait(character, "gluttonous")) foodConsumption *= 1.5f;
+                if (HasTrait(character, "frugal")) foodConsumption *= 0.8f;
+                totalFoodDemand += foodConsumption;
                 
+                float waterConsumption = 2f;
+                if (HasTrait(character, "gluttonous")) waterConsumption *= 1.2f;
+                totalWaterDemand += waterConsumption;
+            }
+            
+            // Remove food and water from resources
+            int foodAvailable = resourceSystem.GetAmount(ResourceType.Food);
+            int waterAvailable = resourceSystem.GetAmount(ResourceType.Water);
+            
+            int foodToRemove = Mathf.RoundToInt(totalFoodDemand);
+            int waterToRemove = Mathf.RoundToInt(totalWaterDemand);
+            
+            float foodSupplyRatio = foodAvailable >= foodToRemove ? 1f : (foodAvailable > 0 ? (float)foodAvailable / foodToRemove : 0f);
+            float waterSupplyRatio = waterAvailable >= waterToRemove ? 1f : (waterAvailable > 0 ? (float)waterAvailable / waterToRemove : 0f);
+            
+            resourceSystem.Remove(ResourceType.Food, foodToRemove, "DailyConsumption");
+            resourceSystem.Remove(ResourceType.Water, waterToRemove, "DailyConsumption");
+            
+            // Apply effects to each character based on supply ratio
+            foreach (var character in aliveCharacters)
+            {
                 float foodConsumption = 2f;
                 if (HasTrait(character, "gluttonous")) foodConsumption *= 1.5f;
                 if (HasTrait(character, "frugal")) foodConsumption *= 0.8f;
                 
-                character.hunger += foodConsumption;
-                
                 float waterConsumption = 2f;
                 if (HasTrait(character, "gluttonous")) waterConsumption *= 1.2f;
                 
-                if (character.hunger > 50)
-                {
-                    float stressGain = (character.hunger - 50) * 0.5f;
-                    if (HasTrait(character, "resilient")) stressGain *= 0.7f;
-                    if (HasTrait(character, "pessimistic")) stressGain *= 1.3f;
-                    character.stress += stressGain;
-                }
+                // Apply hunger based on supply ratio
+                character.hunger += foodConsumption * (2f - foodSupplyRatio); // 1x if full, 2x if none
                 
+                // Work fatigue
                 if (character.currentWork != WorkType.Idle)
                 {
                     float fatigueGain = 10f;
@@ -239,28 +355,55 @@ namespace LastRefuge.Systems
                     character.fatigue += fatigueGain;
                 }
                 
-                if (gameState.currentTimeSlot == TimeSlot.Night)
+                // Stress from hunger/thirst
+                if (character.hunger > 50 || waterSupplyRatio < 1f)
                 {
-                    character.fatigue = Math.Max(0, character.fatigue - 30f);
-                    character.stress = Math.Max(0, character.stress - 5f);
+                    float stressGain = 0f;
+                    if (character.hunger > 50) stressGain += (character.hunger - 50) * 0.5f;
+                    if (waterSupplyRatio < 1f) stressGain += (1f - waterSupplyRatio) * 20f;
                     
-                    if (character.hunger < 20)
-                    {
-                        character.health = Math.Min(character.maxHealth, character.health + 5);
-                    }
-                    else if (character.hunger > 80)
-                    {
-                        character.health = Math.Max(0, character.health - 10);
-                        if (character.health <= 0)
-                        {
-                            KillCharacter(character.characterId, "Starvation");
-                        }
-                    }
+                    if (HasTrait(character, "resilient")) stressGain *= 0.7f;
+                    if (HasTrait(character, "pessimistic")) stressGain *= 1.3f;
+                    character.stress += stressGain;
                 }
                 
                 character.hunger = Math.Clamp(character.hunger, 0, 100);
                 character.stress = Math.Clamp(character.stress, 0, 100);
                 character.fatigue = Math.Clamp(character.fatigue, 0, 100);
+                
+                OnCharacterChanged?.Invoke(character.characterId);
+            }
+        }
+        
+        public void ProcessNightRecovery()
+        {
+            if (gameState.characters == null) return;
+            
+            foreach (var character in gameState.characters)
+            {
+                if (!character.alive) continue;
+                
+                // Fatigue recovery
+                character.fatigue = Math.Max(0, character.fatigue - 30f);
+                
+                // Stress recovery
+                character.stress = Math.Max(0, character.stress - 5f);
+                
+                // Health recovery/damage based on hunger
+                if (character.hunger < 20)
+                {
+                    character.health = Math.Min(character.maxHealth, character.health + 5);
+                }
+                else if (character.hunger > 80)
+                {
+                    character.health = Math.Max(0, character.health - 10);
+                    if (character.health <= 0)
+                    {
+                        KillCharacter(character.characterId, "Starvation");
+                        continue; // Character is dead, skip further processing
+                    }
+                }
+                
                 character.health = Math.Clamp(character.health, 0, character.maxHealth);
                 
                 OnCharacterChanged?.Invoke(character.characterId);
@@ -278,15 +421,18 @@ namespace LastRefuge.Systems
             var character = GetCharacter(characterId);
             if (character == null || !character.alive) return;
             
+            string oldBuildingId = character.assignedBuildingId;
+            
             character.alive = false;
             character.dayOfDeath = gameState.currentDay;
             character.deathCause = cause;
             character.currentWork = WorkType.Idle;
             character.assignedBuildingId = null;
             
-            if (!string.IsNullOrEmpty(character.assignedBuildingId))
+            // Remove from building if was assigned
+            if (!string.IsNullOrEmpty(oldBuildingId))
             {
-                buildingSystem.RemoveWorker(character.assignedBuildingId, characterId);
+                buildingSystem.RemoveWorker(oldBuildingId, characterId);
             }
             
             OnCharacterDied?.Invoke(characterId);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using LastRefuge.Data;
 using LastRefuge.Core;
 
@@ -8,6 +9,7 @@ namespace LastRefuge.Systems
     public class ResourceSystem : IResourceSystem
     {
         private GameState gameState;
+        private IBuildingSystem buildingSystem;
         
         private Dictionary<ResourceType, ResourceState> resourceMap = new Dictionary<ResourceType, ResourceState>();
         
@@ -15,7 +17,13 @@ namespace LastRefuge.Systems
         
         public void Initialize(GameState state)
         {
+            Initialize(state, null);
+        }
+        
+        public void Initialize(GameState state, IBuildingSystem buildSys)
+        {
             gameState = state;
+            buildingSystem = buildSys;
             resourceMap.Clear();
             
             if (gameState.resources != null)
@@ -206,7 +214,41 @@ namespace LastRefuge.Systems
         
         public int GetDailyProduction(ResourceType type)
         {
-            return 0;
+            if (buildingSystem == null) return 0;
+            
+            int totalProduction = 0;
+            var buildings = buildingSystem.GetAllBuildings();
+            
+            foreach (var building in buildings)
+            {
+                if (!building.enabled || building.durability <= 0) continue;
+                
+                var def = buildingSystem.GetBuildingDefinition(building.definitionId);
+                if (def == null || def.production == null) continue;
+                
+                float totalEfficiency = 0f;
+                if (building.assignedWorkers != null)
+                {
+                    // Need access to characterSystem for efficiency - for now use base amount * worker count
+                    int workerCount = building.assignedWorkers.Length;
+                    totalEfficiency = workerCount > 0 ? workerCount : 0.5f; // minimum 0.5 efficiency if no workers
+                }
+                else
+                {
+                    totalEfficiency = 0.5f; // automated/minimal production
+                }
+                
+                foreach (var prod in def.production)
+                {
+                    if (prod.type == type)
+                    {
+                        int finalAmount = Mathf.RoundToInt(prod.baseAmount * totalEfficiency * prod.efficiencyMultiplier);
+                        totalProduction += Math.Max(0, finalAmount);
+                    }
+                }
+            }
+            
+            return totalProduction;
         }
         
         public int GetNetDailyChange(ResourceType type)

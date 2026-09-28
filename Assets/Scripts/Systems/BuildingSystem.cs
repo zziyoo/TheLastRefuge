@@ -48,6 +48,7 @@ namespace LastRefuge.Systems
                 upkeepCost = new ResourceCost[0],
                 housingCapacity = 4,
                 workerSlots = 0,
+                maxCount = 3,
                 tags = new[] { "housing", "starter" },
                 description = "简易的临时住所，可容纳4人"
             };
@@ -72,6 +73,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Food, baseAmount = 10, primaryStat = StatType.Agriculture }
                 },
                 workerSlots = 2,
+                maxCount = 0,
                 tags = new[] { "farming", "food" },
                 description = "基础农田，生产食物"
             };
@@ -97,6 +99,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Water, baseAmount = 15, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 1,
+                maxCount = 0,
                 powerConsumption = 5,
                 tags = new[] { "water", "utility" },
                 description = "净化水源，生产洁净水"
@@ -121,6 +124,7 @@ namespace LastRefuge.Systems
                     ResourceType.Fuel, ResourceType.Parts, ResourceType.Medicine
                 },
                 workerSlots = 0,
+                maxCount = 2,
                 tags = new[] { "storage" },
                 description = "增加资源存储容量"
             };
@@ -146,6 +150,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Parts, baseAmount = 5, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 1,
+                maxCount = 0,
                 powerConsumption = 10,
                 tags = new[] { "crafting", "industry" },
                 description = "基础制造设施，生产零件"
@@ -173,6 +178,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Metal, baseAmount = 8, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 1,
+                maxCount = 0,
                 powerConsumption = 15,
                 tags = new[] { "smelting", "industry" },
                 description = "冶炼铁矿为金属"
@@ -199,6 +205,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Power, baseAmount = 50, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 0,
+                maxCount = 0,
                 powerProduction = 50,
                 tags = new[] { "power", "utility" },
                 description = "燃油发电机，提供电力"
@@ -223,6 +230,7 @@ namespace LastRefuge.Systems
                 },
                 production = new ResourceProduction[0],
                 workerSlots = 1,
+                maxCount = 1,
                 powerConsumption = 10,
                 tags = new[] { "medical", "healing" },
                 description = "治疗受伤人员，生产药品"
@@ -246,6 +254,7 @@ namespace LastRefuge.Systems
                 },
                 production = new ResourceProduction[0],
                 workerSlots = 2,
+                maxCount = 2,
                 powerConsumption = 20,
                 tags = new[] { "research", "technology" },
                 description = "进行科技研究"
@@ -269,6 +278,7 @@ namespace LastRefuge.Systems
                 },
                 production = new ResourceProduction[0],
                 workerSlots = 1,
+                maxCount = 1,
                 tags = new[] { "exploration", "scouting" },
                 description = "派遣探索队，发现新地点"
             };
@@ -276,7 +286,12 @@ namespace LastRefuge.Systems
         
         public IEnumerable<BuildingDefinition> GetAvailableBuildings()
         {
-            return buildingDefinitions.Values.Where(d => !HasBuilding(d.id));
+            return buildingDefinitions.Values.Where(d => 
+            {
+                if (d.maxCount <= 0) return true; // unlimited
+                int currentCount = GetBuildingsByDefinition(d.id).Length;
+                return currentCount < d.maxCount;
+            });
         }
         
         public bool CanUpgrade(string buildingId)
@@ -410,9 +425,13 @@ namespace LastRefuge.Systems
                 resourceSystem.Remove(cost.type, upgradeCost, $"Upgrade_{buildingId}");
             }
             
+            // Remove old level effects before applying new level
+            ApplyBuildingEffects(building, false);
+            
             building.level++;
             building.durability = 100;
             
+            // Apply new level effects
             ApplyBuildingEffects(building, true);
             
             OnBuildingChanged?.Invoke(buildingId);
@@ -430,13 +449,24 @@ namespace LastRefuge.Systems
             {
                 foreach (var resType in def.storageCapacity)
                 {
-                    int capacityBonus = def.maxLevel > 1 ? building.level * 50 : 100;
-                    resourceSystem.AddCapacity(resType, capacityBonus * multiplier);
+                    // Capacity scales with level: base 100 per level
+                    int capacityPerLevel = 100;
+                    int totalCapacity = def.housingCapacity > 0 ? building.level * capacityPerLevel : capacityPerLevel * building.level;
+                    // For adding: add the difference from new level
+                    // For removing: subtract the old level's capacity
+                    int oldLevel = adding ? building.level - 1 : building.level;
+                    int oldCapacity = oldLevel * capacityPerLevel;
+                    int newCapacity = building.level * capacityPerLevel;
+                    int delta = adding ? (newCapacity - oldCapacity) : -oldCapacity;
+                    
+                    resourceSystem.AddCapacity(resType, delta * multiplier);
                 }
             }
             
             if (def.housingCapacity > 0)
             {
+                // Housing capacity is calculated dynamically in GetTotalHousingCapacity
+                // No need to add/remove here, just trigger events
             }
         }
         
@@ -486,6 +516,31 @@ namespace LastRefuge.Systems
                 var def = GetBuildingDefinition(building.definitionId);
                 if (def == null) continue;
                 
+                // Check if building can operate (upkeep and power)
+                bool canOperate = true;
+                
+                // Check upkeep costs
+                if (def.upkeepCost != null)
+                {
+                    foreach (var cost in def.upkeepCost)
+                    {
+                        if (!resourceSystem.CanAfford(cost.type, cost.amount))
+                        {
+                            canOperate = false;
+                            break;
+                        }
+                    }
+                }
+                
+                // Check power consumption
+                if (canOperate && def.powerConsumption > 0)
+                {
+                    if (!resourceSystem.CanAfford(ResourceType.Power, def.powerConsumption))
+                    {
+                        canOperate = false;
+                    }
+                }
+                
                 float totalEfficiency = 0f;
                 if (building.assignedWorkers != null)
                 {
@@ -499,7 +554,7 @@ namespace LastRefuge.Systems
                     }
                 }
                 
-                if (def.production != null)
+                if (canOperate && def.production != null)
                 {
                     foreach (var prod in def.production)
                     {
@@ -512,19 +567,27 @@ namespace LastRefuge.Systems
                             building.currentProduction = finalAmount;
                         }
                     }
-                }
-                
-                if (def.upkeepCost != null)
-                {
-                    foreach (var cost in def.upkeepCost)
+                    
+                    // Pay upkeep costs after successful production
+                    if (def.upkeepCost != null)
                     {
-                        resourceSystem.Remove(cost.type, cost.amount, $"Upkeep_{building.buildingId}");
+                        foreach (var cost in def.upkeepCost)
+                        {
+                            resourceSystem.Remove(cost.type, cost.amount, $"Upkeep_{building.buildingId}");
+                        }
+                    }
+                    
+                    // Pay power consumption
+                    if (def.powerConsumption > 0)
+                    {
+                        resourceSystem.Remove(ResourceType.Power, def.powerConsumption, $"Power_{building.buildingId}");
                     }
                 }
-                
-                if (def.powerConsumption > 0)
+                else if (!canOperate)
                 {
-                    resourceSystem.Remove(ResourceType.Power, def.powerConsumption, $"Power_{building.buildingId}");
+                    // Building cannot operate due to lack of resources
+                    building.currentProduction = 0;
+                    // Optionally: could add a flag to indicate maintenance needed
                 }
                 
                 if (def.powerProduction > 0)

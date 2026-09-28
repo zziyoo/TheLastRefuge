@@ -28,7 +28,7 @@ namespace LastRefuge.Data
         public float efficiencyMultiplier = 1f;
     }
 
-    [System.Serializable]
+[System.Serializable]
     public class BuildingDefinition
     {
         public string id;
@@ -51,7 +51,10 @@ namespace LastRefuge.Data
         public string[] tags;
         
         public string description;
-
+        
+        // maxCount: 0 = unlimited, 1 = unique, >1 = limited count
+        public int maxCount = 0;
+        
         public string GetCostString()
         {
             if (constructionCost == null || constructionCost.Length == 0) return "无";

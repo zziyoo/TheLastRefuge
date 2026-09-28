@@ -338,6 +338,7 @@ namespace LastRefuge.Tests
         {
             resourceSystem.Add(ResourceType.Wood, 50, "Test");
             resourceSystem.Add(ResourceType.Stone, 30, "Test");
+            resourceSystem.Add(ResourceType.Water, 50, "Test");
             
             var building = buildingSystem.Build("farm_basic");
             Assert.IsNotNull(building);

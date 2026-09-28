@@ -56,7 +56,7 @@ namespace LastRefuge.Gameplay
             saveSystem = new SaveSystem();
             
             timeSystem.Initialize(gameState, randomSystem);
-            resourceSystem.Initialize(gameState);
+            resourceSystem.Initialize(gameState, buildingSystem);
             characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
             buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
             effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
@@ -115,7 +115,7 @@ namespace LastRefuge.Gameplay
             {
                 randomSystem.Initialize(gameState.gameSeed);
                 timeSystem.Initialize(gameState, randomSystem);
-                resourceSystem.Initialize(gameState);
+                resourceSystem.Initialize(gameState, buildingSystem);
                 characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
                 buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
                 effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
@@ -188,6 +188,7 @@ namespace LastRefuge.Gameplay
         private void ProcessNight()
         {
             UnityEngine.Debug.Log($"=== Day {gameState.currentDay} Night ===");
+            characterSystem.ProcessNightRecovery();
             timeSystem.SetGameplayState(GameplayState.Night);
         }
         
