@@ -1,4 +1,5 @@
 using LastRefuge.Data;
+using System.Collections.Generic;
 
 namespace LastRefuge.Core
 {
@@ -6,12 +7,14 @@ namespace LastRefuge.Core
     {
         void Initialize(GameState state, IResourceSystem resSys, ICharacterSystem charSys);
         BuildingDefinition GetBuildingDefinition(string id);
+        IEnumerable<BuildingDefinition> GetAvailableBuildings();
         BuildingState[] GetAllBuildings();
         BuildingState GetBuilding(string buildingId);
         BuildingState[] GetBuildingsByDefinition(string definitionId);
         bool CanBuild(string definitionId);
         bool HasBuilding(string definitionId);
         BuildingState Build(string definitionId);
+        bool CanUpgrade(string buildingId);
         bool UpgradeBuilding(string buildingId);
         bool AssignWorker(string buildingId, string characterId);
         bool RemoveWorker(string buildingId, string characterId);

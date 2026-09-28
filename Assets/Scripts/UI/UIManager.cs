@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -12,6 +13,91 @@ namespace LastRefuge.UI
 {
     public class UIManager : MonoBehaviour
     {
+        // Helper methods for UI creation
+        private static GameObject CreateUIObject(string name, Transform parent)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.AddComponent<RectTransform>();
+            return go;
+        }
+        
+        private static GameObject CreateText(Transform parent, string text, int fontSize, FontStyles style = FontStyles.Normal)
+        {
+            var go = new GameObject("Text");
+            go.transform.SetParent(parent, false);
+            var tmp = go.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = fontSize;
+            tmp.fontStyle = style;
+            tmp.color = Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+            return go;
+        }
+        
+        private static Button CreateButton(Transform parent, string text, System.Action onClick, float width, float height)
+        {
+            var go = new GameObject("Btn_" + text, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(width, height);
+            
+            var image = go.AddComponent<Image>();
+            image.sprite = buttonSprite;
+            image.type = Image.Type.Sliced;
+            image.color = new Color(0.2f, 0.3f, 0.4f, 0.95f);
+            
+            var button = go.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.onClick.AddListener(() => onClick?.Invoke());
+            
+            // Add hover/pressed colors
+            var colors = button.colors;
+            colors.normalColor = new Color(0.2f, 0.3f, 0.4f, 0.95f);
+            colors.highlightedColor = new Color(0.3f, 0.4f, 0.5f, 1f);
+            colors.pressedColor = new Color(0.15f, 0.25f, 0.35f, 1f);
+            colors.selectedColor = new Color(0.25f, 0.35f, 0.45f, 1f);
+            colors.disabledColor = new Color(0.1f, 0.15f, 0.2f, 0.5f);
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.1f;
+            button.colors = colors;
+            
+            var tmp = CreateText(go.transform, text, 20, FontStyles.Bold);
+            tmp.GetComponent<RectTransform>().sizeDelta = new Vector2(width - 20, height - 10);
+            
+            return button;
+        }
+        
+        // Reference to button sprite for UI creation
+        private static Sprite buttonSprite;
+        
+        private void InitializeButtonSprite()
+        {
+            if (buttonSprite == null)
+            {
+                var tex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+                Color[] colors = new Color[256];
+                Color borderColor = new Color(0.3f, 0.4f, 0.5f, 1f);
+                Color centerColor = new Color(0.2f, 0.3f, 0.4f, 0.95f);
+                
+                for (int y = 0; y < 16; y++)
+                {
+                    for (int x = 0; x < 16; x++)
+                    {
+                        bool isBorder = x == 0 || x == 15 || y == 0 || y == 15;
+                        colors[y * 16 + x] = isBorder ? borderColor : centerColor;
+                    }
+                }
+                
+                tex.SetPixels(colors);
+                tex.Apply();
+                tex.filterMode = FilterMode.Bilinear;
+                
+                buttonSprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16, 0, SpriteMeshType.FullRect, new Vector4(4, 4, 4, 4));
+            }
+        }
+        
         public static UIManager Instance { get; private set; }
         
         [Header("Main Panels")]
@@ -63,7 +149,9 @@ namespace LastRefuge.UI
         
         private void Start()
         {
+            UnityEngine.Debug.Log("UIManager.Start() called");
             gameManager = GameManager.Instance;
+            UnityEngine.Debug.Log("GameManager.Instance: " + (gameManager != null ? "found" : "NULL"));
             
             // Setup button listeners
             nextTimeSlotButton.onClick.AddListener(OnNextTimeSlotClicked);
@@ -128,8 +216,70 @@ namespace LastRefuge.UI
             saveLoadPanel.SetActive(true);
             settingsPanel.SetActive(false);
             
-            // Populate save list
-            // PopulateSaveList(isSave);
+            PopulateSaveList(isSave);
+        }
+        
+        private void PopulateSaveList(bool isSave)
+        {
+            if (saveLoadPanel == null || gameManager == null) return;
+            
+            // Clear existing content except the back button
+            foreach (Transform child in saveLoadPanel.transform)
+            {
+                if (child.GetComponent<Button>() != null) continue; // Keep back button
+                Destroy(child.gameObject);
+            }
+            
+            var layout = saveLoadPanel.GetComponent<VerticalLayoutGroup>();
+            if (layout == null)
+            {
+                layout = saveLoadPanel.AddComponent<VerticalLayoutGroup>();
+            }
+            layout.childAlignment = TextAnchor.UpperCenter;
+            layout.spacing = 15;
+            layout.padding = new RectOffset(50, 50, 50, 50);
+            
+            var saves = gameManager.saveSystem.GetSaveFiles();
+            
+            if (saves.Length == 0)
+            {
+                CreateText(saveLoadPanel.transform, "暂无存档", 24);
+                return;
+            }
+            
+            Array.Sort(saves); // Sort by name (which includes timestamp)
+            
+            foreach (var savePath in saves)
+            {
+                var fileName = Path.GetFileName(savePath);
+                var saveInfo = gameManager.saveSystem.GetSaveInfo(fileName);
+                
+                if (saveInfo == null) continue;
+                
+                var saveRow = CreateUIObject("Save_" + fileName, saveLoadPanel.transform);
+                var rowLayout = saveRow.AddComponent<HorizontalLayoutGroup>();
+                rowLayout.childAlignment = TextAnchor.MiddleLeft;
+                rowLayout.spacing = 10;
+                rowLayout.padding = new RectOffset(20, 20, 10, 10);
+                
+                var bg = saveRow.AddComponent<Image>();
+                bg.color = new Color(0.2f, 0.2f, 0.25f, 0.8f);
+                
+                var infoText = CreateText(saveRow.transform, $"Day {saveInfo.day} {saveInfo.timeSlot}", 20);
+                infoText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                
+                var popText = CreateText(saveRow.transform, $"人口: {saveInfo.population}", 16);
+                popText.GetComponent<RectTransform>().sizeDelta = new Vector2(150, 40);
+                
+                var timeText = CreateText(saveRow.transform, saveInfo.timestamp, 14);
+                timeText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                
+                var actionBtn = CreateButton(saveRow.transform, "读取", () => 
+                {
+                    gameManager.LoadGame(fileName);
+                    ShowGame();
+                }, 100, 40);
+            }
         }
         
         private void CloseAllSubPanels()
@@ -194,8 +344,10 @@ namespace LastRefuge.UI
             foreach (var kvp in resources)
             {
                 var item = Instantiate(resourceItemPrefab, resourceContainer);
-                var text = item.GetComponentInChildren<TextMeshProUGUI>();
-                if (text != null)
+                item.SetActive(true); // Ensure instance is active
+                
+                var itemUI = item.GetComponent<ResourceItemUI>();
+                if (itemUI != null)
                 {
                     int amount = kvp.Value;
                     int capacity = gameManager.resourceSystem.GetCapacity(kvp.Key);
@@ -205,7 +357,7 @@ namespace LastRefuge.UI
                     string changeStr = netChange >= 0 ? $"+{netChange}" : netChange.ToString();
                     string daysStr = daysRemaining >= 0 ? (daysRemaining == -1 ? "∞" : $"{daysRemaining}天") : "N/A";
                     
-                    text.text = $"{kvp.Key.GetDisplayName()}: {amount}/{capacity} ({changeStr}/天, {daysStr})";
+                    itemUI.Setup(kvp.Key.GetDisplayName(), amount, capacity, netChange, daysRemaining);
                 }
             }
         }
@@ -223,20 +375,26 @@ namespace LastRefuge.UI
             foreach (var character in characters)
             {
                 var item = Instantiate(characterItemPrefab, characterContainer);
-                var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
+                item.SetActive(true); // Ensure instance is active
                 
-                if (texts.Length >= 2)
+                var itemUI = item.GetComponent<CharacterItemUI>();
+                if (itemUI != null)
                 {
-                    texts[0].text = $"{character.name} ({character.profession})";
-                    texts[1].text = $"{character.currentWork.GetDisplayName()} | HP:{character.health} 饥饿:{character.hunger:F0} 压力:{character.stress:F0} 疲劳:{character.fatigue:F0}";
-                }
-                
-                // Add work selection buttons
-                var workButtons = item.GetComponentsInChildren<Button>();
-                foreach (var btn in workButtons)
-                {
-                    var workType = (WorkType)Enum.Parse(typeof(WorkType), btn.name.Replace("Btn_", ""));
-                    btn.onClick.AddListener(() => gameManager.AssignWork(character.characterId, workType));
+                    itemUI.Setup(character, gameManager.characterSystem);
+                    
+                    // Set up work buttons
+                    if (itemUI.workButtons != null && itemUI.workButtons.Length > 0)
+                    {
+                        var workTypes = new[] { WorkType.Idle, WorkType.Farming, WorkType.Gathering, WorkType.Engineering, WorkType.Researching, WorkType.Medical };
+                        for (int i = 0; i < Mathf.Min(itemUI.workButtons.Length, workTypes.Length); i++)
+                        {
+                            var btn = itemUI.workButtons[i];
+                            var workType = workTypes[i];
+                            btn.onClick.RemoveAllListeners();
+                            btn.onClick.AddListener(() => gameManager.AssignWork(character.characterId, workType));
+                            btn.GetComponentInChildren<TextMeshProUGUI>().text = workType.GetDisplayName();
+                        }
+                    }
                 }
             }
         }
@@ -249,7 +407,90 @@ namespace LastRefuge.UI
         
         private void RefreshBuildingPanel()
         {
-            // Building construction and management
+            if (buildingPanel == null || gameManager == null) return;
+            
+            // Clear existing
+            foreach (Transform child in buildingPanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+            
+            var layout = buildingPanel.GetComponent<VerticalLayoutGroup>();
+            if (layout == null)
+            {
+                layout = buildingPanel.AddComponent<VerticalLayoutGroup>();
+            }
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.spacing = 10;
+            layout.padding = new RectOffset(20, 20, 20, 20);
+            
+            // Title
+            var title = CreateText(buildingPanel.transform, "建筑建造", 28, FontStyles.Bold);
+            
+            // Get available buildings
+            var buildings = gameManager.buildingSystem.GetAvailableBuildings();
+            foreach (var building in buildings)
+            {
+                var buildingRow = CreateUIObject("Building_" + building.id, buildingPanel.transform);
+                var rowLayout = buildingRow.AddComponent<HorizontalLayoutGroup>();
+                rowLayout.childAlignment = TextAnchor.MiddleLeft;
+                rowLayout.spacing = 10;
+                rowLayout.padding = new RectOffset(10, 10, 10, 10);
+                
+                var bg = buildingRow.AddComponent<Image>();
+                bg.color = new Color(0.2f, 0.2f, 0.25f, 0.8f);
+                
+                var infoText = CreateText(buildingRow.transform, $"{building.name} (Lv.{building.maxLevel})", 20);
+                infoText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                
+                var costText = CreateText(buildingRow.transform, $"消耗: {building.GetCostString()}", 16);
+                costText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                
+                var canBuild = gameManager.buildingSystem.CanBuild(building.id);
+                var buildBtn = CreateButton(buildingRow.transform, canBuild ? "建造" : "资源不足", () => 
+                {
+                    if (canBuild)
+                    {
+                        gameManager.BuildBuilding(building.id);
+                        RefreshBuildingPanel();
+                        RefreshResources();
+                    }
+                }, 100, 40);
+                buildBtn.interactable = canBuild;
+            }
+            
+            // Existing buildings
+            var existingBuildings = gameManager.buildingSystem.GetAllBuildings();
+            if (existingBuildings.Length > 0)
+            {
+                var separator = CreateText(buildingPanel.transform, "已建建筑", 24, FontStyles.Bold);
+                
+                foreach (var building in existingBuildings)
+                {
+                    var buildingRow = CreateUIObject("Built_" + building.buildingId, buildingPanel.transform);
+                    var rowLayout = buildingRow.AddComponent<HorizontalLayoutGroup>();
+                    rowLayout.childAlignment = TextAnchor.MiddleLeft;
+                    rowLayout.spacing = 10;
+                    rowLayout.padding = new RectOffset(10, 10, 10, 10);
+                    
+                    var bg = buildingRow.AddComponent<Image>();
+                    bg.color = new Color(0.15f, 0.2f, 0.25f, 0.8f);
+                    
+                    var infoText = CreateText(buildingRow.transform, $"{building.definitionId} (Lv.{building.level})", 20);
+                    infoText.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+                    
+                    var statusText = CreateText(buildingRow.transform, building.enabled ? "运行中" : "已停用", 16);
+                    statusText.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 40);
+                    
+                    var upgradeBtn = CreateButton(buildingRow.transform, "升级", () => 
+                    {
+                        gameManager.UpgradeBuilding(building.buildingId);
+                        RefreshBuildingPanel();
+                        RefreshResources();
+                    }, 100, 40);
+                    upgradeBtn.interactable = gameManager.buildingSystem.CanUpgrade(building.buildingId);
+                }
+            }
         }
         
         private void RefreshResourceDetailPanel()
@@ -266,7 +507,8 @@ namespace LastRefuge.UI
         {
             if (nextTimeSlotButton != null)
             {
-                nextTimeSlotButton.interactable = gameManager.GetCurrentGameplayState() == GameplayState.Planning ||
+                nextTimeSlotButton.interactable = gameManager.GetCurrentGameplayState() == GameplayState.Morning ||
+                                                  gameManager.GetCurrentGameplayState() == GameplayState.Planning ||
                                                   gameManager.GetCurrentGameplayState() == GameplayState.Action ||
                                                   gameManager.GetCurrentGameplayState() == GameplayState.Evening ||
                                                   gameManager.GetCurrentGameplayState() == GameplayState.Night;
@@ -330,6 +572,17 @@ namespace LastRefuge.UI
         // Main Menu Buttons
         public void OnNewGameClicked()
         {
+            UnityEngine.Debug.Log("OnNewGameClicked called");
+            if (gameManager == null)
+            {
+                UnityEngine.Debug.LogError("gameManager is null! GameManager.Instance: " + (GameManager.Instance != null ? "exists" : "null"));
+                gameManager = GameManager.Instance;
+                if (gameManager == null)
+                {
+                    UnityEngine.Debug.LogError("Failed to get GameManager.Instance");
+                    return;
+                }
+            }
             gameManager.NewGame();
             ShowGame();
         }
@@ -345,6 +598,11 @@ namespace LastRefuge.UI
                 string fileName = Path.GetFileName(latest);
                 gameManager.LoadGame(fileName);
                 ShowGame();
+            }
+            else
+            {
+                // Show message - no saves available
+                UnityEngine.Debug.Log("No save files found");
             }
         }
         

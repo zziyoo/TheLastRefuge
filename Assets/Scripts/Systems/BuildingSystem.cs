@@ -274,6 +274,28 @@ namespace LastRefuge.Systems
             };
         }
         
+        public IEnumerable<BuildingDefinition> GetAvailableBuildings()
+        {
+            return buildingDefinitions.Values.Where(d => !HasBuilding(d.id));
+        }
+        
+        public bool CanUpgrade(string buildingId)
+        {
+            var building = GetBuilding(buildingId);
+            if (building == null) return false;
+            
+            var def = GetBuildingDefinition(building.definitionId);
+            if (def == null || building.level >= def.maxLevel) return false;
+            
+            foreach (var cost in def.constructionCost)
+            {
+                int upgradeCost = cost.amount * building.level / 2;
+                if (!resourceSystem.CanAfford(cost.type, upgradeCost)) return false;
+            }
+            
+            return true;
+        }
+        
         public BuildingDefinition GetBuildingDefinition(string id)
         {
             buildingDefinitions.TryGetValue(id, out var def);

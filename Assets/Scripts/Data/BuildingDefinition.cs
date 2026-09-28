@@ -51,5 +51,16 @@ namespace LastRefuge.Data
         public string[] tags;
         
         public string description;
+
+        public string GetCostString()
+        {
+            if (constructionCost == null || constructionCost.Length == 0) return "无";
+            var parts = new System.Collections.Generic.List<string>();
+            foreach (var cost in constructionCost)
+            {
+                parts.Add($"{cost.type.GetDisplayName()}:{cost.amount}");
+            }
+            return string.Join(", ", parts);
+        }
     }
 }

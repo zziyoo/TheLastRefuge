@@ -260,6 +260,7 @@ namespace LastRefuge.Tests
         {
             // Setup initial state
             randomSystem.Initialize("save_test_seed");
+            gameState.gameSeed = "save_test_seed"; // Ensure seed is set for save
             resourceSystem.Add(ResourceType.Food, 100, "Test");
             resourceSystem.Add(ResourceType.Water, 50, "Test");
             characterSystem.GenerateInitialCharacters(3);
@@ -289,16 +290,21 @@ namespace LastRefuge.Tests
             var newTimeSystem = new TimeSystem();
             var newEffectResolver = new EffectResolver();
             
+            // Load
+            newSaveSystem.Initialize(newGameState, "0.1.0");
+            bool loaded = newSaveSystem.LoadGame("test_save.json");
+            Assert.IsTrue(loaded);
+            
+            // Initialize RandomSystem first (needs seed from loaded state)
+            string loadedSeed = newGameState.gameSeed ?? "fallback_seed";
+            newRandomSystem.Initialize(loadedSeed);
+            
+            // Re-initialize all systems with loaded state
             newTimeSystem.Initialize(newGameState, newRandomSystem);
             newResourceSystem.Initialize(newGameState);
             newCharacterSystem.Initialize(newGameState, newResourceSystem, newRandomSystem, newBuildingSystem);
             newBuildingSystem.Initialize(newGameState, newResourceSystem, newCharacterSystem);
             newEffectResolver.Initialize(newGameState, newResourceSystem, newCharacterSystem, newBuildingSystem);
-            newSaveSystem.Initialize(newGameState, "0.1.0");
-            
-            // Load
-            bool loaded = newSaveSystem.LoadGame("test_save.json");
-            Assert.IsTrue(loaded);
             
             // Verify
             Assert.AreEqual(seed, newGameState.gameSeed);

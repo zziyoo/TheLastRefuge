@@ -19,9 +19,9 @@ namespace LastRefuge.UI
         public Button[] workButtons;
         
         private CharacterState character;
-        private CharacterSystem characterSystem;
+        private ICharacterSystem characterSystem;
         
-        public void Setup(CharacterState character, CharacterSystem system)
+        public void Setup(CharacterState character, ICharacterSystem system)
         {
             this.character = character;
             this.characterSystem = system;

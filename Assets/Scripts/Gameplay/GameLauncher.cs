@@ -14,6 +14,7 @@ namespace LastRefuge.Gameplay
         
         private void Start()
         {
+            UnityEngine.Debug.Log("GameLauncher.Start() called");
             if (_hasInitialized) return;
             _hasInitialized = true;
             
@@ -38,6 +39,8 @@ namespace LastRefuge.Gameplay
                 return;
             }
             
+            UnityEngine.Debug.Log("GameLauncher found UIManager.Instance");
+            
             // By default, show main menu. Auto-start only for debug.
             if (autoStartNewGame)
             {
@@ -53,6 +56,7 @@ namespace LastRefuge.Gameplay
                 var showMainMenuMethod = uiManagerType.GetMethod("ShowMainMenu");
                 if (showMainMenuMethod != null)
                 {
+                    UnityEngine.Debug.Log("GameLauncher calling UIManager.ShowMainMenu() via reflection");
                     showMainMenuMethod.Invoke(uiManager, null);
                 }
                 else
