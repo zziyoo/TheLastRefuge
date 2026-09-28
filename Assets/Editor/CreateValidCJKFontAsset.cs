@@ -29,7 +29,6 @@ namespace LastRefuge.Editor
             string assetPath = "Assets/Fonts/NotoSansSC-Regular.asset";
 
             // Use the Font Asset Creator API with correct parameter order
-            // CreateFontAsset(Font font, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, AtlasPopulationMode atlasPopulationMode, bool enableMultiAtlasSupport)
             var fontAsset = TMP_FontAsset.CreateFontAsset(
                 sourceFont,
                 90,                         // samplingPointSize
@@ -43,22 +42,114 @@ namespace LastRefuge.Editor
 
             if (fontAsset != null)
             {
+                // Ensure Atlas Texture and Material are properly set up
+                EnsureFontAssetPersistence(fontAsset);
+
+                // Create the main Font Asset
                 AssetDatabase.CreateAsset(fontAsset, assetPath);
+
+                // Persist Atlas Texture as sub-asset (check if already persisted by CreateFontAsset)
+                if (fontAsset.atlasTexture != null)
+                {
+                    string atlasName = fontAsset.name + " Atlas";
+                    if (AssetDatabase.GetAssetPath(fontAsset.atlasTexture) != assetPath)
+                    {
+                        fontAsset.atlasTexture.name = atlasName;
+                        AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset);
+                        UnityEngine.Debug.Log($"Added Atlas Texture as sub-asset: {fontAsset.atlasTexture.name}");
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log($"Atlas Texture already persisted as sub-asset: {fontAsset.atlasTexture.name}");
+                    }
+                }
+
+                // Persist Material as sub-asset
+                if (fontAsset.material != null)
+                {
+                    if (AssetDatabase.GetAssetPath(fontAsset.material) != assetPath)
+                    {
+                        fontAsset.material.name = fontAsset.name + " Material";
+                        AssetDatabase.AddObjectToAsset(fontAsset.material, fontAsset);
+                        UnityEngine.Debug.Log($"Added Material as sub-asset: {fontAsset.material.name}");
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log($"Material already persisted as sub-asset: {fontAsset.material.name}");
+                    }
+                }
+
+                // Persist any additional atlas textures (multi-atlas support)
+                if (fontAsset.atlasTextures != null)
+                {
+                    for (int i = 0; i < fontAsset.atlasTextures.Length; i++)
+                    {
+                        if (fontAsset.atlasTextures[i] != null && AssetDatabase.GetAssetPath(fontAsset.atlasTextures[i]) != assetPath)
+                        {
+                            fontAsset.atlasTextures[i].name = fontAsset.name + " Atlas " + i;
+                            AssetDatabase.AddObjectToAsset(fontAsset.atlasTextures[i], fontAsset);
+                            UnityEngine.Debug.Log($"Added Atlas Texture {i} as sub-asset: {fontAsset.atlasTextures[i].name}");
+                        }
+                    }
+                }
+
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
 
-                UnityEngine.Debug.Log($"Created CJK Font Asset at: {assetPath}");
-                UnityEngine.Debug.Log($"Atlas size: {fontAsset.atlasWidth}x{fontAsset.atlasHeight}");
-                UnityEngine.Debug.Log($"Atlas texture count: {fontAsset.atlasTextures?.Length ?? 0}");
-                if (fontAsset.atlasTextures != null && fontAsset.atlasTextures.Length > 0)
+                // Verify persistence by reloading
+                var reloadedFontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
+                if (reloadedFontAsset != null)
                 {
-                    UnityEngine.Debug.Log($"Atlas texture[0]: {fontAsset.atlasTextures[0]?.name ?? "null"}");
+                    UnityEngine.Debug.Log($"Reloaded Font Asset: {reloadedFontAsset.name}");
+                    UnityEngine.Debug.Log($"Atlas size: {reloadedFontAsset.atlasWidth}x{reloadedFontAsset.atlasHeight}");
+                    UnityEngine.Debug.Log($"Atlas texture count: {reloadedFontAsset.atlasTextures?.Length ?? 0}");
+                    UnityEngine.Debug.Log($"Atlas Texture: {reloadedFontAsset.atlasTexture?.name ?? "null"}");
+                    UnityEngine.Debug.Log($"Material: {reloadedFontAsset.material?.name ?? "null"}");
+                    UnityEngine.Debug.Log($"Atlas Textures: {reloadedFontAsset.atlasTextures?.Length ?? 0}");
+                    
+                    if (reloadedFontAsset.atlasTextures != null && reloadedFontAsset.atlasTextures.Length > 0 && reloadedFontAsset.atlasTextures[0] != null && reloadedFontAsset.material != null)
+                    {
+                        EditorUtility.DisplayDialog("Success", $"CJK Font Asset created and persisted successfully!\nAtlas: {reloadedFontAsset.atlasWidth}x{reloadedFontAsset.atlasHeight}\nTexture: {reloadedFontAsset.atlasTextures[0].name}\nMaterial: {reloadedFontAsset.material.name}", "OK");
+                    }
+                    else
+                    {
+                        EditorUtility.DisplayDialog("Warning", "Font Asset created but Atlas Texture or Material may not be persisted correctly. Check console.", "OK");
+                    }
                 }
-                EditorUtility.DisplayDialog("Success", $"CJK Font Asset created at:\n{assetPath}", "OK");
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "Failed to reload Font Asset after creation.", "OK");
+                }
             }
             else
             {
                 EditorUtility.DisplayDialog("Error", "Failed to create TMP Font Asset.", "OK");
+            }
+        }
+
+        private static void EnsureFontAssetPersistence(TMP_FontAsset fontAsset)
+        {
+            // Ensure Material exists and is properly configured
+            if (fontAsset.material == null)
+            {
+                // Create a new TMP Material with Distance Field shader
+                Shader sdfShader = Shader.Find("TextMeshPro/Distance Field");
+                if (sdfShader != null)
+                {
+                    Material material = new Material(sdfShader);
+                    material.name = "Temp Material";
+                    fontAsset.material = material;
+                }
+                else
+                {
+                    UnityEngine.Debug.LogError("Could not find TextMeshPro/Distance Field shader!");
+                }
+            }
+
+            // Ensure Atlas Texture exists
+            if (fontAsset.atlasTexture == null && (fontAsset.atlasTextures == null || fontAsset.atlasTextures.Length == 0 || fontAsset.atlasTextures[0] == null))
+            {
+                UnityEngine.Debug.LogWarning("Font Asset has no Atlas Texture. The CreateFontAsset API should have created one in Dynamic mode.");
             }
         }
 
@@ -71,6 +162,13 @@ namespace LastRefuge.Editor
             if (fontAsset == null)
             {
                 EditorUtility.DisplayDialog("Error", "CJK Font Asset not found. Run 'Create Valid CJK Font Asset' first.", "OK");
+                return;
+            }
+
+            // Verify persistence before setting as default
+            if (fontAsset.atlasTextures == null || fontAsset.atlasTextures.Length == 0 || fontAsset.atlasTextures[0] == null || fontAsset.material == null)
+            {
+                EditorUtility.DisplayDialog("Error", "Font Asset is missing Atlas Texture or Material. Re-create it first.", "OK");
                 return;
             }
 
