@@ -20,7 +20,7 @@ namespace LastRefuge.UI
             if (existingCanvas != null)
             {
                 var existingUIManager = existingCanvas.GetComponentInChildren<UIManager>();
-                if (existingUIManager != null && existingUIManager.mainMenuPanel != null)
+                if (existingUIManager != null && existingUIManager.mainMenuPanel != null && existingUIManager.saveLoadPanel != null && existingUIManager.settingsPanel != null)
                 {
                     return; // Already fully initialized
                 }
@@ -58,7 +58,19 @@ namespace LastRefuge.UI
             uiMgr.gamePanel = gamePanel;
             SetupGamePanel(gamePanel, uiMgr);
             
-            // Create sub-panels
+            // Create SaveLoad Panel (main menu level)
+            var saveLoadPanel = CreatePanel("SaveLoadPanel", canvasGO.transform);
+            saveLoadPanel.SetActive(false);
+            uiMgr.saveLoadPanel = saveLoadPanel;
+            SetupSaveLoadPanel(saveLoadPanel, uiMgr);
+            
+            // Create Settings Panel (main menu level)
+            var settingsPanel = CreatePanel("SettingsPanel", canvasGO.transform);
+            settingsPanel.SetActive(false);
+            uiMgr.settingsPanel = settingsPanel;
+            SetupSettingsPanel(settingsPanel, uiMgr);
+            
+            // Create sub-panels (game panel level)
             uiMgr.personnelPanel = CreateSubPanel("PersonnelPanel", gamePanel.transform);
             uiMgr.buildingPanel = CreateSubPanel("BuildingPanel", gamePanel.transform);
             uiMgr.resourceDetailPanel = CreateSubPanel("ResourceDetailPanel", gamePanel.transform);
@@ -370,6 +382,34 @@ namespace LastRefuge.UI
             itemUI.workText = workText.GetComponent<TextMeshProUGUI>();
             
             uiManager.characterItemPrefab = go;
+        }
+
+        private static void SetupSaveLoadPanel(GameObject panel, UIManager uiManager)
+        {
+            var layout = panel.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 20;
+            layout.padding = new RectOffset(50, 50, 50, 50);
+            
+            CreateText(panel.transform, "读取存档", 48, FontStyles.Bold);
+            
+            var backBtn = CreateButton(panel.transform, "返回", () => uiManager.ShowMainMenu(), 200, 60);
+        }
+        
+        private static void SetupSettingsPanel(GameObject panel, UIManager uiManager)
+        {
+            var layout = panel.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 20;
+            layout.padding = new RectOffset(50, 50, 50, 50);
+            
+            CreateText(panel.transform, "设置", 48, FontStyles.Bold);
+            
+            CreateText(panel.transform, "音乐", 24);
+            CreateText(panel.transform, "音效", 24);
+            CreateText(panel.transform, "文字速度", 24);
+            
+            var backBtn = CreateButton(panel.transform, "返回", () => uiManager.ShowMainMenu(), 200, 60);
         }
     }
 }
