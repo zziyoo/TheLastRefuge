@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -26,6 +27,13 @@ namespace LastRefuge.Tests
         [SetUp]
         public void Setup()
         {
+            // Save tests write to an isolated folder, never to the player's real saves.
+            SaveSystem.OverrideSaveDirectory = Path.Combine(Application.persistentDataPath, "CoreSystemsTest_Saves");
+            if (Directory.Exists(SaveSystem.OverrideSaveDirectory))
+            {
+                Directory.Delete(SaveSystem.OverrideSaveDirectory, true);
+            }
+            
             gameState = new GameState();
             
             timeSystem = new TimeSystem();
@@ -166,12 +174,19 @@ namespace LastRefuge.Tests
         [Test]
         public void CharacterSystem_AssignWork_Works()
         {
+            resourceSystem.Add(ResourceType.Wood, 50, "Test");
+            resourceSystem.Add(ResourceType.Stone, 30, "Test");
+            var farm = buildingSystem.Build("farm_basic");
+            Assert.IsNotNull(farm, "A farm must be built before a farmer can be assigned");
+            
             characterSystem.GenerateInitialCharacters(1);
             var character = characterSystem.GetAllCharacters()[0];
             
             bool assigned = characterSystem.AssignWork(character.characterId, WorkType.Farming);
             Assert.IsTrue(assigned);
             Assert.AreEqual(WorkType.Farming, character.currentWork);
+            Assert.AreEqual(farm.buildingId, character.assignedBuildingId);
+            Assert.AreEqual(1, farm.assignedWorkers.Length);
         }
         
         [Test]

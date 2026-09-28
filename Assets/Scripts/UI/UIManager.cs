@@ -563,11 +563,14 @@ namespace LastRefuge.UI
         {
             if (nextTimeSlotButton != null)
             {
+                // DayEnd is included: the only way out of the settlement state is to
+                // roll over to the next Morning, so the button must stay usable there.
                 nextTimeSlotButton.interactable = gameManager.GetCurrentGameplayState() == GameplayState.Morning ||
                                                   gameManager.GetCurrentGameplayState() == GameplayState.Planning ||
                                                   gameManager.GetCurrentGameplayState() == GameplayState.Action ||
                                                   gameManager.GetCurrentGameplayState() == GameplayState.Evening ||
-                                                  gameManager.GetCurrentGameplayState() == GameplayState.Night;
+                                                  gameManager.GetCurrentGameplayState() == GameplayState.Night ||
+                                                  gameManager.GetCurrentGameplayState() == GameplayState.DayEnd;
             }
         }
         

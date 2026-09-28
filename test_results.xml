@@ -1,125 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<test-run id="2" testcasecount="32" result="Passed" total="32" passed="32" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-28 14:05:14Z" end-time="2026-09-28 14:05:15Z" duration="0.2759979">
-  <test-suite type="TestSuite" id="1039" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="32" result="Passed" start-time="2026-09-28 14:05:14Z" end-time="2026-09-28 14:05:15Z" duration="0.275998" total="32" passed="32" failed="0" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="41" result="Passed" total="41" passed="41" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-28 15:42:35Z" end-time="2026-09-28 15:42:36Z" duration="0.8176739">
+  <test-suite type="TestSuite" id="1048" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="41" result="Passed" start-time="2026-09-28 15:42:35Z" end-time="2026-09-28 15:42:36Z" duration="0.817674" total="41" passed="41" failed="0" inconclusive="0" skipped="0" asserts="0">
     <properties />
-    <test-suite type="Assembly" id="1074" name="LastRefuge.Tests.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.dll" runstate="Runnable" testcasecount="32" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.240159" total="32" passed="32" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="Assembly" id="1092" name="LastRefuge.Tests.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.dll" runstate="Runnable" testcasecount="41" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.742837" total="41" passed="41" failed="0" inconclusive="0" skipped="0" asserts="0">
       <properties>
-        <property name="_PID" value="28268" />
+        <property name="_PID" value="15000" />
         <property name="_APPDOMAIN" value="Unity Child Domain" />
         <property name="platform" value="EditMode" />
       </properties>
-      <test-suite type="TestSuite" id="1075" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="32" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.239660" total="32" passed="32" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestSuite" id="1093" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="41" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.738746" total="41" passed="41" failed="0" inconclusive="0" skipped="0" asserts="0">
         <properties />
-        <test-suite type="TestSuite" id="1076" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="32" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.235902" total="32" passed="32" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <test-suite type="TestSuite" id="1094" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="41" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.734498" total="41" passed="41" failed="0" inconclusive="0" skipped="0" asserts="0">
           <properties />
-          <test-suite type="TestFixture" id="1040" name="CoreSystemsTest" fullname="LastRefuge.Tests.CoreSystemsTest" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.168979" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestFixture" id="1049" name="CoreSystemsTest" fullname="LastRefuge.Tests.CoreSystemsTest" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.414495" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-case id="1049" name="BuildingSystem_CanBuild_And_PaysCost" fullname="LastRefuge.Tests.CoreSystemsTest.BuildingSystem_CanBuild_And_PaysCost" methodname="BuildingSystem_CanBuild_And_PaysCost" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1316976972" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.046604" asserts="0">
+            <test-case id="1058" name="BuildingSystem_CanBuild_And_PaysCost" fullname="LastRefuge.Tests.CoreSystemsTest.BuildingSystem_CanBuild_And_PaysCost" methodname="BuildingSystem_CanBuild_And_PaysCost" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1449591856" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.117397" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1050" name="BuildingSystem_CannotBuild_WhenResourcesInsufficient" fullname="LastRefuge.Tests.CoreSystemsTest.BuildingSystem_CannotBuild_WhenResourcesInsufficient" methodname="BuildingSystem_CannotBuild_WhenResourcesInsufficient" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1544237018" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002416" asserts="0">
+            <test-case id="1059" name="BuildingSystem_CannotBuild_WhenResourcesInsufficient" fullname="LastRefuge.Tests.CoreSystemsTest.BuildingSystem_CannotBuild_WhenResourcesInsufficient" methodname="BuildingSystem_CannotBuild_WhenResourcesInsufficient" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="2035309917" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005623" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1057" name="BuildingSystem_Production_GeneratesResources" fullname="LastRefuge.Tests.CoreSystemsTest.BuildingSystem_Production_GeneratesResources" methodname="BuildingSystem_Production_GeneratesResources" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="887721003" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.013714" asserts="0">
+            <test-case id="1066" name="BuildingSystem_Production_GeneratesResources" fullname="LastRefuge.Tests.CoreSystemsTest.BuildingSystem_Production_GeneratesResources" methodname="BuildingSystem_Production_GeneratesResources" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1486031718" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.037415" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1048" name="CharacterSystem_AssignWork_Works" fullname="LastRefuge.Tests.CoreSystemsTest.CharacterSystem_AssignWork_Works" methodname="CharacterSystem_AssignWork_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1596175891" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.006647" asserts="0">
+            <test-case id="1057" name="CharacterSystem_AssignWork_Works" fullname="LastRefuge.Tests.CoreSystemsTest.CharacterSystem_AssignWork_Works" methodname="CharacterSystem_AssignWork_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1807850947" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.021390" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1047" name="CharacterSystem_GeneratesInitialCharacters" fullname="LastRefuge.Tests.CoreSystemsTest.CharacterSystem_GeneratesInitialCharacters" methodname="CharacterSystem_GeneratesInitialCharacters" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="680443676" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002645" asserts="0">
+            <test-case id="1056" name="CharacterSystem_GeneratesInitialCharacters" fullname="LastRefuge.Tests.CoreSystemsTest.CharacterSystem_GeneratesInitialCharacters" methodname="CharacterSystem_GeneratesInitialCharacters" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="451336328" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.006714" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1056" name="CharacterSystem_WorkEfficiency_CalculatesCorrectly" fullname="LastRefuge.Tests.CoreSystemsTest.CharacterSystem_WorkEfficiency_CalculatesCorrectly" methodname="CharacterSystem_WorkEfficiency_CalculatesCorrectly" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="100580195" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.006674" asserts="0">
+            <test-case id="1065" name="CharacterSystem_WorkEfficiency_CalculatesCorrectly" fullname="LastRefuge.Tests.CoreSystemsTest.CharacterSystem_WorkEfficiency_CalculatesCorrectly" methodname="CharacterSystem_WorkEfficiency_CalculatesCorrectly" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="172141932" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.012672" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1051" name="EffectResolver_AddResource_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_AddResource_Works" methodname="EffectResolver_AddResource_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="228546448" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001990" asserts="0">
+            <test-case id="1060" name="EffectResolver_AddResource_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_AddResource_Works" methodname="EffectResolver_AddResource_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="741374597" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008303" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1053" name="EffectResolver_DamageCharacter_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_DamageCharacter_Works" methodname="EffectResolver_DamageCharacter_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1561375189" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001368" asserts="0">
+            <test-case id="1062" name="EffectResolver_DamageCharacter_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_DamageCharacter_Works" methodname="EffectResolver_DamageCharacter_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1404254274" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.007238" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1054" name="EffectResolver_KillCharacter_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_KillCharacter_Works" methodname="EffectResolver_KillCharacter_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1520122041" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002344" asserts="0">
+            <test-case id="1063" name="EffectResolver_KillCharacter_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_KillCharacter_Works" methodname="EffectResolver_KillCharacter_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1208480953" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008085" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1052" name="EffectResolver_RemoveResource_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_RemoveResource_Works" methodname="EffectResolver_RemoveResource_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1067112005" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001008" asserts="0">
+            <test-case id="1061" name="EffectResolver_RemoveResource_Works" fullname="LastRefuge.Tests.CoreSystemsTest.EffectResolver_RemoveResource_Works" methodname="EffectResolver_RemoveResource_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="372054181" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005411" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1041" name="GameState_Initialization_Works" fullname="LastRefuge.Tests.CoreSystemsTest.GameState_Initialization_Works" methodname="GameState_Initialization_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="931669575" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001189" asserts="0">
+            <test-case id="1050" name="GameState_Initialization_Works" fullname="LastRefuge.Tests.CoreSystemsTest.GameState_Initialization_Works" methodname="GameState_Initialization_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="859368708" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005604" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1042" name="RandomSystem_SameSeed_ProducesSameResults" fullname="LastRefuge.Tests.CoreSystemsTest.RandomSystem_SameSeed_ProducesSameResults" methodname="RandomSystem_SameSeed_ProducesSameResults" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1916017100" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002423" asserts="0">
+            <test-case id="1051" name="RandomSystem_SameSeed_ProducesSameResults" fullname="LastRefuge.Tests.CoreSystemsTest.RandomSystem_SameSeed_ProducesSameResults" methodname="RandomSystem_SameSeed_ProducesSameResults" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1399071823" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008069" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1043" name="ResourceSystem_AddAndRemove_Works" fullname="LastRefuge.Tests.CoreSystemsTest.ResourceSystem_AddAndRemove_Works" methodname="ResourceSystem_AddAndRemove_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="255478513" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001442" asserts="0">
+            <test-case id="1052" name="ResourceSystem_AddAndRemove_Works" fullname="LastRefuge.Tests.CoreSystemsTest.ResourceSystem_AddAndRemove_Works" methodname="ResourceSystem_AddAndRemove_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1870514625" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005802" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1045" name="ResourceSystem_CanAfford_Works" fullname="LastRefuge.Tests.CoreSystemsTest.ResourceSystem_CanAfford_Works" methodname="ResourceSystem_CanAfford_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1176786996" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002360" asserts="0">
+            <test-case id="1054" name="ResourceSystem_CanAfford_Works" fullname="LastRefuge.Tests.CoreSystemsTest.ResourceSystem_CanAfford_Works" methodname="ResourceSystem_CanAfford_Works" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="461964228" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.007247" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1044" name="ResourceSystem_CannotGoNegative" fullname="LastRefuge.Tests.CoreSystemsTest.ResourceSystem_CannotGoNegative" methodname="ResourceSystem_CannotGoNegative" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="2091692947" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.005085" asserts="0">
+            <test-case id="1053" name="ResourceSystem_CannotGoNegative" fullname="LastRefuge.Tests.CoreSystemsTest.ResourceSystem_CannotGoNegative" methodname="ResourceSystem_CannotGoNegative" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1481472155" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.004614" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1055" name="SaveSystem_SaveAndLoad_PreservesState" fullname="LastRefuge.Tests.CoreSystemsTest.SaveSystem_SaveAndLoad_PreservesState" methodname="SaveSystem_SaveAndLoad_PreservesState" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="23514476" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.029007" asserts="0">
+            <test-case id="1064" name="SaveSystem_SaveAndLoad_PreservesState" fullname="LastRefuge.Tests.CoreSystemsTest.SaveSystem_SaveAndLoad_PreservesState" methodname="SaveSystem_SaveAndLoad_PreservesState" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1884864233" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.059774" asserts="0">
               <properties />
-              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\test_save.json
-Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\test_save.json
+              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\CoreSystemsTest_Saves\test_save.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\CoreSystemsTest_Saves\test_save.json
 ]]></output>
             </test-case>
-            <test-case id="1058" name="TimeSlot_Next_ReturnsCorrectSequence" fullname="LastRefuge.Tests.CoreSystemsTest.TimeSlot_Next_ReturnsCorrectSequence" methodname="TimeSlot_Next_ReturnsCorrectSequence" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1040725800" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001733" asserts="0">
+            <test-case id="1067" name="TimeSlot_Next_ReturnsCorrectSequence" fullname="LastRefuge.Tests.CoreSystemsTest.TimeSlot_Next_ReturnsCorrectSequence" methodname="TimeSlot_Next_ReturnsCorrectSequence" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1026859794" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.006653" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1046" name="TimeSystem_AdvancesCorrectly" fullname="LastRefuge.Tests.CoreSystemsTest.TimeSystem_AdvancesCorrectly" methodname="TimeSystem_AdvancesCorrectly" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1270502505" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002770" asserts="0">
+            <test-case id="1055" name="TimeSystem_AdvancesCorrectly" fullname="LastRefuge.Tests.CoreSystemsTest.TimeSystem_AdvancesCorrectly" methodname="TimeSystem_AdvancesCorrectly" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1585191382" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.007378" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1059" name="WorkType_GetPrimaryStat_ReturnsCorrectStat" fullname="LastRefuge.Tests.CoreSystemsTest.WorkType_GetPrimaryStat_ReturnsCorrectStat" methodname="WorkType_GetPrimaryStat_ReturnsCorrectStat" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1466074650" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001013" asserts="0">
+            <test-case id="1068" name="WorkType_GetPrimaryStat_ReturnsCorrectStat" fullname="LastRefuge.Tests.CoreSystemsTest.WorkType_GetPrimaryStat_ReturnsCorrectStat" methodname="WorkType_GetPrimaryStat_ReturnsCorrectStat" classname="LastRefuge.Tests.CoreSystemsTest" runstate="Runnable" seed="1150535358" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005039" asserts="0">
               <properties />
             </test-case>
           </test-suite>
-          <test-suite type="TestFixture" id="1060" name="GameplayIntegrationTest" fullname="LastRefuge.Tests.GameplayIntegrationTest" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.058906" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestFixture" id="1069" name="GameplayIntegrationTest" fullname="LastRefuge.Tests.GameplayIntegrationTest" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" testcasecount="22" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.308203" total="22" passed="22" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-case id="1068" name="AssignWork_IsAtomicWhenTargetIsFull" fullname="LastRefuge.Tests.GameplayIntegrationTest.AssignWork_IsAtomicWhenTargetIsFull" methodname="AssignWork_IsAtomicWhenTargetIsFull" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1758787546" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.004486" asserts="0">
+            <test-case id="1077" name="AssignWork_IsAtomicWhenTargetIsFull" fullname="LastRefuge.Tests.GameplayIntegrationTest.AssignWork_IsAtomicWhenTargetIsFull" methodname="AssignWork_IsAtomicWhenTargetIsFull" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="2002453472" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008910" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1067" name="BuildCountLimit_IsEnforcedByTheSystem" fullname="LastRefuge.Tests.GameplayIntegrationTest.BuildCountLimit_IsEnforcedByTheSystem" methodname="BuildCountLimit_IsEnforcedByTheSystem" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1876018659" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002114" asserts="0">
+            <test-case id="1087" name="AssignWorkFailure_PreservesPreviousAssignment" fullname="LastRefuge.Tests.GameplayIntegrationTest.AssignWorkFailure_PreservesPreviousAssignment" methodname="AssignWorkFailure_PreservesPreviousAssignment" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="2093095557" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005942" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1064" name="BuildingWithoutUpkeep_StopsProducing" fullname="LastRefuge.Tests.GameplayIntegrationTest.BuildingWithoutUpkeep_StopsProducing" methodname="BuildingWithoutUpkeep_StopsProducing" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1154577774" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.003937" asserts="0">
+            <test-case id="1086" name="AssignWorkWithoutAvailableBuilding_Fails" fullname="LastRefuge.Tests.GameplayIntegrationTest.AssignWorkWithoutAvailableBuilding_Fails" methodname="AssignWorkWithoutAvailableBuilding_Fails" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="638584936" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008939" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1069" name="CharacterDeath_ReleasesTheWorkplace" fullname="LastRefuge.Tests.GameplayIntegrationTest.CharacterDeath_ReleasesTheWorkplace" methodname="CharacterDeath_ReleasesTheWorkplace" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1903203102" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001310" asserts="0">
+            <test-case id="1076" name="BuildCountLimit_IsEnforcedByTheSystem" fullname="LastRefuge.Tests.GameplayIntegrationTest.BuildCountLimit_IsEnforcedByTheSystem" methodname="BuildCountLimit_IsEnforcedByTheSystem" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1914033981" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.006648" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1062" name="FoodShortage_DrainsStockAndCausesHunger" fullname="LastRefuge.Tests.GameplayIntegrationTest.FoodShortage_DrainsStockAndCausesHunger" methodname="FoodShortage_DrainsStockAndCausesHunger" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="527340635" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002662" asserts="0">
+            <test-case id="1073" name="BuildingWithoutUpkeep_StopsProducing" fullname="LastRefuge.Tests.GameplayIntegrationTest.BuildingWithoutUpkeep_StopsProducing" methodname="BuildingWithoutUpkeep_StopsProducing" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="954971501" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.009256" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1070" name="ForecastMatchesTheActualDailySettlement" fullname="LastRefuge.Tests.GameplayIntegrationTest.ForecastMatchesTheActualDailySettlement" methodname="ForecastMatchesTheActualDailySettlement" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1132813816" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002880" asserts="0">
+            <test-case id="1078" name="CharacterDeath_ReleasesTheWorkplace" fullname="LastRefuge.Tests.GameplayIntegrationTest.CharacterDeath_ReleasesTheWorkplace" methodname="CharacterDeath_ReleasesTheWorkplace" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="2031815939" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005444" asserts="0">
               <properties />
             </test-case>
-            <test-case id="1061" name="FullDayFlow_BuildAssignProduceConsumeRecoverAndAdvance" fullname="LastRefuge.Tests.GameplayIntegrationTest.FullDayFlow_BuildAssignProduceConsumeRecoverAndAdvance" methodname="FullDayFlow_BuildAssignProduceConsumeRecoverAndAdvance" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="2014444575" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.003836" asserts="0">
+            <test-case id="1091" name="CorruptMainSave_FallsBackToBackup" fullname="LastRefuge.Tests.GameplayIntegrationTest.CorruptMainSave_FallsBackToBackup" methodname="CorruptMainSave_FallsBackToBackup" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="114465079" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.046872" asserts="0">
               <properties />
-            </test-case>
-            <test-case id="1063" name="FullFoodSupply_KeepsHungerFlat" fullname="LastRefuge.Tests.GameplayIntegrationTest.FullFoodSupply_KeepsHungerFlat" methodname="FullFoodSupply_KeepsHungerFlat" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="2146590381" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.002190" asserts="0">
-              <properties />
-            </test-case>
-            <test-case id="1065" name="PowerIsNotChargedTwice" fullname="LastRefuge.Tests.GameplayIntegrationTest.PowerIsNotChargedTwice" methodname="PowerIsNotChargedTwice" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="789233132" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.003369" asserts="0">
-              <properties />
-            </test-case>
-            <test-case id="1071" name="ProductionForecast_IsZeroWithoutWorkers" fullname="LastRefuge.Tests.GameplayIntegrationTest.ProductionForecast_IsZeroWithoutWorkers" methodname="ProductionForecast_IsZeroWithoutWorkers" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1972832712" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001617" asserts="0">
-              <properties />
-            </test-case>
-            <test-case id="1073" name="ReloadedCapacity_DoesNotDoubleWithBuildings" fullname="LastRefuge.Tests.GameplayIntegrationTest.ReloadedCapacity_DoesNotDoubleWithBuildings" methodname="ReloadedCapacity_DoesNotDoubleWithBuildings" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1674170677" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.009451" asserts="0">
-              <properties />
-              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\integration_capacity.json
-Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\integration_capacity.json
+              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\double_save.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\double_save.json
+Main save missing or invalid (C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\double_save.json); recovered backup C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\double_save.json.bak
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\double_save.json.bak
 ]]></output>
             </test-case>
-            <test-case id="1072" name="SaveLoad_PreservesWorkAndState" fullname="LastRefuge.Tests.GameplayIntegrationTest.SaveLoad_PreservesWorkAndState" methodname="SaveLoad_PreservesWorkAndState" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="434795787" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.013080" asserts="0">
+            <test-case id="1088" name="DayEnd_AdvancesExactlyOnce" fullname="LastRefuge.Tests.GameplayIntegrationTest.DayEnd_AdvancesExactlyOnce" methodname="DayEnd_AdvancesExactlyOnce" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1511104230" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.010309" asserts="0">
               <properties />
-              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\integration_save.json
-Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\integration_save.json
+            </test-case>
+            <test-case id="1089" name="DayEndAutoSave_IsLoadableAndResumable" fullname="LastRefuge.Tests.GameplayIntegrationTest.DayEndAutoSave_IsLoadableAndResumable" methodname="DayEndAutoSave_IsLoadableAndResumable" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="774598651" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.020600" asserts="0">
+              <properties />
+              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\autosave.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\autosave.json
 ]]></output>
             </test-case>
-            <test-case id="1066" name="UpgradeWarehouse_RecalculatesCapacityWithoutDoubleCount" fullname="LastRefuge.Tests.GameplayIntegrationTest.UpgradeWarehouse_RecalculatesCapacityWithoutDoubleCount" methodname="UpgradeWarehouse_RecalculatesCapacityWithoutDoubleCount" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1962513509" result="Passed" start-time="2026-09-28 14:05:15Z" end-time="2026-09-28 14:05:15Z" duration="0.001944" asserts="0">
+            <test-case id="1083" name="ExactUpkeepCost_StillProduces" fullname="LastRefuge.Tests.GameplayIntegrationTest.ExactUpkeepCost_StillProduces" methodname="ExactUpkeepCost_StillProduces" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="833019163" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008775" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1071" name="FoodShortage_DrainsStockAndCausesHunger" fullname="LastRefuge.Tests.GameplayIntegrationTest.FoodShortage_DrainsStockAndCausesHunger" methodname="FoodShortage_DrainsStockAndCausesHunger" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="2096656245" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.004421" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1079" name="ForecastMatchesTheActualDailySettlement" fullname="LastRefuge.Tests.GameplayIntegrationTest.ForecastMatchesTheActualDailySettlement" methodname="ForecastMatchesTheActualDailySettlement" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="676260035" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.007857" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1070" name="FullDayFlow_BuildAssignProduceConsumeRecoverAndAdvance" fullname="LastRefuge.Tests.GameplayIntegrationTest.FullDayFlow_BuildAssignProduceConsumeRecoverAndAdvance" methodname="FullDayFlow_BuildAssignProduceConsumeRecoverAndAdvance" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1783341363" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.007257" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1072" name="FullFoodSupply_KeepsHungerFlat" fullname="LastRefuge.Tests.GameplayIntegrationTest.FullFoodSupply_KeepsHungerFlat" methodname="FullFoodSupply_KeepsHungerFlat" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1328966438" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.008341" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1085" name="GeneratorAfterConsumer_IsDeterministic" fullname="LastRefuge.Tests.GameplayIntegrationTest.GeneratorAfterConsumer_IsDeterministic" methodname="GeneratorAfterConsumer_IsDeterministic" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1226299741" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005918" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1084" name="GeneratorBeforeConsumer_IsDeterministic" fullname="LastRefuge.Tests.GameplayIntegrationTest.GeneratorBeforeConsumer_IsDeterministic" methodname="GeneratorBeforeConsumer_IsDeterministic" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1577882877" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005947" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1074" name="PowerIsNotChargedTwice" fullname="LastRefuge.Tests.GameplayIntegrationTest.PowerIsNotChargedTwice" methodname="PowerIsNotChargedTwice" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1671267845" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005942" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1080" name="ProductionForecast_IsZeroWithoutWorkers" fullname="LastRefuge.Tests.GameplayIntegrationTest.ProductionForecast_IsZeroWithoutWorkers" methodname="ProductionForecast_IsZeroWithoutWorkers" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1719133197" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.005663" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1082" name="ReloadedCapacity_DoesNotDoubleWithBuildings" fullname="LastRefuge.Tests.GameplayIntegrationTest.ReloadedCapacity_DoesNotDoubleWithBuildings" methodname="ReloadedCapacity_DoesNotDoubleWithBuildings" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="968529547" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.021083" asserts="0">
+              <properties />
+              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\integration_capacity.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\integration_capacity.json
+]]></output>
+            </test-case>
+            <test-case id="1090" name="SaveFailure_PreservesPreviousSave" fullname="LastRefuge.Tests.GameplayIntegrationTest.SaveFailure_PreservesPreviousSave" methodname="SaveFailure_PreservesPreviousSave" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1366814021" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.057464" asserts="0">
+              <properties />
+              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\resume_test.json
+Save failed: The target file 'C:\Users\32360\AppData\LocalLow\DefaultCompany\最后避难所\GameplayIntegrationTest_Saves\resume_test.json.bak' is a directory, not a file.
+  at System.IO.FileSystem.CopyFile (System.String sourceFullPath, System.String destFullPath, System.Boolean overwrite) [0x00058] in <1071a2cb0cb3433aae80a793c277a048>:0 
+  at System.IO.File.Copy (System.String sourceFileName, System.String destFileName, System.Boolean overwrite) [0x00062] in <1071a2cb0cb3433aae80a793c277a048>:0 
+  at LastRefuge.Save.SaveSystem.SaveGame (System.Boolean isAutoSave, System.String customName) [0x000ec] in C:\Users\32360\Desktop\最后避难所\Assets\Scripts\Save\SaveSystem.cs:120 
+]]></output>
+            </test-case>
+            <test-case id="1081" name="SaveLoad_PreservesWorkAndState" fullname="LastRefuge.Tests.GameplayIntegrationTest.SaveLoad_PreservesWorkAndState" methodname="SaveLoad_PreservesWorkAndState" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1174048502" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.021869" asserts="0">
+              <properties />
+              <output><![CDATA[Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\integration_save.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\GameplayIntegrationTest_Saves\integration_save.json
+]]></output>
+            </test-case>
+            <test-case id="1075" name="UpgradeWarehouse_RecalculatesCapacityWithoutDoubleCount" fullname="LastRefuge.Tests.GameplayIntegrationTest.UpgradeWarehouse_RecalculatesCapacityWithoutDoubleCount" methodname="UpgradeWarehouse_RecalculatesCapacityWithoutDoubleCount" classname="LastRefuge.Tests.GameplayIntegrationTest" runstate="Runnable" seed="1535559202" result="Passed" start-time="2026-09-28 15:42:36Z" end-time="2026-09-28 15:42:36Z" duration="0.009017" asserts="0">
               <properties />
             </test-case>
           </test-suite>

@@ -27,6 +27,14 @@ namespace LastRefuge.Gameplay
         public string gameVersion = "0.1.0";
         public bool autoSaveOnDayEnd = true;
         
+        /// <summary>
+        /// True while a run is actually active (New Game or successful Load).
+        /// Quit/pause autosaves are gated on this so returning to the main menu or
+        /// quitting before starting a run can never manufacture an invalid autosave.
+        /// </summary>
+        [HideInInspector]
+        public bool hasActiveGame = false;
+        
         private bool isInitialized = false;
         
         private void Awake()
@@ -84,12 +92,19 @@ namespace LastRefuge.Gameplay
         {
             saveSystem.CreateNewGame(seed);
             
+            // CreateNewGame resets gameState.resources to an empty array, but the real
+            // amounts live in ResourceSystem's map. Re-initialize so the array is rebuilt
+            // from the map again, otherwise the first autosave would serialize nothing.
+            resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
+            
             randomSystem.Initialize(gameState.gameSeed);
             
             GenerateInitialState();
             
             timeSystem.SetTime(1, TimeSlot.Morning);
             timeSystem.SetGameplayState(GameplayState.Morning);
+            
+            hasActiveGame = true;
             
             UnityEngine.Debug.Log($"New game started with seed: {gameState.gameSeed}");
         }
@@ -124,6 +139,8 @@ namespace LastRefuge.Gameplay
                 
                 timeSystem.OnDayEnd -= OnDayEnd;
                 timeSystem.OnDayEnd += OnDayEnd;
+                
+                hasActiveGame = true;
             }
         }
         
@@ -139,6 +156,14 @@ namespace LastRefuge.Gameplay
             timeSystem.AdvanceTimeSlot();
             
             UpdateGameplayState();
+            
+            // The day has been settled (DayEnd) and rolled over to the next Morning:
+            // autosave from this stable point so a load never resumes at an un-settled
+            // DayEnd. This is the only transition that lands on Morning.
+            if (timeSystem.CurrentTimeSlot == TimeSlot.Morning && autoSaveOnDayEnd)
+            {
+                saveSystem.SaveGame(true);
+            }
         }
         
         private void ProcessTimeSlot(TimeSlot slot)
@@ -200,13 +225,10 @@ namespace LastRefuge.Gameplay
         private void ProcessDayEnd()
         {
             UnityEngine.Debug.Log($"=== Day {gameState.currentDay} End ===");
-            // DayEnd: the day is written to disk, TimeSystem then rolls over to the next morning.
+            // DayEnd: the colony stats are recomputed and the daily report is written.
+            // The autosave happens in AdvanceTimeSlot after the rollover to the next
+            // Morning, so the saved state is always a stable, continuable day start.
             buildingSystem.RecalculateAllBuildingEffects();
-            
-            if (autoSaveOnDayEnd)
-            {
-                saveSystem.SaveGame(true);
-            }
             
             GenerateDailyReport();
         }
@@ -294,15 +316,30 @@ namespace LastRefuge.Gameplay
         
         private void OnApplicationPause(bool pauseStatus)
         {
-            if (pauseStatus && autoSaveOnDayEnd)
+            if (pauseStatus && hasActiveGame)
             {
-                saveSystem.SaveGame(true);
+                CommitAutosaveBeforeExit();
             }
         }
         
         private void OnApplicationQuit()
         {
-            if (autoSaveOnDayEnd)
+            if (!hasActiveGame) return;
+            CommitAutosaveBeforeExit();
+        }
+        
+        /// <summary>
+        /// Save on exit. At DayEnd the day has not been settled yet, so first roll over
+        /// to the next Morning (which settles the day and writes the autosave). Never
+        /// persist an un-settled DayEnd snapshot.
+        /// </summary>
+        private void CommitAutosaveBeforeExit()
+        {
+            if (timeSystem.CurrentTimeSlot == TimeSlot.DayEnd)
+            {
+                AdvanceTimeSlot();
+            }
+            else if (autoSaveOnDayEnd)
             {
                 saveSystem.SaveGame(true);
             }

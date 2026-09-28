@@ -14,6 +14,7 @@ namespace LastRefuge.Core
         bool CanBuild(string definitionId);
         bool CanBuildCount(string definitionId);
         bool HasBuilding(string definitionId);
+        bool WorkTypeSupportedBy(string buildingId, WorkType workType);
         BuildingState Build(string definitionId);
         bool CanUpgrade(string buildingId);
         bool UpgradeBuilding(string buildingId);

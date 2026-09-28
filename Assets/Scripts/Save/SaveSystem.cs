@@ -16,6 +16,12 @@ namespace LastRefuge.Save
         private const int CURRENT_SAVE_VERSION = 1;
         private const int CURRENT_CONTENT_VERSION = 1;
         
+        /// <summary>
+        /// Overrides the save folder, used by tests to keep player saves untouched.
+        /// Null (the normal case) means the production folder under persistentDataPath.
+        /// </summary>
+        public static string OverrideSaveDirectory = null;
+        
         private GameState gameState;
         private string gameVersion = "0.1.0";
         
@@ -36,6 +42,10 @@ namespace LastRefuge.Save
         
         private string GetSaveDirectory()
         {
+            if (!string.IsNullOrEmpty(OverrideSaveDirectory))
+            {
+                return OverrideSaveDirectory;
+            }
             return Path.Combine(Application.persistentDataPath, SAVE_FOLDER);
         }
         
@@ -95,20 +105,29 @@ namespace LastRefuge.Save
                 
                 string tempPath = fullPath + ".tmp";
                 File.WriteAllText(tempPath, json, Encoding.UTF8);
-                
+
                 string verifyJson = File.ReadAllText(tempPath, Encoding.UTF8);
                 var verified = JsonUtility.FromJson<SaveData>(verifyJson);
                 if (verified == null)
                 {
                     throw new Exception("Save verification failed");
                 }
-                
+
+                // Snapshot the previous save BEFORE touching the main file, so a failed
+                // promotion can never leave the only recoverable copy destroyed.
                 if (File.Exists(fullPath))
                 {
-                    File.Delete(fullPath);
+                    File.Copy(fullPath, fullPath + ".bak", true);
                 }
-                File.Move(tempPath, fullPath);
-                
+
+                // Promote the verified temp over the main file. The backup created above
+                // already preserves the previous state in case this copy is interrupted.
+                File.Copy(tempPath, fullPath, true);
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+
                 OnSaveComplete?.Invoke(true, fullPath);
                 
                 EventBus.Publish(new GameSavedEvent
@@ -134,18 +153,22 @@ namespace LastRefuge.Save
             {
                 string savePath = GetSaveDirectory();
                 string fullPath = Path.Combine(savePath, fileName);
+                string usedPath = fullPath;
                 
-                if (!File.Exists(fullPath))
+                if (!TryReadSave(fullPath, out SaveData saveData))
                 {
-                    throw new FileNotFoundException($"Save file not found: {fullPath}");
-                }
-                
-                string json = File.ReadAllText(fullPath, Encoding.UTF8);
-                var saveData = JsonUtility.FromJson<SaveData>(json);
-                
-                if (saveData == null || saveData.gameState == null)
-                {
-                    throw new Exception("Invalid save data");
+                    // The main file is missing or invalid: fall back to the last snapshot
+                    // taken before the previous successful write (never a failed one).
+                    string backupPath = fullPath + ".bak";
+                    if (TryReadSave(backupPath, out saveData))
+                    {
+                        UnityEngine.Debug.LogWarning($"Main save missing or invalid ({fullPath}); recovered backup {backupPath}");
+                        usedPath = backupPath;
+                    }
+                    else
+                    {
+                        throw new Exception($"No readable save or backup: {fullPath}");
+                    }
                 }
                 
                 MigrateSave(saveData);
@@ -171,14 +194,14 @@ namespace LastRefuge.Save
                 gameState.contentVersion = saveData.contentVersion;
                 gameState.saveTimestamp = saveData.saveTimestamp;
                 
-                OnLoadComplete?.Invoke(true, fullPath);
+                OnLoadComplete?.Invoke(true, usedPath);
                 
                 EventBus.Publish(new GameLoadedEvent
                 {
-                    savePath = fullPath
+                    savePath = usedPath
                 });
                 
-                UnityEngine.Debug.Log($"Game loaded: {fullPath}");
+                UnityEngine.Debug.Log($"Game loaded: {usedPath}");
                 return true;
             }
             catch (Exception e)
@@ -187,6 +210,40 @@ namespace LastRefuge.Save
                 OnLoadComplete?.Invoke(false, e.Message);
                 return false;
             }
+        }
+        
+        /// <summary>
+        /// Reads and validates a save file. A valid save has the "gameState" marker that
+        /// every JsonUtility write contains; anything else (missing, empty, truncated,
+        /// garbage or wrong-shaped) is rejected so loading falls back to the backup.
+        /// </summary>
+        private static bool TryReadSave(string path, out SaveData saveData)
+        {
+            saveData = null;
+            if (!File.Exists(path)) return false;
+            
+            string raw;
+            try
+            {
+                raw = File.ReadAllText(path, Encoding.UTF8);
+            }
+            catch
+            {
+                return false;
+            }
+            
+            if (string.IsNullOrEmpty(raw) || !raw.Contains("\"gameState\"")) return false;
+            
+            try
+            {
+                saveData = JsonUtility.FromJson<SaveData>(raw);
+            }
+            catch
+            {
+                return false;
+            }
+            
+            return saveData != null && saveData.gameState != null;
         }
         
         private void MigrateSave(SaveData saveData)

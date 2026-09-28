@@ -53,6 +53,7 @@ namespace LastRefuge.Systems
                 upkeepCost = new ResourceCost[0],
                 housingCapacity = 4,
                 workerSlots = 0,
+                supportedWorkTypes = new WorkType[0],
                 maxCount = 3,
                 tags = new[] { "housing", "starter" },
                 description = "简易的临时住所，可容纳4人"
@@ -78,6 +79,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Food, baseAmount = 10, primaryStat = StatType.Agriculture }
                 },
                 workerSlots = 2,
+                supportedWorkTypes = new[] { WorkType.Farming },
                 maxCount = 0,
                 tags = new[] { "farming", "food" },
                 description = "基础农田，生产食物"
@@ -104,6 +106,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Water, baseAmount = 15, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 1,
+                supportedWorkTypes = new[] { WorkType.Engineering },
                 maxCount = 0,
                 powerConsumption = 5,
                 tags = new[] { "water", "utility" },
@@ -129,6 +132,7 @@ namespace LastRefuge.Systems
                     ResourceType.Fuel, ResourceType.Parts, ResourceType.Medicine
                 },
                 workerSlots = 0,
+                supportedWorkTypes = new WorkType[0],
                 maxCount = 2,
                 tags = new[] { "storage" },
                 description = "增加资源存储容量"
@@ -155,6 +159,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Parts, baseAmount = 5, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 1,
+                supportedWorkTypes = new[] { WorkType.Engineering },
                 maxCount = 0,
                 powerConsumption = 10,
                 tags = new[] { "crafting", "industry" },
@@ -183,6 +188,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Metal, baseAmount = 8, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 1,
+                supportedWorkTypes = new[] { WorkType.Engineering },
                 maxCount = 0,
                 powerConsumption = 15,
                 tags = new[] { "smelting", "industry" },
@@ -210,6 +216,7 @@ namespace LastRefuge.Systems
                     new ResourceProduction { type = ResourceType.Power, baseAmount = 50, primaryStat = StatType.Engineering }
                 },
                 workerSlots = 0,
+                supportedWorkTypes = new WorkType[0],
                 maxCount = 0,
                 powerProduction = 50,
                 tags = new[] { "power", "utility" },
@@ -235,6 +242,7 @@ namespace LastRefuge.Systems
                 },
                 production = new ResourceProduction[0],
                 workerSlots = 1,
+                supportedWorkTypes = new[] { WorkType.Medical },
                 maxCount = 1,
                 powerConsumption = 10,
                 tags = new[] { "medical", "healing" },
@@ -259,6 +267,7 @@ namespace LastRefuge.Systems
                 },
                 production = new ResourceProduction[0],
                 workerSlots = 2,
+                supportedWorkTypes = new[] { WorkType.Researching },
                 maxCount = 2,
                 powerConsumption = 20,
                 tags = new[] { "research", "technology" },
@@ -283,6 +292,7 @@ namespace LastRefuge.Systems
                 },
                 production = new ResourceProduction[0],
                 workerSlots = 1,
+                supportedWorkTypes = new WorkType[0],
                 maxCount = 1,
                 tags = new[] { "exploration", "scouting" },
                 description = "派遣探索队，发现新地点"
@@ -379,6 +389,23 @@ namespace LastRefuge.Systems
         public bool HasBuilding(string definitionId)
         {
             return GetBuildingsByDefinition(definitionId).Length > 0;
+        }
+        
+        /// <summary>
+        /// Whether a building can be staffed by the given work type.
+        /// </summary>
+        public bool WorkTypeSupportedBy(string buildingId, WorkType workType)
+        {
+            var building = GetBuilding(buildingId);
+            if (building == null) return false;
+            return WorkTypeSupportedByDefinition(building.definitionId, workType);
+        }
+        
+        private bool WorkTypeSupportedByDefinition(string definitionId, WorkType workType)
+        {
+            var def = GetBuildingDefinition(definitionId);
+            if (def == null || def.supportedWorkTypes == null) return false;
+            return def.supportedWorkTypes.Contains(workType);
         }
         
         public BuildingState Build(string definitionId)
@@ -590,19 +617,18 @@ namespace LastRefuge.Systems
         }
         
         /// <summary>
-        /// The single production formula. Used by the daily settlement and by the UI forecast,
-        /// so predicted and actual output can never drift apart.
+        /// The single production formula, without any affordability gate.
+        /// Used by the real settlement so the produced amount is computed before the
+        /// operation cost is paid (a building that can exactly afford its upkeep must
+        /// still produce). Keep this in sync with the gated public forecast.
         /// </summary>
-        public Dictionary<ResourceType, int> CalculateProduction(BuildingState building)
+        public Dictionary<ResourceType, int> CalculateProductionInternal(BuildingState building)
         {
             var result = new Dictionary<ResourceType, int>();
             if (building == null) return result;
             
             var def = GetBuildingDefinition(building.definitionId);
             if (def == null || def.production == null) return result;
-            
-            // A building that cannot pay its cost produces nothing this cycle.
-            if (!CanOperate(building)) return result;
             
             float workerEfficiency = 0f;
             if (building.assignedWorkers != null)
@@ -640,6 +666,16 @@ namespace LastRefuge.Systems
             return result;
         }
         
+        /// <summary>
+        /// Public forecast for UI/predictions: a building that cannot pay its cost
+        /// produces nothing this cycle.
+        /// </summary>
+        public Dictionary<ResourceType, int> CalculateProduction(BuildingState building)
+        {
+            if (!CanOperate(building)) return new Dictionary<ResourceType, int>();
+            return CalculateProductionInternal(building);
+        }
+        
         public int GetBuildingDailyProduction(BuildingState building, ResourceType type)
         {
             var production = CalculateProduction(building);
@@ -650,8 +686,25 @@ namespace LastRefuge.Systems
         {
             if (gameState.buildings == null) return;
             
-            foreach (var building in gameState.buildings)
+            // Power producers run first so consumers can use freshly generated electricity
+            // in the same cycle, regardless of the order buildings were constructed.
+            // Buildings are never sorted: the construction order must stay stable.
+            ProcessBuildings(isPowerProducing: true);
+            ProcessBuildings(isPowerProducing: false);
+        }
+        
+        private bool IsPowerProducing(BuildingState building)
+        {
+            var def = GetBuildingDefinition(building.definitionId);
+            return def != null && def.powerProduction > 0;
+        }
+        
+        private void ProcessBuildings(bool isPowerProducing)
+        {
+            var buildings = gameState.buildings;
+            for (int i = 0; i < buildings.Length; i++)
             {
+                var building = buildings[i];
                 if (!building.enabled || building.durability <= 0)
                 {
                     building.currentProduction = 0;
@@ -661,22 +714,25 @@ namespace LastRefuge.Systems
                 var def = GetBuildingDefinition(building.definitionId);
                 if (def == null) continue;
                 
-                // CheckOperation -> ConsumeCosts -> Produce. Nothing is produced unless the
-                // whole cost was verified and paid first.
+                if (IsPowerProducing(building) != isPowerProducing) continue;
+                
                 var cost = CalculateOperationCost(building);
                 if (!resourceSystem.CanAfford(cost))
                 {
                     building.currentProduction = 0;
                     building.durability = Math.Max(0, building.durability - 1);
+                    if (building.durability <= 0) building.enabled = false;
                     continue;
                 }
+                
+                // Produce first, pay afterwards: a building whose stock exactly covers the
+                // cost must still run this cycle instead of being starved by an empty ledger.
+                var production = CalculateProductionInternal(building);
                 
                 foreach (var kvp in cost)
                 {
                     resourceSystem.Remove(kvp.Key, kvp.Value, $"Operation_{building.buildingId}");
                 }
-                
-                var production = CalculateProduction(building);
                 
                 int totalProduced = 0;
                 foreach (var kvp in production)

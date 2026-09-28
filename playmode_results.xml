@@ -1,37 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.8746581">
-  <test-suite type="TestSuite" id="1000" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.874658" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="4" result="Passed" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.262678">
+  <test-suite type="TestSuite" id="1000" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.262678" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
     <properties />
-    <test-suite type="Assembly" id="1003" name="LastRefuge.Tests.PlayMode.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.PlayMode.dll" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.860726" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="Assembly" id="1006" name="LastRefuge.Tests.PlayMode.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.PlayMode.dll" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.245104" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
       <properties>
-        <property name="_PID" value="25064" />
+        <property name="_PID" value="18664" />
         <property name="_APPDOMAIN" value="Unity Child Domain" />
         <property name="platform" value="PlayMode" />
       </properties>
-      <test-suite type="TestSuite" id="1004" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.851669" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestSuite" id="1007" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.237884" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
         <properties />
-        <test-suite type="TestSuite" id="1005" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.834902" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <test-suite type="TestSuite" id="1008" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.219906" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
           <properties />
-          <test-suite type="TestFixture" id="1001" name="GameplayPlayModeTest" fullname="LastRefuge.Tests.GameplayPlayModeTest" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.815883" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestFixture" id="1001" name="GameplayPlayModeTest" fullname="LastRefuge.Tests.GameplayPlayModeTest" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.200964" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-case id="1002" name="AcceptanceFlow_RunsInsidePlayMode" fullname="LastRefuge.Tests.GameplayPlayModeTest.AcceptanceFlow_RunsInsidePlayMode" methodname="AcceptanceFlow_RunsInsidePlayMode" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="2040176929" result="Passed" start-time="2026-09-28 14:05:37Z" end-time="2026-09-28 14:05:38Z" duration="0.792907" asserts="0">
+            <test-case id="1002" name="AcceptanceFlow_RunsInsidePlayMode" fullname="LastRefuge.Tests.GameplayPlayModeTest.AcceptanceFlow_RunsInsidePlayMode" methodname="AcceptanceFlow_RunsInsidePlayMode" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="938331625" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:10Z" duration="1.211121" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
               <output><![CDATA[GameManager initialized
+GameLauncher.Start() called
+UIManager.Start() called
+GameManager.Instance: found
+GameLauncher found UIManager.Instance
+GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262011375546901_80422
+New game started with seed: 639262070491758442_72027
 === Day 1 Morning ===
 === Day 1 Action ===
 === Day 1 Evening ===
 === Day 1 Night ===
 === Day 1 End ===
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\autosave.json
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\autosave.json
-Daily Report - Day 1: Food=31, Water=17, Population=4
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\save_20260928_140537.json
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\save_20260928_140537.json
-Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\Saves\save_20260928_140537.json
+Daily Report - Day 1: Food=32, Water=17, Population=4
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+=== Day 2 Morning ===
+=== Day 2 Action ===
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260928_154409.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260928_154409.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260928_154409.json
+]]></output>
+            </test-case>
+            <test-case id="1003" name="DayEndQuit_AutosavesAtMorningAndContinues" fullname="LastRefuge.Tests.GameplayPlayModeTest.DayEndQuit_AutosavesAtMorningAndContinues" methodname="DayEndQuit_AutosavesAtMorningAndContinues" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="512616126" result="Passed" start-time="2026-09-28 15:44:10Z" end-time="2026-09-28 15:44:10Z" duration="0.414243" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <output><![CDATA[GameManager initialized
+GameLauncher.Start() called
+UIManager.Start() called
+GameManager.Instance: found
+GameLauncher found UIManager.Instance
+GameLauncher calling UIManager.ShowMainMenu() via reflection
+OnNewGameClicked called
+New game started with seed: 639262070503156577_34358
+=== Day 1 Morning ===
+=== Day 1 Action ===
+=== Day 1 Evening ===
+=== Day 1 Night ===
+=== Day 1 End ===
+Daily Report - Day 1: Food=21, Water=22, Population=4
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+=== Day 2 Morning ===
+]]></output>
+            </test-case>
+            <test-case id="1004" name="QuitWithoutActiveRun_DoesNotCreateAnAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotCreateAnAutosave" methodname="QuitWithoutActiveRun_DoesNotCreateAnAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="203977019" result="Passed" start-time="2026-09-28 15:44:10Z" end-time="2026-09-28 15:44:10Z" duration="0.201144" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <output><![CDATA[GameManager initialized
+GameLauncher.Start() called
+UIManager.Start() called
+GameManager.Instance: found
+GameLauncher found UIManager.Instance
+GameLauncher calling UIManager.ShowMainMenu() via reflection
+]]></output>
+            </test-case>
+            <test-case id="1005" name="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" methodname="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1177547011" result="Passed" start-time="2026-09-28 15:44:10Z" end-time="2026-09-28 15:44:11Z" duration="0.333194" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <output><![CDATA[GameManager initialized
+GameLauncher.Start() called
+UIManager.Start() called
+GameManager.Instance: found
+GameLauncher found UIManager.Instance
+GameLauncher calling UIManager.ShowMainMenu() via reflection
+OnNewGameClicked called
+New game started with seed: 639262070509293487_25296
+=== Day 1 Morning ===
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+GameManager initialized
 ]]></output>
             </test-case>
           </test-suite>

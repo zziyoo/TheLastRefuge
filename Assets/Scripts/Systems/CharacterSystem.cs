@@ -187,6 +187,10 @@ namespace LastRefuge.Systems
             if (string.IsNullOrEmpty(targetBuildingId) && workType != WorkType.Idle)
             {
                 targetBuildingId = FindSuitableBuilding(characterId, workType);
+                
+                // A workplace is mandatory: without one the assignment is refused and
+                // the character's current work/building assignment stays untouched.
+                if (string.IsNullOrEmpty(targetBuildingId)) return false;
             }
 
             // --- Validation phase: no state may be mutated before every check passed ---
@@ -199,6 +203,9 @@ namespace LastRefuge.Systems
 
                 targetDef = buildingSystem.GetBuildingDefinition(targetBuilding.definitionId);
                 if (targetDef == null) return false;
+
+                // The building must accept this work type.
+                if (!buildingSystem.WorkTypeSupportedBy(targetBuildingId, workType)) return false;
 
                 // A character already counted in this building must not block itself.
                 int occupiedSlots = 0;
@@ -252,6 +259,9 @@ namespace LastRefuge.Systems
             foreach (var building in buildings)
             {
                 if (!building.enabled) continue;
+                
+                // Only buildings that accept this work type can ever be picked.
+                if (!buildingSystem.WorkTypeSupportedBy(building.buildingId, workType)) continue;
                 
                 var def = buildingSystem.GetBuildingDefinition(building.definitionId);
                 if (def == null) continue;

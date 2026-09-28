@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using LastRefuge.Core;
 using LastRefuge.Data;
 using LastRefuge.Systems;
@@ -26,6 +28,13 @@ namespace LastRefuge.Tests
         [SetUp]
         public void Setup()
         {
+            // Save tests write to an isolated folder, never to the player's real saves.
+            SaveSystem.OverrideSaveDirectory = Path.Combine(Application.persistentDataPath, "GameplayIntegrationTest_Saves");
+            if (Directory.Exists(SaveSystem.OverrideSaveDirectory))
+            {
+                Directory.Delete(SaveSystem.OverrideSaveDirectory, true);
+            }
+            
             gameState = new GameState();
             timeSystem = new TimeSystem();
             randomSystem = new RandomSystem();
@@ -440,6 +449,309 @@ namespace LastRefuge.Tests
             newBuildingSystem.Initialize(newGameState, newResourceSystem, newCharacterSystem);
             
             Assert.AreEqual(capacityBefore, newResourceSystem.GetCapacity(ResourceType.Food), "Reloading recalculates the same capacity instead of adding it again");
+        }
+        
+        // --- Phase 2 Final Stabilization: exact upkeep, power order, work gating, safe saves ---
+        
+        [Test]
+        public void ExactUpkeepCost_StillProduces()
+        {
+            resourceSystem.Add(ResourceType.Wood, 100, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 100, "Setup");
+            resourceSystem.Add(ResourceType.Metal, 100, "Setup");
+            resourceSystem.Add(ResourceType.Iron, 100, "Setup");
+            resourceSystem.Add(ResourceType.Fuel, 100, "Setup");
+            
+            var farm = buildingSystem.Build("farm_basic");
+            var purifier = buildingSystem.Build("water_purifier");
+            var furnace = buildingSystem.Build("furnace");
+            
+            var farmer = CreateWorker("exact_farmer", WorkType.Farming, StatType.Agriculture, 5);
+            var engineer1 = CreateWorker("exact_pump", WorkType.Engineering, StatType.Engineering, 5);
+            var engineer2 = CreateWorker("exact_smelter", WorkType.Engineering, StatType.Engineering, 5);
+            Assert.IsTrue(characterSystem.AssignWork(farmer.characterId, WorkType.Farming, farm.buildingId));
+            Assert.IsTrue(characterSystem.AssignWork(engineer1.characterId, WorkType.Engineering, purifier.buildingId));
+            Assert.IsTrue(characterSystem.AssignWork(engineer2.characterId, WorkType.Engineering, furnace.buildingId));
+            
+            // Exactly enough to run every building, nothing more. An exact bankroll must
+            // not starve the buildings: production is computed before the cost is paid.
+            resourceSystem.Add(ResourceType.Water, 5, "Exact");
+            resourceSystem.Add(ResourceType.Power, 20, "Exact");
+            
+            int foodBefore = resourceSystem.GetAmount(ResourceType.Food);
+            int waterBefore = resourceSystem.GetAmount(ResourceType.Water);
+            int powerBefore = resourceSystem.GetAmount(ResourceType.Power);
+            int fuelBefore = resourceSystem.GetAmount(ResourceType.Fuel);
+            int metalBefore = resourceSystem.GetAmount(ResourceType.Metal);
+            
+            buildingSystem.ProcessBuildingProduction();
+            
+            Assert.AreEqual(10, resourceSystem.GetAmount(ResourceType.Food) - foodBefore, "Farm must produce despite an exact water budget");
+            Assert.AreEqual(15, resourceSystem.GetAmount(ResourceType.Water) - (waterBefore - 5), "Purifier must run on exactly 5 power");
+            Assert.AreEqual(8, resourceSystem.GetAmount(ResourceType.Metal) - metalBefore, "Furnace must run on exactly 10 fuel + 15 power");
+            Assert.AreEqual(0, resourceSystem.GetAmount(ResourceType.Power), "The exact 20 power budget is spent");
+            Assert.AreEqual(fuelBefore - 10, resourceSystem.GetAmount(ResourceType.Fuel), "Only the furnace paid fuel upkeep");
+            Assert.AreEqual(10, farm.currentProduction);
+            Assert.AreEqual(15, purifier.currentProduction);
+            Assert.AreEqual(8, furnace.currentProduction);
+        }
+        
+        [Test]
+        public void GeneratorBeforeConsumer_IsDeterministic()
+        {
+            int[] result = RunGeneratorPurifier(generatorFirst: true);
+            Assert.AreEqual(45, result[0], "Power: 50 produced minus 5 consumed, independent of construction order");
+            Assert.AreEqual(15, result[1], "Water produced by the purifier, independent of construction order");
+        }
+        
+        [Test]
+        public void GeneratorAfterConsumer_IsDeterministic()
+        {
+            int[] result = RunGeneratorPurifier(generatorFirst: false);
+            Assert.AreEqual(45, result[0], "Consumer built BEFORE the generator must still receive power");
+            Assert.AreEqual(15, result[1]);
+        }
+        
+        private int[] RunGeneratorPurifier(bool generatorFirst)
+        {
+            resourceSystem.Add(ResourceType.Wood, 200, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 200, "Setup");
+            resourceSystem.Add(ResourceType.Metal, 200, "Setup");
+            resourceSystem.Add(ResourceType.Parts, 200, "Setup");
+            resourceSystem.Add(ResourceType.Fuel, 200, "Setup");
+            
+            BuildingState generator;
+            BuildingState purifier;
+            if (generatorFirst)
+            {
+                generator = buildingSystem.Build("generator");
+                purifier = buildingSystem.Build("water_purifier");
+            }
+            else
+            {
+                purifier = buildingSystem.Build("water_purifier");
+                generator = buildingSystem.Build("generator");
+            }
+            
+            var engineer = CreateWorker("power_eng", WorkType.Engineering, StatType.Engineering, 5);
+            Assert.IsTrue(characterSystem.AssignWork(engineer.characterId, WorkType.Engineering, purifier.buildingId));
+            
+            int powerBefore = resourceSystem.GetAmount(ResourceType.Power);
+            int waterBefore = resourceSystem.GetAmount(ResourceType.Water);
+            
+            buildingSystem.ProcessBuildingProduction();
+            
+            int powerDelta = resourceSystem.GetAmount(ResourceType.Power) - powerBefore;
+            int waterDelta = resourceSystem.GetAmount(ResourceType.Water) - waterBefore;
+            
+            Assert.AreEqual(50, generator.currentProduction);
+            Assert.AreEqual(15, purifier.currentProduction);
+            
+            return new[] { powerDelta, waterDelta };
+        }
+        
+        [Test]
+        public void AssignWorkWithoutAvailableBuilding_Fails()
+        {
+            resourceSystem.Add(ResourceType.Wood, 200, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 200, "Setup");
+            
+            var worker = CreateWorker("no_farm", WorkType.Idle, StatType.Agriculture, 5);
+            bool assigned = characterSystem.AssignWork(worker.characterId, WorkType.Farming);
+            
+            Assert.IsFalse(assigned, "Assigning Farming without a farm must fail");
+            Assert.AreEqual(WorkType.Idle, worker.currentWork, "The work type must not change on a failed assignment");
+            Assert.IsNull(worker.assignedBuildingId);
+            Assert.AreEqual(0, buildingSystem.GetAllBuildings().SelectMany(b => b.assignedWorkers ?? new string[0]).Count(), "No building may gain a worker");
+        }
+        
+        [Test]
+        public void AssignWorkFailure_PreservesPreviousAssignment()
+        {
+            resourceSystem.Add(ResourceType.Wood, 200, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 200, "Setup");
+            
+            var farm = buildingSystem.Build("farm_basic");
+            var worker = CreateWorker("farmer_kept", WorkType.Farming, StatType.Agriculture, 5);
+            Assert.IsTrue(characterSystem.AssignWork(worker.characterId, WorkType.Farming, farm.buildingId));
+            Assert.AreEqual(farm.buildingId, worker.assignedBuildingId);
+            
+            // No lab exists: the auto-find must fail without unlinking the farmer.
+            bool moved = characterSystem.AssignWork(worker.characterId, WorkType.Researching);
+            Assert.IsFalse(moved);
+            Assert.AreEqual(WorkType.Farming, worker.currentWork);
+            Assert.AreEqual(farm.buildingId, worker.assignedBuildingId);
+            Assert.AreEqual(1, farm.assignedWorkers.Length);
+            Assert.AreEqual(worker.characterId, farm.assignedWorkers[0]);
+            
+            // Explicit but unsupported building: also refused, state preserved.
+            bool unsupported = characterSystem.AssignWork(worker.characterId, WorkType.Medical, farm.buildingId);
+            Assert.IsFalse(unsupported);
+            Assert.AreEqual(WorkType.Farming, worker.currentWork);
+            Assert.AreEqual(farm.buildingId, worker.assignedBuildingId);
+        }
+        
+        [Test]
+        public void DayEnd_AdvancesExactlyOnce()
+        {
+            timeSystem.SetTime(1, TimeSlot.Morning);
+            int dayEndFired = 0;
+            int dayChanges = 0;
+            timeSystem.OnDayEnd += () => dayEndFired++;
+            timeSystem.OnDayChanged += d => dayChanges++;
+            
+            // Morning -> ... -> DayEnd (five advances).
+            for (int i = 0; i < 5; i++) timeSystem.AdvanceTimeSlot();
+            Assert.AreEqual(TimeSlot.DayEnd, timeSystem.CurrentTimeSlot);
+            Assert.AreEqual(1, gameState.currentDay);
+            Assert.AreEqual(0, dayEndFired, "DayEnd must not fire before the rollover");
+            
+            // The rollover: exactly one day increment and one DayEnd event.
+            timeSystem.AdvanceTimeSlot();
+            Assert.AreEqual(TimeSlot.Morning, timeSystem.CurrentTimeSlot);
+            Assert.AreEqual(2, gameState.currentDay, "DayEnd rolls into exactly one new day");
+            Assert.AreEqual(1, dayEndFired);
+            Assert.AreEqual(1, dayChanges);
+            
+            // And the same exactness holds for the next day.
+            for (int i = 0; i < 5; i++) timeSystem.AdvanceTimeSlot();
+            Assert.AreEqual(TimeSlot.DayEnd, timeSystem.CurrentTimeSlot);
+            timeSystem.AdvanceTimeSlot();
+            Assert.AreEqual(3, gameState.currentDay);
+            Assert.AreEqual(2, dayEndFired);
+            Assert.AreEqual(2, dayChanges);
+        }
+        
+        [Test]
+        public void DayEndAutoSave_IsLoadableAndResumable()
+        {
+            resourceSystem.Add(ResourceType.Wood, 200, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 200, "Setup");
+            resourceSystem.Add(ResourceType.Food, 60, "Setup");
+            resourceSystem.Add(ResourceType.Water, 60, "Setup");
+            
+            var farm = buildingSystem.Build("farm_basic");
+            var farmer = CreateWorker("autosaver", WorkType.Farming, StatType.Agriculture, 5);
+            Assert.IsTrue(characterSystem.AssignWork(farmer.characterId, WorkType.Farming, farm.buildingId));
+            
+            timeSystem.SetTime(1, TimeSlot.Morning);
+            randomSystem.Initialize("autosave_seed");
+            gameState.gameSeed = "autosave_seed";
+            
+            // Walk the full day as the GameManager does: settle at DayEnd and roll
+            // over to the next Morning, which is when the autosave is written.
+            while (timeSystem.CurrentTimeSlot != TimeSlot.DayEnd)
+            {
+                ProcessTimeSlot(timeSystem.CurrentTimeSlot);
+            }
+            buildingSystem.RecalculateAllBuildingEffects();
+            timeSystem.AdvanceTimeSlot(); // DayEnd -> Morning, day 2
+            Assert.AreEqual(TimeSlot.Morning, timeSystem.CurrentTimeSlot);
+            Assert.AreEqual(2, gameState.currentDay);
+            timeSystem.SetGameplayState(GameplayState.Morning); // mirrors GameManager.UpdateGameplayState
+            saveSystem.SaveGame(true); // autosave.json, mirroring GameManager.AdvanceTimeSlot
+            
+            string autosavePath = Path.Combine(SaveSystem.OverrideSaveDirectory, "autosave.json");
+            Assert.IsTrue(File.Exists(autosavePath));
+            
+            // A fresh session loads the autosave and must resume at Day 2 Morning.
+            var fresh = new GameState();
+            var freshSave = new SaveSystem();
+            var freshRandom = new RandomSystem();
+            var freshTime = new TimeSystem();
+            var freshResource = new ResourceSystem();
+            var freshCharacter = new CharacterSystem();
+            var freshBuilding = new BuildingSystem();
+            
+            freshSave.Initialize(fresh, "0.1.0");
+            Assert.IsTrue(freshSave.LoadGame("autosave.json"));
+            freshRandom.Initialize(fresh.gameSeed ?? "fallback");
+            freshTime.Initialize(fresh, freshRandom);
+            freshResource.Initialize(fresh, freshBuilding, freshCharacter);
+            freshCharacter.Initialize(fresh, freshResource, freshRandom, freshBuilding);
+            freshBuilding.Initialize(fresh, freshResource, freshCharacter);
+            
+            Assert.AreEqual(2, fresh.currentDay, "Autosave must hold Day 2");
+            Assert.AreEqual(TimeSlot.Morning, fresh.currentTimeSlot, "Autosave must hold Morning, never DayEnd");
+            Assert.AreEqual(GameplayState.Morning, fresh.gameplayState);
+            Assert.AreEqual(1, freshBuilding.GetBuildingsByDefinition("farm_basic").Length);
+            
+            var loadedFarmer = freshCharacter.GetCharacter(farmer.characterId);
+            Assert.IsNotNull(loadedFarmer);
+            Assert.AreEqual(farm.buildingId, loadedFarmer.assignedBuildingId, "Work assignment must survive the autosave");
+            
+            // Resumable: advancing the loaded morning works.
+            freshTime.AdvanceTimeSlot();
+            Assert.AreEqual(TimeSlot.Planning, fresh.currentTimeSlot);
+            Assert.AreEqual(2, fresh.currentDay);
+        }
+        
+        [Test]
+        public void SaveFailure_PreservesPreviousSave()
+        {
+            resourceSystem.Add(ResourceType.Wood, 200, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 200, "Setup");
+            
+            buildingSystem.Build("farm_basic");
+            timeSystem.SetTime(3, TimeSlot.Night);
+            saveSystem.SaveGame(false, "resume_test.json");
+            Assert.IsTrue(File.Exists(Path.Combine(SaveSystem.OverrideSaveDirectory, "resume_test.json")));
+            
+            // A path that cannot be written must fail the save cleanly BEFORE the main
+            // file is touched. Block the backup destination with a directory.
+            timeSystem.SetTime(5, TimeSlot.Morning);
+            string backupPath = Path.Combine(SaveSystem.OverrideSaveDirectory, "resume_test.json.bak");
+            Directory.CreateDirectory(backupPath);
+            
+            // Failing is the point of this test: consume the expected error log.
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Save failed: .*"));
+            bool saved = saveSystem.SaveGame(false, "resume_test.json");
+            Assert.IsFalse(saved, "A save whose backup cannot be written must fail cleanly");
+            
+            var info = saveSystem.GetSaveInfo("resume_test.json");
+            Assert.IsNotNull(info);
+            Assert.AreEqual(3, info.day, "The previous save must survive a failed overwrite");
+            
+            Directory.Delete(backupPath, true);
+        }
+        
+        [Test]
+        public void CorruptMainSave_FallsBackToBackup()
+        {
+            resourceSystem.Add(ResourceType.Wood, 200, "Setup");
+            resourceSystem.Add(ResourceType.Stone, 200, "Setup");
+            
+            buildingSystem.Build("farm_basic");
+            timeSystem.SetTime(1, TimeSlot.Morning);
+            saveSystem.SaveGame(false, "double_save.json");
+            
+            // Second save snapshots day 1 into the backup, main becomes day 2.
+            timeSystem.SetTime(2, TimeSlot.Morning);
+            saveSystem.SaveGame(false, "double_save.json");
+            
+            // Corrupt the main save (valid JSON, but not a SaveData with a gameState).
+            string mainPath = Path.Combine(SaveSystem.OverrideSaveDirectory, "double_save.json");
+            File.WriteAllText(mainPath, "{}");
+            
+            var fresh = new GameState();
+            var freshSave = new SaveSystem();
+            var freshRandom = new RandomSystem();
+            var freshTime = new TimeSystem();
+            var freshResource = new ResourceSystem();
+            var freshCharacter = new CharacterSystem();
+            var freshBuilding = new BuildingSystem();
+            
+            freshSave.Initialize(fresh, "0.1.0");
+            Assert.IsTrue(freshSave.LoadGame("double_save.json"), "Load must succeed by falling back to the backup");
+            
+            freshRandom.Initialize(fresh.gameSeed ?? "fallback");
+            freshTime.Initialize(fresh, freshRandom);
+            freshResource.Initialize(fresh, freshBuilding, freshCharacter);
+            freshCharacter.Initialize(fresh, freshResource, freshRandom, freshBuilding);
+            freshBuilding.Initialize(fresh, freshResource, freshCharacter);
+            
+            Assert.AreEqual(1, fresh.currentDay, "Load must recover the last snapshot when the main save is corrupt");
+            Assert.AreEqual(1, freshBuilding.GetBuildingsByDefinition("farm_basic").Length);
         }
     }
 }

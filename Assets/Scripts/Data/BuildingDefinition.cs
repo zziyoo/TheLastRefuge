@@ -45,6 +45,9 @@ namespace LastRefuge.Data
         public int housingCapacity = 0;
         public int workerSlots = 1;
         
+        /// <summary>Work types that may staff this building. Empty means the building never needs workers.</summary>
+        public WorkType[] supportedWorkTypes;
+        
         /// <summary>Electricity drawn per production cycle. Merged with upkeepCost by BuildingSystem so Power is never paid twice.</summary>
         public int powerConsumption = 0;
         

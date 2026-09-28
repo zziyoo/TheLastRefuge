@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 using LastRefuge.Gameplay;
 
 namespace LastRefuge.Gameplay
@@ -18,25 +19,48 @@ namespace LastRefuge.Gameplay
             if (_hasInitialized) return;
             _hasInitialized = true;
             
-            var uiManagerType = System.Type.GetType("LastRefuge.UI.UIManager, LastRefuge.UI");
+            // The UI is created once by UISetup at play mode entry. When the scene is
+            // (re)loaded the canvas can take a few frames to materialize again, so retry
+            // instead of failing on the first frame.
+            StartCoroutine(ShowUiWhenReady());
+        }
+        
+        private IEnumerator ShowUiWhenReady()
+        {
+            const int maxAttempts = 180;
+            int attempts = 0;
+            object uiManager = null;
+            System.Type uiManagerType = null;
+            
+            while (attempts < maxAttempts)
+            {
+                uiManagerType = System.Type.GetType("LastRefuge.UI.UIManager, LastRefuge.UI");
+                if (uiManagerType != null)
+                {
+                    var instanceProperty = uiManagerType.GetProperty("Instance");
+                    if (instanceProperty != null)
+                    {
+                        uiManager = instanceProperty.GetValue(null);
+                        // UnityEngine.Object cast: a destroyed Instance must compare as null.
+                        if (uiManager != null && (UnityEngine.Object)uiManager != null)
+                        {
+                            break;
+                        }
+                    }
+                }
+                attempts++;
+                yield return null;
+            }
+            
             if (uiManagerType == null)
             {
                 UnityEngine.Debug.LogError("UIManager type not found! UI assembly may not be loaded.");
-                return;
+                yield break;
             }
-            
-            var instanceProperty = uiManagerType.GetProperty("Instance");
-            if (instanceProperty == null)
+            if (uiManager == null || (UnityEngine.Object)uiManager == null)
             {
-                UnityEngine.Debug.LogError("UIManager.Instance property not found!");
-                return;
-            }
-            
-            var uiManager = instanceProperty.GetValue(null);
-            if (uiManager == null)
-            {
-                UnityEngine.Debug.LogError("UIManager.Instance is null! UI may not be initialized properly.");
-                return;
+                UnityEngine.Debug.LogError("UIManager.Instance is still null after waiting; UI may not be initialized properly.");
+                yield break;
             }
             
             UnityEngine.Debug.Log("GameLauncher found UIManager.Instance");
