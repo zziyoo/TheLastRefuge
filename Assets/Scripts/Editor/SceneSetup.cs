@@ -34,14 +34,62 @@ namespace LastRefuge.Editor
             camera.backgroundColor = new Color(0.1f, 0.1f, 0.12f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             
-            // Create GameManager
-            var gmGO = new GameObject("GameManager");
-            gmGO.AddComponent<GameManager>();
-            gmGO.AddComponent<GameBootstrap>();
+            // Find or create GameManager
+            var gmGO = GameObject.Find("GameManager");
+            GameManager gm;
+            if (gmGO != null)
+            {
+                gm = gmGO.GetComponent<GameManager>();
+                if (gm == null)
+                {
+                    gm = gmGO.AddComponent<GameManager>();
+                    UnityEngine.Debug.Log("Added GameManager component to existing GameManager object");
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("Reusing existing GameManager");
+                }
+            }
+            else
+            {
+                var gmGO2 = new GameObject("GameManager");
+                gm = gmGO2.AddComponent<GameManager>();
+                UnityEngine.Debug.Log("Created new GameManager");
+            }
             
-            // Create GameLauncher
-            var launcherGO = new GameObject("GameLauncher");
-            launcherGO.AddComponent<GameLauncher>();
+            // Ensure GameBootstrap exists on GameManager
+            var bootstrap = gmGO.GetComponent<GameBootstrap>();
+            if (bootstrap == null)
+            {
+                gmGO.AddComponent<GameBootstrap>();
+                UnityEngine.Debug.Log("Added GameBootstrap to GameManager");
+            }
+            else
+            {
+                UnityEngine.Debug.Log("GameBootstrap already exists on GameManager");
+            }
+            
+            // Find or create GameLauncher
+            var launcherGO = GameObject.Find("GameLauncher");
+            if (launcherGO != null)
+            {
+                var launcher = launcherGO.GetComponent<GameLauncher>();
+                if (launcher == null)
+                {
+                    launcherGO.AddComponent<GameLauncher>();
+                    UnityEngine.Debug.Log("Added GameLauncher component to existing GameLauncher object");
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("Reusing existing GameLauncher");
+                }
+            }
+            else
+            {
+                var launcherGO2 = new GameObject("GameLauncher");
+                launcherGO2.AddComponent<GameLauncher>();
+                UnityEngine.Debug.Log("Created new GameLauncher");
+            }
             
             // Save scene
             System.IO.Directory.CreateDirectory("Assets/Scenes");
