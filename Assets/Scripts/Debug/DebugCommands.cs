@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
+using LastRefuge.Gameplay;
 using LastRefuge.Core;
 using LastRefuge.Data;
 using LastRefuge.Systems;
@@ -18,7 +21,7 @@ namespace LastRefuge.Debug
         
         private void Update()
         {
-            if (!Application.isEditor && !Debug.isDebugBuild) return;
+            if (!Application.isEditor && !UnityEngine.Debug.isDebugBuild) return;
             
             HandleDebugKeys();
         }
@@ -162,8 +165,9 @@ namespace LastRefuge.Debug
             var buildSys = gameManager.buildingSystem;
             var randSys = gameManager.randomSystem;
             
-            var definitions = new List<string>(buildSys.GetType().GetField("buildingDefinitions", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(buildSys) as Dictionary<string, BuildingDefinition>).Keys;
+            var field = buildSys.GetType().GetField("buildingDefinitions", BindingFlags.NonPublic | BindingFlags.Instance);
+            var dict = field?.GetValue(buildSys) as Dictionary<string, BuildingDefinition>;
+            var definitions = dict?.Keys.ToList() ?? new List<string>();
             
             if (definitions.Count > 0)
             {

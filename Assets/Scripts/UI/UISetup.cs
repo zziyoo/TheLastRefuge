@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using LastRefuge.Debug;
+using LastRefuge.Gameplay;
 
 namespace LastRefuge.UI
 {
@@ -50,9 +52,9 @@ namespace LastRefuge.UI
             uiManager.logPanel = CreateSubPanel("LogPanel", gamePanel.transform);
             uiManager.saveLoadGamePanel = CreateSubPanel("SaveLoadGamePanel", gamePanel.transform);
             
-            // Add DebugCommands
-            canvasGO.AddComponent<LastRefuge.Debug.DebugCommands>();
-            canvasGO.AddComponent<LastRefuge.Core.GameBootstrap>();
+            // Add DebugCommands and GameBootstrap
+            canvasGO.AddComponent<DebugCommands>();
+            canvasGO.AddComponent<GameBootstrap>();
         }
         
         private static GameObject CreatePanel(string name, Transform parent)

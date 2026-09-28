@@ -141,7 +141,7 @@ namespace LastRefuge.UI
             saveLoadGamePanel?.SetActive(false);
         }
         
-        private void TogglePanel(GameObject panel)
+        public void TogglePanel(GameObject panel)
         {
             if (panel == null) return;
             
@@ -317,12 +317,12 @@ namespace LastRefuge.UI
         }
         
         // Button Handlers
-        private void OnNextTimeSlotClicked()
+        public void OnNextTimeSlotClicked()
         {
             gameManager.AdvanceTimeSlot();
         }
         
-        private void OnMenuClicked()
+        public void OnMenuClicked()
         {
             ShowMainMenu();
         }

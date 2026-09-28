@@ -7,6 +7,7 @@ using LastRefuge.Core;
 using LastRefuge.Data;
 using LastRefuge.Systems;
 using LastRefuge.Save;
+using LastRefuge.Gameplay;
 
 namespace LastRefuge.Tests
 {

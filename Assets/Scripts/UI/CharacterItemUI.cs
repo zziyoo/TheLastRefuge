@@ -1,6 +1,9 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using LastRefuge.Core;
 using LastRefuge.Data;
+using LastRefuge.Systems;
 
 namespace LastRefuge.UI
 {
@@ -39,7 +42,6 @@ namespace LastRefuge.UI
             if (stressBar) stressBar.fillAmount = character.stress / 100f;
             if (fatigueBar) fatigueBar.fillAmount = character.fatigue / 100f;
             
-            // Color bars based on status
             if (hungerBar) hungerBar.color = character.hunger > 70 ? Color.red : (character.hunger > 40 ? Color.yellow : Color.green);
             if (stressBar) stressBar.color = character.stress > 70 ? Color.red : (character.stress > 40 ? Color.yellow : Color.green);
             if (fatigueBar) fatigueBar.color = character.fatigue > 70 ? Color.red : (character.fatigue > 40 ? Color.yellow : Color.green);
