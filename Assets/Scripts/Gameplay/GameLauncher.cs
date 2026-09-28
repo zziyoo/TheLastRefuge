@@ -6,29 +6,59 @@ namespace LastRefuge.Gameplay
 {
     public class GameLauncher : MonoBehaviour
     {
-        [Header("Auto Start")]
-        public bool autoStartNewGame = true;
+        [Header("Auto Start (Debug Only)")]
+        public bool autoStartNewGame = false;
         public string fixedSeed = "";
+        
+        private bool _hasInitialized = false;
         
         private void Start()
         {
-            StartCoroutine(InitializeGame());
-        }
-        
-        private System.Collections.IEnumerator InitializeGame()
-        {
-            yield return null;
+            if (_hasInitialized) return;
+            _hasInitialized = true;
             
-            var gameManager = GameManager.Instance;
-            if (gameManager == null)
+            var uiManagerType = System.Type.GetType("LastRefuge.UI.UIManager, LastRefuge.UI");
+            if (uiManagerType == null)
             {
-                UnityEngine.Debug.LogError("GameManager not found!");
-                yield break;
+                UnityEngine.Debug.LogError("UIManager type not found! UI assembly may not be loaded.");
+                return;
             }
             
+            var instanceProperty = uiManagerType.GetProperty("Instance");
+            if (instanceProperty == null)
+            {
+                UnityEngine.Debug.LogError("UIManager.Instance property not found!");
+                return;
+            }
+            
+            var uiManager = instanceProperty.GetValue(null);
+            if (uiManager == null)
+            {
+                UnityEngine.Debug.LogError("UIManager.Instance is null! UI may not be initialized properly.");
+                return;
+            }
+            
+            // By default, show main menu. Auto-start only for debug.
             if (autoStartNewGame)
             {
-                gameManager.NewGame(string.IsNullOrEmpty(fixedSeed) ? null : fixedSeed);
+                var gameManager = GameManager.Instance;
+                if (gameManager != null)
+                {
+                    gameManager.NewGame(string.IsNullOrEmpty(fixedSeed) ? null : fixedSeed);
+                }
+            }
+            else
+            {
+                // Show main menu by default
+                var showMainMenuMethod = uiManagerType.GetMethod("ShowMainMenu");
+                if (showMainMenuMethod != null)
+                {
+                    showMainMenuMethod.Invoke(uiManager, null);
+                }
+                else
+                {
+                    UnityEngine.Debug.LogError("UIManager.ShowMainMenu method not found!");
+                }
             }
         }
     }

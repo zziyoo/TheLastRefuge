@@ -8,10 +8,24 @@ namespace LastRefuge.Editor
 {
     public class SceneSetup
     {
+        private const string ScenePath = "Assets/Scenes/Main.unity";
+        
         [MenuItem("Tools/Last Refuge/Setup Main Scene")]
         public static void SetupMainScene()
         {
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            // Check if scene already exists
+            var existingScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
+            Scene scene;
+            
+            if (existingScene != null)
+            {
+                scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                UnityEngine.Debug.Log("Main scene already exists, updating...");
+            }
+            else
+            {
+                scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            }
             
             // Set up camera for 2D/UI
             var camera = Camera.main;
@@ -25,18 +39,30 @@ namespace LastRefuge.Editor
             gmGO.AddComponent<GameManager>();
             gmGO.AddComponent<GameBootstrap>();
             
+            // Create GameLauncher
+            var launcherGO = new GameObject("GameLauncher");
+            launcherGO.AddComponent<GameLauncher>();
+            
             // Save scene
-            string scenePath = "Assets/Scenes/Main.unity";
             System.IO.Directory.CreateDirectory("Assets/Scenes");
-            EditorSceneManager.SaveScene(scene, scenePath);
+            EditorSceneManager.SaveScene(scene, ScenePath);
             
             // Set as first scene in build settings
             var buildScenes = EditorBuildSettings.scenes;
-            System.Array.Resize(ref buildScenes, buildScenes.Length + 1);
-            buildScenes[buildScenes.Length - 1] = new EditorBuildSettingsScene(scenePath, true);
+            var existingIndex = System.Array.FindIndex(buildScenes, s => s.path == "Assets/Scenes/Main.unity");
+            
+            if (existingIndex >= 0)
+            {
+                buildScenes[existingIndex] = new EditorBuildSettingsScene(ScenePath, true);
+            }
+            else
+            {
+                System.Array.Resize(ref buildScenes, buildScenes.Length + 1);
+                buildScenes[buildScenes.Length - 1] = new EditorBuildSettingsScene(ScenePath, true);
+            }
             EditorBuildSettings.scenes = buildScenes;
             
-            UnityEngine.Debug.Log("Main scene created at: " + scenePath);
+            UnityEngine.Debug.Log("Main scene created/updated at: " + ScenePath);
         }
         
         [MenuItem("Tools/Last Refuge/Configure Project Settings")]

@@ -23,23 +23,6 @@ namespace LastRefuge.Gameplay
                 go.AddComponent<GameManager>();
                 DontDestroyOnLoad(go);
             }
-            
-            // Ensure UIManager exists
-            var uiManagerType = System.Type.GetType("LastRefuge.UI.UIManager, LastRefuge.UI");
-            if (uiManagerType != null)
-            {
-                var instanceProperty = uiManagerType.GetProperty("Instance");
-                if (instanceProperty != null)
-                {
-                    var instance = instanceProperty.GetValue(null);
-                    if (instance == null)
-                    {
-                        var go = new GameObject("UIManager");
-                        go.AddComponent(uiManagerType);
-                        DontDestroyOnLoad(go);
-                    }
-                }
-            }
         }
     }
 }

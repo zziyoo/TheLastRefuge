@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using LastRefuge.Debug;
 using LastRefuge.Gameplay;
 
 namespace LastRefuge.UI
@@ -11,7 +10,16 @@ namespace LastRefuge.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void SetupUI()
         {
-            if (FindObjectOfType<UIManager>() != null) return;
+            // Check if we already have a fully initialized UI
+            var existingCanvas = GameObject.Find("MainCanvas");
+            if (existingCanvas != null)
+            {
+                var existingUIManager = existingCanvas.GetComponentInChildren<UIManager>();
+                if (existingUIManager != null && existingUIManager.mainMenuPanel != null)
+                {
+                    return; // Already fully initialized
+                }
+            }
             
             // Create Canvas
             var canvasGO = new GameObject("MainCanvas");
@@ -32,29 +40,25 @@ namespace LastRefuge.UI
             // Create UIManager
             var uiManagerGO = new GameObject("UIManager");
             uiManagerGO.transform.SetParent(canvasGO.transform);
-            var uiManager = uiManagerGO.AddComponent<UIManager>();
+            var uiMgr = uiManagerGO.AddComponent<UIManager>();
             
             // Create Main Menu Panel
             var mainMenuPanel = CreatePanel("MainMenuPanel", canvasGO.transform);
-            uiManager.mainMenuPanel = mainMenuPanel;
-            SetupMainMenu(mainMenuPanel, uiManager);
+            uiMgr.mainMenuPanel = mainMenuPanel;
+            SetupMainMenu(mainMenuPanel, uiMgr);
             
             // Create Game Panel
             var gamePanel = CreatePanel("GamePanel", canvasGO.transform);
             gamePanel.SetActive(false);
-            uiManager.gamePanel = gamePanel;
-            SetupGamePanel(gamePanel, uiManager);
+            uiMgr.gamePanel = gamePanel;
+            SetupGamePanel(gamePanel, uiMgr);
             
             // Create sub-panels
-            uiManager.personnelPanel = CreateSubPanel("PersonnelPanel", gamePanel.transform);
-            uiManager.buildingPanel = CreateSubPanel("BuildingPanel", gamePanel.transform);
-            uiManager.resourceDetailPanel = CreateSubPanel("ResourceDetailPanel", gamePanel.transform);
-            uiManager.logPanel = CreateSubPanel("LogPanel", gamePanel.transform);
-            uiManager.saveLoadGamePanel = CreateSubPanel("SaveLoadGamePanel", gamePanel.transform);
-            
-            // Add DebugCommands and GameBootstrap
-            canvasGO.AddComponent<DebugCommands>();
-            canvasGO.AddComponent<GameBootstrap>();
+            uiMgr.personnelPanel = CreateSubPanel("PersonnelPanel", gamePanel.transform);
+            uiMgr.buildingPanel = CreateSubPanel("BuildingPanel", gamePanel.transform);
+            uiMgr.resourceDetailPanel = CreateSubPanel("ResourceDetailPanel", gamePanel.transform);
+            uiMgr.logPanel = CreateSubPanel("LogPanel", gamePanel.transform);
+            uiMgr.saveLoadGamePanel = CreateSubPanel("SaveLoadGamePanel", gamePanel.transform);
         }
         
         private static GameObject CreatePanel(string name, Transform parent)

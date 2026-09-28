@@ -1,6 +1,6 @@
 {
     "name": "LastRefuge.UI",
-    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Data", "LastRefuge.Gameplay", "LastRefuge.Debug", "Unity.TextMeshPro", "UnityEngine.UI"],
+    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Data", "LastRefuge.Gameplay", "Unity.TextMeshPro", "UnityEngine.UI"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
