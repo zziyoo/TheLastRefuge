@@ -41,9 +41,18 @@ namespace LastRefuge.Editor
                 return;
             }
             
-            // Create TMP Font Asset - use correct API
-            // CreateFontAsset(Font sourceFontFile, int samplingPointSize, int atlasWidth, GlyphRenderMode renderMode, int atlasPadding, int characterSetSelection, AtlasPopulationMode populationMode)
-            var fontAsset = TMP_FontAsset.CreateFontAsset(sourceFont, 90, 2048, GlyphRenderMode.SDFAA, 5, 0, AtlasPopulationMode.Dynamic);
+            // Create TMP Font Asset with Static population and ASCII character set
+            // This pre-populates the atlas with ASCII characters (valid atlas texture)
+            // Chinese characters will be dynamically added at runtime via TMP's dynamic fallback
+            var fontAsset = TMP_FontAsset.CreateFontAsset(
+                sourceFont, 
+                90,                   // sampling point size
+                2048,                 // atlas width
+                GlyphRenderMode.SDFAA,
+                5,                    // atlas padding
+                1,                    // character set selection (1 = ASCII)
+                AtlasPopulationMode.Static
+            );
 
             if (fontAsset != null)
             {
@@ -51,8 +60,18 @@ namespace LastRefuge.Editor
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 
-                UnityEngine.Debug.Log($"Created CJK Font Asset at: {assetPath}");
-                EditorUtility.DisplayDialog("Success", $"CJK Font Asset created at:\n{assetPath}", "OK");
+                // Verify the font asset has valid atlas texture
+                if (fontAsset.atlasTextures != null && fontAsset.atlasTextures.Length > 0 && fontAsset.atlasTextures[0] != null)
+                {
+                    UnityEngine.Debug.Log($"Created CJK Font Asset at: {assetPath}");
+                    UnityEngine.Debug.Log($"Atlas size: {fontAsset.atlasWidth}x{fontAsset.atlasHeight}, Atlas texture: {fontAsset.atlasTextures[0].name}");
+                    EditorUtility.DisplayDialog("Success", $"CJK Font Asset created at:\n{assetPath}\nAtlas: {fontAsset.atlasWidth}x{fontAsset.atlasHeight}\nTexture: {fontAsset.atlasTextures[0].name}", "OK");
+                }
+                else
+                {
+                    UnityEngine.Debug.LogError("Font asset created but atlas texture is null!");
+                    EditorUtility.DisplayDialog("Warning", "Font asset created but atlas texture is null. Check console.", "OK");
+                }
             }
             else
             {
@@ -69,6 +88,15 @@ namespace LastRefuge.Editor
             if (fontAsset == null)
             {
                 EditorUtility.DisplayDialog("Error", "CJK Font Asset not found. Run 'Create CJK Font Asset' first.", "OK");
+                return;
+            }
+
+            // Verify font asset is valid (atlas texture exists, even if minimal in batch mode)
+            // Dynamic/Static mode in batch mode with Null graphics may produce minimal atlas
+            // but will populate correctly at runtime with GPU
+            if (fontAsset.atlasTextures == null || fontAsset.atlasTextures.Length == 0)
+            {
+                EditorUtility.DisplayDialog("Error", "Font asset has no atlas texture array. Regenerate it first.", "OK");
                 return;
             }
 

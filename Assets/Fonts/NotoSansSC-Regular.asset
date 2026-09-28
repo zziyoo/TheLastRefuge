@@ -18,8 +18,8 @@ MonoBehaviour:
   m_Version: 1.1.0
   m_SourceFontFileGUID: 20eb97a5171b87147a64e165210ef098
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 20eb97a5171b87147a64e165210ef098, type: 3}
-  m_SourceFontFile: {fileID: 12800000, guid: 20eb97a5171b87147a64e165210ef098, type: 3}
-  m_AtlasPopulationMode: 1
+  m_SourceFontFile: {fileID: 0}
+  m_AtlasPopulationMode: 0
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Microsoft YaHei
@@ -54,7 +54,7 @@ MonoBehaviour:
   - m_X: 0
     m_Y: 0
     m_Width: 4
-    m_Height: -1
+    m_Height: 0
   m_fontInfo:
     Name: 
     PointSize: 0
@@ -79,7 +79,7 @@ MonoBehaviour:
     AtlasHeight: 0
   atlas: {fileID: 0}
   m_AtlasWidth: 5
-  m_AtlasHeight: 0
+  m_AtlasHeight: 1
   m_AtlasPadding: 2048
   m_AtlasRenderMode: 4165
   m_glyphInfoList: []

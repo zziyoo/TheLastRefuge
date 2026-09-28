@@ -286,7 +286,7 @@ namespace LastRefuge.UI
         
         private static Button CreateButton(Transform parent, string text, System.Action onClick, float width, float height)
         {
-            var go = new GameObject("Btn_" + text);
+            var go = new GameObject("Btn_" + text, typeof(RectTransform));
             go.transform.SetParent(parent, false);
             
             var rt = go.GetComponent<RectTransform>();
