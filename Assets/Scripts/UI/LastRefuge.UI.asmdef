@@ -1,0 +1,12 @@
+{
+    "name": "LastRefuge.UI",
+    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Data", "LastRefuge.Gameplay"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "optionalUnityReferences": ["TextMeshPro", "UnityEngine.UI"]
+}

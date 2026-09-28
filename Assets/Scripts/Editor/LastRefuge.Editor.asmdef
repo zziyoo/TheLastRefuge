@@ -1,0 +1,11 @@
+{
+    "name": "LastRefuge.Editor",
+    "references": ["LastRefuge.Core", "LastRefuge.Gameplay", "LastRefuge.UI", "LastRefuge.Data"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

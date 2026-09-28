@@ -1,0 +1,11 @@
+{
+    "name": "LastRefuge.Tests",
+    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Save", "LastRefuge.Data", "LastRefuge.Gameplay", "UnityEngine.TestRunner"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

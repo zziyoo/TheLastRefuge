@@ -1,0 +1,11 @@
+{
+    "name": "LastRefuge.Save",
+    "references": ["LastRefuge.Core", "LastRefuge.Data"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

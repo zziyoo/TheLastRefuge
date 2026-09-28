@@ -1,0 +1,26 @@
+# ===================== Unity generated folders =====================
+# These are regenerated locally by the Unity Editor. Never commit them.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# MemoryCaptures can grow very large
+/[Mm]emoryCaptures/
+
+# Asset meta data must be kept, so re-include .meta inside Assets
+!/[Aa]ssets/**/*.meta
+
+# ===================== Editor / IDE =====================
+.vs/
+.idea/
+.vscode/
+.gradle/
+
+# ===================== OS / misc =====================
+Thumbs.db
+.DS_Store
+sysinfo.txt

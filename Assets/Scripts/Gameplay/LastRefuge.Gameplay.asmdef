@@ -1,0 +1,11 @@
+{
+    "name": "LastRefuge.Gameplay",
+    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Save", "LastRefuge.Data"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
