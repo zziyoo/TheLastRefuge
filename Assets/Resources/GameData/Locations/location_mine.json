@@ -1,0 +1,17 @@
+{
+  "location": {
+    "id": "location_mine",
+    "name": "荒废矿区",
+    "tier": 2,
+    "unlockDay": 6,
+    "distance": 4,
+    "danger": 2,
+    "baseYield": [
+      { "resource": "Stone", "min": 5, "max": 10 },
+      { "resource": "Iron", "min": 3, "max": 6 }
+    ],
+    "eventPool": ["event_mine_01", "event_scrap_01"],
+    "prerequisites": ["location_forest"],
+    "tags": ["tier2"]
+  }
+}

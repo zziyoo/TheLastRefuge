@@ -256,17 +256,21 @@ namespace LastRefuge.Tests
         {
             PrepareSaveDirectory("ExplorationSystemTest_TimeCost");
             var gm = StartNewGame();
-            AddLocationTo(gm, MakeLocation("location_forest", 2, 0));
+            gm.gameState.gameFlags.intFlags["event_roll_day"] = gm.GetCurrentDay();
+            AddLocationTo(gm, MakeLocation("location_lake", 2, 0));
 
             gm.AdvanceTimeSlot();
             gm.AdvanceTimeSlot();
             Assert.AreEqual(TimeSlot.Action, gm.GetCurrentTimeSlot());
 
             var survivor = gm.characterSystem.GetAliveCharacters()[0];
-            Assert.IsTrue(gm.ExploreLocation("location_forest", new[] { survivor.characterId }, out var reason),
+            Assert.IsTrue(gm.ExploreLocation("location_lake", new[] { survivor.characterId }, out var reason),
                 reason);
 
-            Assert.AreEqual(TimeSlot.Night, gm.GetCurrentTimeSlot());
+            Assert.AreEqual(TimeSlot.Night, gm.GetCurrentTimeSlot(),
+                $"diag: slot={gm.gameState.currentTimeSlot} state={gm.gameState.gameplayState} " +
+                $"rollDay={gm.gameState.gameFlags.intFlags.GetValueOrDefault("event_roll_day", -1)} " +
+                $"pending={gm.GetPendingEvent()?.id} food={gm.resourceSystem.GetAmount(ResourceType.Food)}");
             Assert.AreEqual(GameplayState.Night, gm.gameState.gameplayState);
         }
 
@@ -345,15 +349,18 @@ namespace LastRefuge.Tests
         {
             PrepareSaveDirectory("ExplorationSystemTest_Discovery");
             var gm = StartNewGame();
-            AddLocationTo(gm, MakeLocation("location_forest", 2, 0));
+            gm.gameState.gameFlags.intFlags["event_roll_day"] = gm.GetCurrentDay();
+            AddLocationTo(gm, MakeLocation("location_lake", 2, 0));
 
             gm.AdvanceTimeSlot();
             gm.AdvanceTimeSlot();
 
             var survivor = gm.characterSystem.GetAliveCharacters()[0];
-            Assert.IsTrue(gm.ExploreLocation("location_forest", new[] { survivor.characterId }, out var reason),
+            Assert.IsTrue(gm.ExploreLocation("location_lake", new[] { survivor.characterId }, out var reason),
                 reason);
-            CollectionAssert.Contains(gm.gameState.worldState.discoveredLocations, "location_forest");
+            Assert.IsNotNull(gm.gameState.worldState, "diag: worldState null after explore");
+            Assert.IsNotNull(gm.gameState.worldState.discoveredLocations, "diag: discoveredLocations null after explore");
+            CollectionAssert.Contains(gm.gameState.worldState.discoveredLocations, "location_lake");
 
             gm.SaveGame(false, "expl_discovery_save.json");
             Object.DestroyImmediate(gm.gameObject);
@@ -362,7 +369,7 @@ namespace LastRefuge.Tests
             var reloaded = StartNewGame();
             reloaded.LoadGame("expl_discovery_save.json");
 
-            CollectionAssert.Contains(reloaded.gameState.worldState.discoveredLocations, "location_forest");
+            CollectionAssert.Contains(reloaded.gameState.worldState.discoveredLocations, "location_lake");
         }
 
         [Test]
@@ -370,7 +377,7 @@ namespace LastRefuge.Tests
         {
             PrepareSaveDirectory("ExplorationSystemTest_Resume");
             var gm = StartNewGame();
-            AddLocationTo(gm, MakeLocation("location_forest", 2, 0));
+            AddLocationTo(gm, MakeLocation("location_lake", 2, 0));
             gm.contentDatabase.AddEvent(new EventDefinition
             {
                 id = "event_daily_blocker",
@@ -380,16 +387,19 @@ namespace LastRefuge.Tests
                 weight = 10f,
                 options = new[] { new EventOption { id = "opt", text = "ok", effects = new Effect[0] } }
             });
+            gm.eventSystem.ScheduleNow("event_daily_blocker");
 
             gm.AdvanceTimeSlot();
             gm.AdvanceTimeSlot();
             Assert.AreEqual(TimeSlot.Action, gm.GetCurrentTimeSlot());
 
             var survivor = gm.characterSystem.GetAliveCharacters()[0];
-            Assert.IsTrue(gm.ExploreLocation("location_forest", new[] { survivor.characterId }, out var reason),
+            Assert.IsTrue(gm.ExploreLocation("location_lake", new[] { survivor.characterId }, out var reason),
                 reason);
 
-            Assert.AreEqual(TimeSlot.Evening, gm.GetCurrentTimeSlot());
+            Assert.AreEqual(TimeSlot.Evening, gm.GetCurrentTimeSlot(),
+                $"diag: slot={gm.gameState.currentTimeSlot} state={gm.gameState.gameplayState} " +
+                $"pending={gm.GetPendingEvent()?.id}");
             Assert.AreEqual(GameplayState.Event, gm.gameState.gameplayState);
             Assert.IsNotNull(gm.GetPendingEvent());
             Assert.AreEqual("event_daily_blocker", gm.GetPendingEvent().id);
@@ -399,7 +409,7 @@ namespace LastRefuge.Tests
             Assert.AreEqual(TimeSlot.Night, gm.GetCurrentTimeSlot());
             Assert.AreEqual(GameplayState.Night, gm.gameState.gameplayState);
             Assert.IsNull(gm.GetPendingEvent());
-            CollectionAssert.Contains(gm.gameState.worldState.discoveredLocations, "location_forest");
+            CollectionAssert.Contains(gm.gameState.worldState.discoveredLocations, "location_lake");
             Assert.IsNull(survivor.locationId);
         }
     }

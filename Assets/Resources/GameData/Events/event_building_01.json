@@ -1,0 +1,44 @@
+{
+  "event": {
+    "id": "event_building_01",
+    "name": "农场害虫",
+    "type": "Normal",
+    "phase": "Evening",
+    "weight": 8,
+    "cooldownDays": 6,
+    "minDay": 3,
+    "maxDay": 0,
+    "conditions": [
+      { "type": "BuildingExists", "targetId": "farm" }
+    ],
+    "options": [
+      {
+        "id": "manual",
+        "text": "人工除虫（某人会很累）",
+        "conditions": [],
+        "effects": [
+          { "type": "AddFatigue", "targetId": "@random", "floatValue": 12 },
+          { "type": "SetFlag", "targetId": "farm_handled", "stringValue": "true" }
+        ]
+      },
+      {
+        "id": "spray",
+        "text": "药品处理（药品 -1）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Medicine", "intValue": 1 }
+        ]
+      },
+      {
+        "id": "abandon",
+        "text": "暂时放弃",
+        "conditions": [],
+        "effects": [
+          { "type": "SetFlag", "targetId": "farm_pests", "stringValue": "true" }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["building"]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "event": {
+    "id": "event_character_02",
+    "name": "生日",
+    "type": "Character",
+    "phase": "Evening",
+    "weight": 6,
+    "cooldownDays": 30,
+    "minDay": 5,
+    "maxDay": 0,
+    "conditions": [
+      { "type": "ResourceAtLeast", "resource": "Food", "amount": 30 }
+    ],
+    "options": [
+      {
+        "id": "celebrate",
+        "text": "办一顿像样的庆祝（压力 -10）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveStress", "targetId": "@random", "floatValue": 10 }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["character"]
+  }
+}

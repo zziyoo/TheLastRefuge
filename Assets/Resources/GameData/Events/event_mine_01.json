@@ -1,0 +1,34 @@
+{
+  "event": {
+    "id": "event_mine_01",
+    "name": "浅层铁矿",
+    "type": "Exploration",
+    "phase": "Action",
+    "weight": 10,
+    "cooldownDays": 2,
+    "minDay": 0,
+    "maxDay": 0,
+    "conditions": [],
+    "options": [
+      {
+        "id": "dig",
+        "text": "开挖（铁 +15）",
+        "conditions": [],
+        "effects": [
+          { "type": "AddResource", "resourceType": "Iron", "intValue": 15 }
+        ]
+      },
+      {
+        "id": "deep",
+        "text": "往深处挖（铁 +25，有塌方风险）",
+        "conditions": [],
+        "effects": [
+          { "type": "AddResource", "resourceType": "Iron", "intValue": 25 },
+          { "type": "DamageCharacter", "targetId": "@random", "intValue": 8 }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["exploration"]
+  }
+}

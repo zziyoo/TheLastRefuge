@@ -112,6 +112,9 @@ namespace LastRefuge.Tests
         {
             for (int i = 0; i < times; i++)
             {
+                // These tests walk the day loop; keep the daily event roll from
+                // interrupting them with real content events.
+                gameManager.gameState.gameFlags.intFlags["event_roll_day"] = gameManager.GetCurrentDay();
                 InvokeUI("OnNextTimeSlotClicked");
             }
         }
@@ -181,7 +184,10 @@ namespace LastRefuge.Tests
             
             Assert.AreEqual(TimeSlot.Evening, gameManager.GetCurrentTimeSlot(), "The Action slot must have been processed");
             int foodAfterAction = gameManager.resourceSystem.GetAmount(ResourceType.Food);
-            Assert.Greater(foodAfterAction, foodBefore, "The farm must feed the colony");
+            Assert.Greater(foodAfterAction, foodBefore,
+                $"diag foodBefore={foodBefore} state={gameManager.gameState.gameplayState} " +
+                $"slot={gameManager.GetCurrentTimeSlot()} pending={gameManager.GetPendingEvent()?.id} " +
+                $"assigned={farmer.currentWork}/{farmer.assignedBuildingId}");
             Assert.Less(gameManager.resourceSystem.GetAmount(ResourceType.Water), waterBefore, "Water must be spent on upkeep and drinking");
             
             // --- Evening -> Night -> DayEnd ---

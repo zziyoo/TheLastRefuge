@@ -1,0 +1,46 @@
+{
+  "event": {
+    "id": "event_building_02",
+    "name": "发电机异响",
+    "type": "Normal",
+    "phase": "Evening",
+    "weight": 7,
+    "cooldownDays": 6,
+    "minDay": 3,
+    "maxDay": 0,
+    "conditions": [
+      { "type": "BuildingExists", "targetId": "generator" }
+    ],
+    "options": [
+      {
+        "id": "inspect",
+        "text": "请工程师检查",
+        "conditions": [
+          { "type": "HasProfession", "targetId": "Engineer" }
+        ],
+        "effects": [
+          { "type": "SetFlag", "targetId": "generator_checked", "stringValue": "true" }
+        ]
+      },
+      {
+        "id": "repair",
+        "text": "自己动手修（零件 -2）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Parts", "intValue": 2 },
+          { "type": "RepairBuilding", "targetId": "@building:generator", "intValue": 10 }
+        ]
+      },
+      {
+        "id": "ignore",
+        "text": "放着不管（发电机耐久 -20）",
+        "conditions": [],
+        "effects": [
+          { "type": "DamageBuilding", "targetId": "@building:generator", "intValue": 20 }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["building"]
+  }
+}

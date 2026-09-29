@@ -1,0 +1,17 @@
+{
+  "location": {
+    "id": "location_cabin",
+    "name": "废弃小屋",
+    "tier": 1,
+    "unlockDay": 1,
+    "distance": 2,
+    "danger": 1,
+    "baseYield": [
+      { "resource": "Wood", "min": 3, "max": 6 },
+      { "resource": "Parts", "min": 1, "max": 2 }
+    ],
+    "eventPool": ["event_scrap_01", "event_forest_01"],
+    "prerequisites": [],
+    "tags": ["tier1"]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "event": {
+    "id": "event_food_storage_01",
+    "name": "粮仓里的老鼠",
+    "type": "Normal",
+    "phase": "Evening",
+    "weight": 10,
+    "cooldownDays": 5,
+    "minDay": 2,
+    "maxDay": 0,
+    "conditions": [
+      { "type": "ResourceAtLeast", "resource": "Food", "amount": 21 }
+    ],
+    "options": [
+      {
+        "id": "trap",
+        "text": "连夜捕杀（食物 -3）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 3 }
+        ]
+      },
+      {
+        "id": "poison",
+        "text": "投放毒饵（药品 -1）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Medicine", "intValue": 1 },
+          { "type": "SetFlag", "targetId": "rats_poisoned", "stringValue": "true" }
+        ]
+      },
+      {
+        "id": "ignore",
+        "text": "由它去（食物 -8）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 8 }
+        ]
+      }
+    ],
+    "followUpEvents": [
+      { "id": "event_food_storage_02", "delayDays": 4 }
+    ],
+    "tags": ["resource"]
+  }
+}

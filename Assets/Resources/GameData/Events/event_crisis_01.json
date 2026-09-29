@@ -1,0 +1,43 @@
+{
+  "event": {
+    "id": "event_crisis_01",
+    "name": "野兽袭击",
+    "type": "Crisis",
+    "phase": "Evening",
+    "weight": 5,
+    "cooldownDays": 8,
+    "minDay": 3,
+    "maxDay": 0,
+    "conditions": [],
+    "options": [
+      {
+        "id": "fight",
+        "text": "奋力抵抗（有人会受伤，食物 -6）",
+        "conditions": [],
+        "effects": [
+          { "type": "DamageCharacter", "targetId": "@random", "intValue": 15 },
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 6 }
+        ]
+      },
+      {
+        "id": "bait",
+        "text": "抛出一批口粮引开它们（食物 -15）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 15 }
+        ]
+      },
+      {
+        "id": "retreat",
+        "text": "退守围墙（食物 -4）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 4 },
+          { "type": "SetFlag", "targetId": "beast_watch", "stringValue": "true" }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["crisis"]
+  }
+}

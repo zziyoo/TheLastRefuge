@@ -97,6 +97,7 @@ namespace LastRefuge.Tests
         public void FullDayConsumption_FourCharactersSettlesExactlyOnce()
         {
             var gm = StartNewGame();
+            gm.gameState.gameFlags.intFlags["event_roll_day"] = gm.GetCurrentDay();
 
             // Deterministic demand: no trait may multiply consumption.
             foreach (var character in gm.characterSystem.GetAliveCharacters())

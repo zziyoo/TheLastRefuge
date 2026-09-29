@@ -1,0 +1,35 @@
+{
+  "event": {
+    "id": "event_scrap_01",
+    "name": "废弃零件",
+    "type": "Exploration",
+    "phase": "Action",
+    "weight": 10,
+    "cooldownDays": 2,
+    "minDay": 0,
+    "maxDay": 0,
+    "conditions": [],
+    "options": [
+      {
+        "id": "salvage",
+        "text": "拆解（零件 +4）",
+        "conditions": [],
+        "effects": [
+          { "type": "AddResource", "resourceType": "Parts", "intValue": 4 }
+        ]
+      },
+      {
+        "id": "expert",
+        "text": "请工程人员拆解（零件 +7）",
+        "conditions": [
+          { "type": "HasProfession", "targetId": "Engineer" }
+        ],
+        "effects": [
+          { "type": "AddResource", "resourceType": "Parts", "intValue": 7 }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["exploration"]
+  }
+}

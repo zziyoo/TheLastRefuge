@@ -1,0 +1,43 @@
+{
+  "event": {
+    "id": "event_food_storage_02",
+    "name": "发霉的食物",
+    "type": "Normal",
+    "phase": "Evening",
+    "weight": 8,
+    "cooldownDays": 5,
+    "minDay": 0,
+    "maxDay": 0,
+    "conditions": [],
+    "options": [
+      {
+        "id": "process",
+        "text": "立即加工（食物 -4）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 4 },
+          { "type": "SetFlag", "targetId": "mold_processed", "stringValue": "true" }
+        ]
+      },
+      {
+        "id": "discard",
+        "text": "直接丢弃（食物 -12）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 12 }
+        ]
+      },
+      {
+        "id": "eat",
+        "text": "冒险食用（食物 -2，可能吃坏肚子）",
+        "conditions": [],
+        "effects": [
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 2 },
+          { "type": "DamageCharacter", "targetId": "@random", "intValue": 10 }
+        ]
+      }
+    ],
+    "followUpEvents": [],
+    "tags": ["resource"]
+  }
+}

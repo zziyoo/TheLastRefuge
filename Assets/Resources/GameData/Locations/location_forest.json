@@ -1,0 +1,17 @@
+{
+  "location": {
+    "id": "location_forest",
+    "name": "近处森林",
+    "tier": 1,
+    "unlockDay": 1,
+    "distance": 2,
+    "danger": 1,
+    "baseYield": [
+      { "resource": "Food", "min": 3, "max": 6 },
+      { "resource": "Wood", "min": 2, "max": 5 }
+    ],
+    "eventPool": ["event_forest_01", "event_scrap_01"],
+    "prerequisites": [],
+    "tags": ["tier1"]
+  }
+}

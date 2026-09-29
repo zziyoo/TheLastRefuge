@@ -172,6 +172,10 @@ Effect 与 Condition 都用"单类 + type 枚举 + 通用字段"模式（与现�
   每日 Morning 检查到期 → 直接启动（**不受 weight 影响的定向链**）
 - `conditions` / `options[].conditions`：见 3.3
 - ID 全部 `lower_snake_case`（33 文档 §13），文件名 = ID + `.json`
+- 效果目标占位符（M4 实现）：character/building 定向效果的 `targetId` 支持
+  `@random`（随机存活角色，经 RandomSystem 抽取）与 `@building:<definitionId>`
+  （该 definitionId 的第一个实例）。解析发生在 `ResolveChoice` 应用效果之前，
+  找不到目标时该效果返回失败（记入 effectLog，不影响其余效果）
 
 ### 3.3 Condition 类型（MVP 实现集）
 

@@ -236,13 +236,30 @@ namespace LastRefuge.Tests
         }
 
         [Test]
-        public void LoadAll_EmptyContentFolders_NoDiagnostics()
+        public void Content_SliceAllFilesParseAndValidate()
         {
             var database = ContentLoader.LoadAll();
 
             Assert.AreEqual(0, database.Diagnostics.Count, string.Join("\n", database.Diagnostics));
-            Assert.AreEqual(0, database.Events.Count);
-            Assert.AreEqual(0, database.Locations.Count);
+            Assert.AreEqual(9, database.Events.Count);
+            Assert.AreEqual(3, database.Locations.Count);
+
+            var diagnostics = database.Validate();
+            Assert.AreEqual(0, diagnostics.Count, string.Join("\n", diagnostics));
+
+            Assert.IsTrue(database.TryGetEvent("event_food_storage_01", out var chain));
+            Assert.AreEqual(1, chain.followUpEvents.Length);
+            Assert.AreEqual("event_food_storage_02", chain.followUpEvents[0].id);
+            Assert.AreEqual(21, chain.conditions[0].amount);
+
+            Assert.IsTrue(database.TryGetEvent("event_crisis_01", out var crisis));
+            Assert.AreEqual(3, crisis.minDay);
+            Assert.GreaterOrEqual(crisis.options.Length, 3);
+
+            Assert.IsTrue(database.TryGetLocation("location_mine", out var mine));
+            Assert.AreEqual(4, mine.distance);
+            Assert.AreEqual(2, mine.danger);
+            Assert.AreEqual("location_forest", mine.prerequisites[0]);
         }
     }
 }

@@ -12,6 +12,22 @@ namespace LastRefuge.Systems
         private const string DuePrefix = "event_due_";
         private const string DailyRollContext = "DailyEventRoll";
         private const string LocationRollContext = "LocationEventRoll";
+        private const string EventTargetContext = "EventTarget";
+
+        private static readonly EffectType[] CharacterScopedEffects =
+        {
+            EffectType.DamageCharacter, EffectType.HealCharacter,
+            EffectType.AddStress, EffectType.RemoveStress,
+            EffectType.AddFatigue, EffectType.RemoveFatigue,
+            EffectType.AddHunger, EffectType.RemoveHunger,
+            EffectType.SetHealth, EffectType.AddTrait, EffectType.RemoveTrait,
+            EffectType.KillCharacter, EffectType.ChangeWork
+        };
+
+        private static readonly EffectType[] BuildingScopedEffects =
+        {
+            EffectType.DamageBuilding, EffectType.RepairBuilding, EffectType.SetBuildingEnabled
+        };
 
         private GameState gameState;
         private ITimeSystem timeSystem;
@@ -157,7 +173,7 @@ namespace LastRefuge.Systems
             var resolvedEvent = PendingEvent;
             timeSystem.SetGameplayState(GameplayState.Resolution);
 
-            var effects = option.effects ?? new Effect[0];
+            var effects = MaterializeTargets(option.effects ?? new Effect[0]);
             effectResolver.ResolveAll(effects);
 
             var effectLog = new string[effects.Length];
@@ -387,6 +403,57 @@ namespace LastRefuge.Systems
             if (flags.boolFlags.TryGetValue(key, out boolValue)) return boolValue ? "true" : "false";
 
             return null;
+        }
+
+        private Effect[] MaterializeTargets(Effect[] source)
+        {
+            var materialized = new Effect[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                var effect = source[i];
+                if (effect == null) continue;
+
+                var clone = new Effect
+                {
+                    type = effect.type,
+                    targetId = effect.targetId,
+                    resourceType = effect.resourceType,
+                    intValue = effect.intValue,
+                    floatValue = effect.floatValue,
+                    stringValue = effect.stringValue,
+                    stringArrayValue = effect.stringArrayValue
+                };
+
+                if (clone.targetId == "@random" &&
+                    Array.IndexOf(CharacterScopedEffects, clone.type) >= 0)
+                {
+                    var alive = characterSystem.GetAliveCharacters();
+                    if (alive != null && alive.Length > 0)
+                    {
+                        clone.targetId = randomSystem.NextElement(EventTargetContext, alive).characterId;
+                    }
+                }
+                else if (clone.targetId != null &&
+                         clone.targetId.StartsWith("@building:", StringComparison.Ordinal) &&
+                         Array.IndexOf(BuildingScopedEffects, clone.type) >= 0)
+                {
+                    string definitionId = clone.targetId.Substring("@building:".Length);
+                    if (gameState.buildings != null)
+                    {
+                        foreach (var building in gameState.buildings)
+                        {
+                            if (building != null && building.definitionId == definitionId)
+                            {
+                                clone.targetId = building.buildingId;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                materialized[i] = clone;
+            }
+            return materialized;
         }
 
         private void AppendHistory(EventHistoryEntry entry)
