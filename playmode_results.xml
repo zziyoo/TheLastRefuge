@@ -1,76 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<test-run id="2" testcasecount="4" result="Passed" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.262678">
-  <test-suite type="TestSuite" id="1000" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.262678" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.6133331">
+  <test-suite type="TestSuite" id="1000" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.613333" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
     <properties />
-    <test-suite type="Assembly" id="1006" name="LastRefuge.Tests.PlayMode.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.PlayMode.dll" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.245104" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="Assembly" id="1008" name="LastRefuge.Tests.PlayMode.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.PlayMode.dll" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.607492" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
       <properties>
-        <property name="_PID" value="18664" />
+        <property name="_PID" value="25464" />
         <property name="_APPDOMAIN" value="Unity Child Domain" />
         <property name="platform" value="PlayMode" />
       </properties>
-      <test-suite type="TestSuite" id="1007" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.237884" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestSuite" id="1009" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.594125" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
         <properties />
-        <test-suite type="TestSuite" id="1008" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.219906" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <test-suite type="TestSuite" id="1010" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.577401" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
           <properties />
-          <test-suite type="TestFixture" id="1001" name="GameplayPlayModeTest" fullname="LastRefuge.Tests.GameplayPlayModeTest" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:11Z" duration="2.200964" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestFixture" id="1001" name="GameplayPlayModeTest" fullname="LastRefuge.Tests.GameplayPlayModeTest" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:26Z" duration="1.358144" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-case id="1002" name="AcceptanceFlow_RunsInsidePlayMode" fullname="LastRefuge.Tests.GameplayPlayModeTest.AcceptanceFlow_RunsInsidePlayMode" methodname="AcceptanceFlow_RunsInsidePlayMode" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="938331625" result="Passed" start-time="2026-09-28 15:44:08Z" end-time="2026-09-28 15:44:10Z" duration="1.211121" asserts="0">
+            <test-case id="1002" name="AcceptanceFlow_RunsInsidePlayMode" fullname="LastRefuge.Tests.GameplayPlayModeTest.AcceptanceFlow_RunsInsidePlayMode" methodname="AcceptanceFlow_RunsInsidePlayMode" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="844510273" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:26Z" duration="0.590081" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
               <output><![CDATA[GameManager initialized
+GameManager: duplicate instance on 'GameManager' destroyed, keeping the existing one.
 GameLauncher.Start() called
 UIManager.Start() called
 GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262070491758442_72027
+New game started with seed: 639262753456313539_63617
+[NewGame] GameState created
+Resource:
+  food=30
+  water=30
+  wood=40
+  stone=20
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=1
+
+UIManager.ShowGame: resources=10 characters=4 buildings=1
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=60 children=1 [Detail_shelter_temp_1_0 active=True h=40]
 === Day 1 Morning ===
 === Day 1 Action ===
 === Day 1 Evening ===
 === Day 1 Night ===
 === Day 1 End ===
-Daily Report - Day 1: Food=32, Water=17, Population=4
+Daily Report - Day 1: Food=31, Water=17, Population=4
 Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
 Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+UIManager.ShowGame: resources=10 characters=4 buildings=2
 Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+[LoadGame] GameState created
+Resource:
+  food=31
+  water=17
+  wood=10
+  stone=10
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=2
+
 === Day 2 Morning ===
 === Day 2 Action ===
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260928_154409.json
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260928_154409.json
-Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260928_154409.json
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=105 children=2 [Detail_shelter_temp_1_0 active=True h=40] [Detail_farm_basic_1_1 active=True h=40]
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_104225.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_104225.json
+UIManager.ShowGame: resources=10 characters=4 buildings=2
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_104225.json
+[LoadGame] GameState created
+Resource:
+  food=32
+  water=4
+  wood=10
+  stone=10
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=2
+
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=105 children=2 [Detail_shelter_temp_1_0 active=True h=40] [Detail_farm_basic_1_1 active=True h=40]
 ]]></output>
             </test-case>
-            <test-case id="1003" name="DayEndQuit_AutosavesAtMorningAndContinues" fullname="LastRefuge.Tests.GameplayPlayModeTest.DayEndQuit_AutosavesAtMorningAndContinues" methodname="DayEndQuit_AutosavesAtMorningAndContinues" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="512616126" result="Passed" start-time="2026-09-28 15:44:10Z" end-time="2026-09-28 15:44:10Z" duration="0.414243" asserts="0">
+            <test-case id="1003" name="DayEndQuit_AutosavesAtMorningAndContinues" fullname="LastRefuge.Tests.GameplayPlayModeTest.DayEndQuit_AutosavesAtMorningAndContinues" methodname="DayEndQuit_AutosavesAtMorningAndContinues" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="2139239765" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:26Z" duration="0.277530" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
               <output><![CDATA[GameManager initialized
+GameManager: duplicate instance on 'GameManager' destroyed, keeping the existing one.
 GameLauncher.Start() called
 UIManager.Start() called
 GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262070503156577_34358
+New game started with seed: 639262753462123017_80968
+[NewGame] GameState created
+Resource:
+  food=30
+  water=30
+  wood=40
+  stone=20
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=1
+
+UIManager.ShowGame: resources=10 characters=4 buildings=1
 === Day 1 Morning ===
 === Day 1 Action ===
 === Day 1 Evening ===
 === Day 1 Night ===
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=60 children=1 [Detail_shelter_temp_1_0 active=True h=40]
 === Day 1 End ===
 Daily Report - Day 1: Food=21, Water=22, Population=4
 Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
 Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+UIManager.ShowGame: resources=10 characters=4 buildings=1
 Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
+[LoadGame] GameState created
+Resource:
+  food=21
+  water=22
+  wood=40
+  stone=20
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=1
+
 === Day 2 Morning ===
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=60 children=1 [Detail_shelter_temp_1_0 active=True h=40]
 ]]></output>
             </test-case>
-            <test-case id="1004" name="QuitWithoutActiveRun_DoesNotCreateAnAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotCreateAnAutosave" methodname="QuitWithoutActiveRun_DoesNotCreateAnAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="203977019" result="Passed" start-time="2026-09-28 15:44:10Z" end-time="2026-09-28 15:44:10Z" duration="0.201144" asserts="0">
+            <test-case id="1004" name="QuitWithoutActiveRun_DoesNotCreateAnAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotCreateAnAutosave" methodname="QuitWithoutActiveRun_DoesNotCreateAnAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1512131327" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:26Z" duration="0.183219" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
               <output><![CDATA[GameManager initialized
+GameManager: duplicate instance on 'GameManager' destroyed, keeping the existing one.
 GameLauncher.Start() called
 UIManager.Start() called
 GameManager.Instance: found
@@ -78,22 +176,401 @@ GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 ]]></output>
             </test-case>
-            <test-case id="1005" name="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" methodname="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1177547011" result="Passed" start-time="2026-09-28 15:44:10Z" end-time="2026-09-28 15:44:11Z" duration="0.333194" asserts="0">
+            <test-case id="1005" name="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" methodname="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1579329413" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:26Z" duration="0.286680" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
               <output><![CDATA[GameManager initialized
+GameManager: duplicate instance on 'GameManager' destroyed, keeping the existing one.
 GameLauncher.Start() called
 UIManager.Start() called
 GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262070509293487_25296
+New game started with seed: 639262753466761975_81796
+[NewGame] GameState created
+Resource:
+  food=30
+  water=30
+  wood=40
+  stone=20
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=1
+
+UIManager.ShowGame: resources=10 characters=4 buildings=1
 === Day 1 Morning ===
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=60 children=1 [Detail_shelter_temp_1_0 active=True h=40]
 Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
 Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\autosave.json
 GameManager initialized
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1006" name="UIDiagnosticTest" fullname="LastRefuge.Tests.UIDiagnosticTest" classname="LastRefuge.Tests.UIDiagnosticTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:27Z" duration="0.201526" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1007" name="DumpUiAfterNewGame" fullname="LastRefuge.Tests.UIDiagnosticTest.DumpUiAfterNewGame" methodname="DumpUiAfterNewGame" classname="LastRefuge.Tests.UIDiagnosticTest" runstate="Runnable" seed="2021879139" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:27Z" duration="0.185742" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <output><![CDATA[GameManager initialized
+GameManager: duplicate instance on 'GameManager' destroyed, keeping the existing one.
+GameLauncher.Start() called
+UIManager.Start() called
+GameManager.Instance: found
+GameLauncher found UIManager.Instance
+GameLauncher calling UIManager.ShowMainMenu() via reflection
+OnNewGameClicked called
+New game started with seed: 639262753469459489_15672
+[NewGame] GameState created
+Resource:
+  food=30
+  water=30
+  wood=40
+  stone=20
+  iron=10
+  metal=0
+  fuel=0
+  parts=0
+  medicine=0
+  power=0
+Character count=4
+Building count=1
+
+UIManager.ShowGame: resources=10 characters=4 buildings=1
+[UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
+[UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
+[UILayout] Detail: column=320 viewport=266 content=60 children=1 [Detail_shelter_temp_1_0 active=True h=40]
+===== UI DUMP =====
+MainCanvas [w=800 h=600]
+  UIManager [no-rt]
+    ResourceItemPrefab [w=0 h=40] (inactive)
+      Text [w=100 h=30] (inactive) "Resource"
+      Text [w=80 h=30] (inactive) "0 / 0"
+      Text [w=70 h=30] (inactive) "+0/天"
+      Text [w=50 h=30] (inactive) "∞"
+      CapacitySlider [w=100 h=20] (inactive)
+        Handle [w=20 h=40] (inactive)
+        Fill [w=0 h=20] (inactive)
+        Background [w=100 h=20] (inactive)
+    CharacterItemPrefab [w=0 h=120] (inactive)
+      NameRow [w=100 h=100] (inactive)
+        Text [w=200 h=25] (inactive) "Name (Profession)"
+      StatusRow [w=100 h=100] (inactive)
+        Text [w=250 h=20] (inactive) "HP:100 饥饿:0 压力:0 疲劳:0"
+        HealthBar [w=80 h=16] (inactive)
+          Fill [w=80 h=16] (inactive)
+        HungerBar [w=80 h=16] (inactive)
+          Fill [w=80 h=16] (inactive)
+        StressBar [w=80 h=16] (inactive)
+          Fill [w=80 h=16] (inactive)
+        FatigueBar [w=80 h=16] (inactive)
+          Fill [w=80 h=16] (inactive)
+      WorkRow [w=100 h=100] (inactive)
+        Text [w=150 h=20] (inactive) "工作: 待机"
+        WorkButtons [w=100 h=100] (inactive)
+          Btn_Idle [w=70 h=30] (inactive)
+            Text [w=50 h=20] (inactive) "待命"
+          Btn_Farming [w=70 h=30] (inactive)
+            Text [w=50 h=20] (inactive) "农业"
+          Btn_Gathering [w=70 h=30] (inactive)
+            Text [w=50 h=20] (inactive) "采集"
+          Btn_Engineering [w=70 h=30] (inactive)
+            Text [w=50 h=20] (inactive) "工程"
+  MainMenuPanel [w=800 h=600] (inactive)
+    Text [w=700 h=73] (inactive) "最后避难所"
+    Btn_新游戏 [w=700 h=65] (inactive)
+      Text [w=180 h=50] (inactive) "新游戏"
+    Btn_继续游戏 [w=700 h=65] (inactive)
+      Text [w=180 h=50] (inactive) "继续游戏"
+    Btn_读取存档 [w=700 h=65] (inactive)
+      Text [w=180 h=50] (inactive) "读取存档"
+    Btn_设置 [w=700 h=65] (inactive)
+      Text [w=180 h=50] (inactive) "设置"
+    Btn_退出 [w=700 h=65] (inactive)
+      Text [w=180 h=50] (inactive) "退出"
+  GamePanel [w=800 h=600]
+    TopBar [w=800 h=80]
+      Text [w=411 h=60] "第 1 天 清晨"
+      Text [w=329 h=60] "☀ 晴天"
+    ResourcePanel [w=270 h=320]
+      Text [w=250 h=29] "资源"
+      Viewport [w=250 h=266]
+        ResourceContainer [w=250 h=465]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=38 h=30] "食物"
+            Text [w=64 h=30] "30 / 100"
+            Text [w=38 h=30] "-8/天"
+            Text [w=27 h=30] "3天"
+            CapacitySlider [w=2 h=20]
+              Handle [w=20 h=40]
+              Fill [w=1 h=20]
+              Background [w=2 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=24 h=30] "水"
+            Text [w=68 h=30] "30 / 100"
+            Text [w=42 h=30] "-8/天"
+            Text [w=30 h=30] "3天"
+            CapacitySlider [w=6 h=20]
+              Handle [w=20 h=40]
+              Fill [w=2 h=20]
+              Background [w=6 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=39 h=30] "木材"
+            Text [w=65 h=30] "40 / 200"
+            Text [w=42 h=30] "+0/天"
+            Text [w=19 h=30] "∞"
+            CapacitySlider [w=3 h=20]
+              Handle [w=20 h=40]
+              Fill [w=1 h=20]
+              Background [w=3 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=39 h=30] "石材"
+            Text [w=65 h=30] "20 / 200"
+            Text [w=42 h=30] "+0/天"
+            Text [w=19 h=30] "∞"
+            CapacitySlider [w=3 h=20]
+              Handle [w=20 h=40]
+              Fill [w=0 h=20]
+              Background [w=3 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=25 h=30] "铁"
+            Text [w=69 h=30] "10 / 100"
+            Text [w=46 h=30] "+0/天"
+            Text [w=23 h=30] "∞"
+            CapacitySlider [w=7 h=20]
+              Handle [w=20 h=40]
+              Fill [w=1 h=20]
+              Background [w=7 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=41 h=30] "金属"
+            Text [w=58 h=30] "0 / 100"
+            Text [w=44 h=30] "+0/天"
+            Text [w=21 h=30] "∞"
+            CapacitySlider [w=5 h=20]
+              Handle [w=20 h=40]
+              Fill [w=0 h=20]
+              Background [w=5 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=41 h=30] "燃料"
+            Text [w=58 h=30] "0 / 100"
+            Text [w=44 h=30] "+0/天"
+            Text [w=21 h=30] "∞"
+            CapacitySlider [w=5 h=20]
+              Handle [w=20 h=40]
+              Fill [w=0 h=20]
+              Background [w=5 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=41 h=30] "零件"
+            Text [w=58 h=30] "0 / 100"
+            Text [w=44 h=30] "+0/天"
+            Text [w=21 h=30] "∞"
+            CapacitySlider [w=5 h=20]
+              Handle [w=20 h=40]
+              Fill [w=0 h=20]
+              Background [w=5 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=43 h=30] "药品"
+            Text [w=50 h=30] "0 / 50"
+            Text [w=46 h=30] "+0/天"
+            Text [w=23 h=30] "∞"
+            CapacitySlider [w=7 h=20]
+              Handle [w=20 h=40]
+              Fill [w=0 h=20]
+              Background [w=7 h=20]
+          ResourceItemPrefab(Clone) [w=230 h=40]
+            Text [w=41 h=30] "电力"
+            Text [w=58 h=30] "0 / 500"
+            Text [w=44 h=30] "+0/天"
+            Text [w=21 h=30] "∞"
+            CapacitySlider [w=5 h=20]
+              Handle [w=20 h=40]
+              Fill [w=0 h=20]
+              Background [w=5 h=20]
+    CharacterPanel [w=270 h=320]
+      Text [w=250 h=29] "人员"
+      Viewport [w=250 h=266]
+        CharacterContainer [w=250 h=515]
+          CharacterItemPrefab(Clone) [w=230 h=120]
+            NameRow [w=210 h=100]
+              Text [w=110 h=25] "刘1 (Hunter)"
+            StatusRow [w=210 h=100]
+              Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
+              HealthBar [w=0 h=16]
+                Fill [w=0 h=16]
+              HungerBar [w=0 h=16]
+                Fill [w=0 h=16]
+              StressBar [w=0 h=16]
+                Fill [w=0 h=16]
+              FatigueBar [w=0 h=16]
+                Fill [w=0 h=16]
+            WorkRow [w=210 h=100]
+              Text [w=44 h=20] "工作: 待命"
+              WorkButtons [w=156 h=100]
+                Btn_Idle [w=35 h=30]
+                  Text [w=50 h=20] "待命"
+                Btn_Farming [w=35 h=30]
+                  Text [w=50 h=20] "农业"
+                Btn_Gathering [w=35 h=30]
+                  Text [w=50 h=20] "采集"
+                Btn_Engineering [w=35 h=30]
+                  Text [w=50 h=20] "工程"
+          CharacterItemPrefab(Clone) [w=230 h=120]
+            NameRow [w=210 h=100]
+              Text [w=127 h=25] "王2 (Engineer)"
+            StatusRow [w=210 h=100]
+              Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
+              HealthBar [w=0 h=16]
+                Fill [w=0 h=16]
+              HungerBar [w=0 h=16]
+                Fill [w=0 h=16]
+              StressBar [w=0 h=16]
+                Fill [w=0 h=16]
+              FatigueBar [w=0 h=16]
+                Fill [w=0 h=16]
+            WorkRow [w=210 h=100]
+              Text [w=44 h=20] "工作: 待命"
+              WorkButtons [w=156 h=100]
+                Btn_Idle [w=35 h=30]
+                  Text [w=50 h=20] "待命"
+                Btn_Farming [w=35 h=30]
+                  Text [w=50 h=20] "农业"
+                Btn_Gathering [w=35 h=30]
+                  Text [w=50 h=20] "采集"
+                Btn_Engineering [w=35 h=30]
+                  Text [w=50 h=20] "工程"
+          CharacterItemPrefab(Clone) [w=230 h=120]
+            NameRow [w=210 h=100]
+              Text [w=98 h=25] "李3 (Miner)"
+            StatusRow [w=210 h=100]
+              Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
+              HealthBar [w=0 h=16]
+                Fill [w=0 h=16]
+              HungerBar [w=0 h=16]
+                Fill [w=0 h=16]
+              StressBar [w=0 h=16]
+                Fill [w=0 h=16]
+              FatigueBar [w=0 h=16]
+                Fill [w=0 h=16]
+            WorkRow [w=210 h=100]
+              Text [w=44 h=20] "工作: 待命"
+              WorkButtons [w=156 h=100]
+                Btn_Idle [w=35 h=30]
+                  Text [w=50 h=20] "待命"
+                Btn_Farming [w=35 h=30]
+                  Text [w=50 h=20] "农业"
+                Btn_Gathering [w=35 h=30]
+                  Text [w=50 h=20] "采集"
+                Btn_Engineering [w=35 h=30]
+                  Text [w=50 h=20] "工程"
+          CharacterItemPrefab(Clone) [w=230 h=120]
+            NameRow [w=210 h=100]
+              Text [w=127 h=25] "张4 (Engineer)"
+            StatusRow [w=210 h=100]
+              Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
+              HealthBar [w=0 h=16]
+                Fill [w=0 h=16]
+              HungerBar [w=0 h=16]
+                Fill [w=0 h=16]
+              StressBar [w=0 h=16]
+                Fill [w=0 h=16]
+              FatigueBar [w=0 h=16]
+                Fill [w=0 h=16]
+            WorkRow [w=210 h=100]
+              Text [w=44 h=20] "工作: 待命"
+              WorkButtons [w=156 h=100]
+                Btn_Idle [w=35 h=30]
+                  Text [w=50 h=20] "待命"
+                Btn_Farming [w=35 h=30]
+                  Text [w=50 h=20] "农业"
+                Btn_Gathering [w=35 h=30]
+                  Text [w=50 h=20] "采集"
+                Btn_Engineering [w=35 h=30]
+                  Text [w=50 h=20] "工程"
+    DetailPanel [w=230 h=320]
+      Text [w=210 h=29] "详情 / 建筑"
+      Viewport [w=210 h=266]
+        DetailContainer [w=210 h=60]
+          Detail_shelter_temp_1_0 [w=190 h=40]
+            Text [w=90 h=30] "临时住所 (Lv.1)"
+            Text [w=36 h=30] "工人 0/0"
+            Text [w=29 h=30] "运行中"
+    BottomBar [w=800 h=120]
+      Btn_人员 [w=100 h=100]
+        Text [w=80 h=40] "人员"
+      Btn_建筑 [w=100 h=100]
+        Text [w=80 h=40] "建筑"
+      Btn_资源 [w=100 h=100]
+        Text [w=80 h=40] "资源"
+      Btn_日志 [w=100 h=100]
+        Text [w=80 h=40] "日志"
+      Btn_下一阶段 [w=100 h=100]
+        Text [w=120 h=50] "下一阶段"
+      Btn_存档 [w=100 h=100]
+        Text [w=80 h=40] "存档"
+      Btn_菜单 [w=100 h=100]
+        Text [w=80 h=40] "菜单"
+    PersonnelPanel [w=640 h=480] (inactive)
+    BuildingPanel [w=640 h=480] (inactive)
+    ResourceDetailPanel [w=640 h=480] (inactive)
+    LogPanel [w=640 h=480] (inactive)
+    SaveLoadGamePanel [w=640 h=480] (inactive)
+  SaveLoadPanel [w=800 h=600] (inactive)
+    Text [w=100 h=100] (inactive) "读取存档"
+    Btn_返回 [w=200 h=60] (inactive)
+      Text [w=180 h=50] (inactive) "返回"
+  SettingsPanel [w=800 h=600] (inactive)
+    Text [w=100 h=100] (inactive) "设置"
+    AudioSettings [w=100 h=100] (inactive)
+      Text [w=100 h=100] (inactive) "音乐"
+      Slider_MusicVolume [w=200 h=30] (inactive)
+        Background [w=200 h=30] (inactive)
+        Fill Area [w=180 h=20] (inactive)
+          Handle Slide [w=20 h=40] (inactive)
+    AudioSettings2 [w=100 h=100] (inactive)
+      Text [w=100 h=100] (inactive) "音效"
+      Slider_SFXVolume [w=200 h=30] (inactive)
+        Background [w=200 h=30] (inactive)
+        Fill Area [w=180 h=20] (inactive)
+          Handle Slide [w=20 h=40] (inactive)
+    UISettings [w=100 h=100] (inactive)
+      Text [w=100 h=100] (inactive) "文字速度"
+      Slider_TextSpeed [w=200 h=30] (inactive)
+        Background [w=200 h=30] (inactive)
+        Fill Area [w=47 h=20] (inactive)
+          Handle Slide [w=20 h=40] (inactive)
+    Btn_返回 [w=200 h=60] (inactive)
+      Text [w=180 h=50] (inactive) "返回"
+
+===== STATE ===== food=30 wood=40 water=30 chars=4 buildings=1
+===== BINDING =====
+mainMenuPanel=inactive
+gamePanel=active
+resourceContainer=ResourceContainer children=10
+characterContainer=CharacterContainer children=4
+resourceItemPrefab=ResourceItemPrefab active=False
+characterItemPrefab=CharacterItemPrefab active=False
+UIManager._gameManager=set
+resourceContainer rect w=250 h=465
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-30) [食物][30 / 100][-8/天][3天]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-75) [水][30 / 100][-8/天][3天]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-120) [木材][40 / 200][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-165) [石材][20 / 200][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-210) [铁][10 / 100][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-255) [金属][0 / 100][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-300) [燃料][0 / 100][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-345) [零件][0 / 100][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-390) [药品][0 / 50][+0/天][∞]
+  item ResourceItemPrefab(Clone) active=True h=40 w=230 pos=(125,-435) [电力][0 / 500][+0/天][∞]
+
 ]]></output>
             </test-case>
           </test-suite>

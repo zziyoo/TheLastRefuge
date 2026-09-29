@@ -396,9 +396,9 @@ namespace LastRefuge.Gameplay
             UnityEngine.Debug.Log($"Daily Report - Day {gameState.currentDay}: Food={food}, Water={water}, Population={pop}");
         }
         
-        public void AssignWork(string characterId, WorkType workType, string buildingId = null)
+        public bool AssignWork(string characterId, WorkType workType, string buildingId = null)
         {
-            characterSystem.AssignWork(characterId, workType, buildingId);
+            return characterSystem.AssignWork(characterId, workType, buildingId);
         }
         
         public bool BuildBuilding(string definitionId)

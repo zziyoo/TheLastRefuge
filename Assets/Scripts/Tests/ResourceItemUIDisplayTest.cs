@@ -26,8 +26,8 @@ namespace LastRefuge.Tests
         [TearDown]
         public void TearDown()
         {
-            if (item != null) Object.Destroy(item.gameObject);
-            if (daysText != null) Object.Destroy(daysText.gameObject);
+            if (item != null) Object.DestroyImmediate(item.gameObject);
+            if (daysText != null) Object.DestroyImmediate(daysText.gameObject);
         }
 
         [Test]

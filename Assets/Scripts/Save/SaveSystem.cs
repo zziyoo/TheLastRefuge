@@ -97,8 +97,21 @@ namespace LastRefuge.Save
                 
                 string json = JsonUtility.ToJson(saveData, true);
                 
-                string fileName = isAutoSave ? AUTO_SAVE_NAME : 
-                    (customName ?? $"{MANUAL_SAVE_PREFIX}{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
+                string fileName;
+                if (isAutoSave)
+                {
+                    fileName = AUTO_SAVE_NAME;
+                }
+                else if (string.IsNullOrEmpty(customName))
+                {
+                    fileName = $"{MANUAL_SAVE_PREFIX}{DateTime.UtcNow:yyyyMMdd_HHmmss}.json";
+                }
+                else
+                {
+                    fileName = customName.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                        ? customName
+                        : customName + ".json";
+                }
                 
                 string savePath = GetSaveDirectory();
                 string fullPath = Path.Combine(savePath, fileName);

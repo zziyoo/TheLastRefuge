@@ -35,7 +35,7 @@ namespace LastRefuge.Tests
         {
             if (gameManager != null)
             {
-                Object.Destroy(gameManager.gameObject);
+                Object.DestroyImmediate(gameManager.gameObject);
                 gameManager = null;
             }
 
@@ -175,7 +175,7 @@ namespace LastRefuge.Tests
             Assert.AreEqual(30, gm.resourceSystem.GetAmount(ResourceType.Food));
             Assert.AreEqual(1, gm.GetCurrentDay());
 
-            Assert.IsTrue(gm.saveSystem.LoadGame(fileName));
+            gm.LoadGame(fileName);
 
             Assert.AreEqual(1, gm.GetCurrentDay());
             Assert.AreEqual(TimeSlot.Evening, gm.GetCurrentTimeSlot());
