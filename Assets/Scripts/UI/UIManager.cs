@@ -162,6 +162,10 @@ namespace LastRefuge.UI
         }
         
         private bool isGamePanelActive = false;
+
+        /// <summary>Running in-game event log shown by the 日志 panel.</summary>
+        private readonly System.Collections.Generic.List<string> logLines = new System.Collections.Generic.List<string>();
+        private const int MaxLogLines = 30;
         
         private void Awake()
         {
@@ -172,6 +176,18 @@ namespace LastRefuge.UI
             }
             Instance = this;
         }
+
+        /// <summary>
+        /// Wires a button to exactly one handler, dropping whatever was attached before
+        /// (UISetup binds handlers at creation time, so a plain AddListener here would
+        /// make every click fire twice).
+        /// </summary>
+        private static void BindButton(Button button, System.Action onClick)
+        {
+            if (button == null) return;
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => onClick?.Invoke());
+        }
         
         private void Start()
         {
@@ -179,19 +195,23 @@ namespace LastRefuge.UI
             _gameManager = GameManager.Instance;
             UnityEngine.Debug.Log("GameManager.Instance: " + (gameManager != null ? "found" : "NULL"));
             
-            // Setup button listeners
-            nextTimeSlotButton.onClick.AddListener(OnNextTimeSlotClicked);
-            personnelButton.onClick.AddListener(() => TogglePanel(personnelPanel));
-            buildingButton.onClick.AddListener(() => TogglePanel(buildingPanel));
-            resourceButton.onClick.AddListener(() => TogglePanel(resourceDetailPanel));
-            logButton.onClick.AddListener(() => TogglePanel(logPanel));
-            saveButton.onClick.AddListener(() => TogglePanel(saveLoadGamePanel));
-            menuButton.onClick.AddListener(OnMenuClicked);
+            // Bind the bottom bar exactly once. UISetup already attached handlers when it
+            // created these buttons; adding them a second time made every click fire
+            // twice, so panels opened and instantly closed ("button does nothing") and
+            // the time button jumped two slots per press.
+            BindButton(nextTimeSlotButton, OnNextTimeSlotClicked);
+            BindButton(personnelButton, () => TogglePanel(personnelPanel));
+            BindButton(buildingButton, () => TogglePanel(buildingPanel));
+            BindButton(resourceButton, () => TogglePanel(resourceDetailPanel));
+            BindButton(logButton, () => TogglePanel(logPanel));
+            BindButton(saveButton, () => TogglePanel(saveLoadGamePanel));
+            BindButton(menuButton, OnMenuClicked);
             
             // Subscribe to events
             EventBus.Subscribe<ResourceChangedEvent>(OnResourceChanged);
             EventBus.Subscribe<CharacterChangedEvent>(OnCharacterChanged);
             EventBus.Subscribe<BuildingChangedEvent>(OnBuildingChanged);
+            EventBus.Subscribe<BuildingConstructedEvent>(OnBuildingConstructed);
             EventBus.Subscribe<TimeChangedEvent>(OnTimeChanged);
             EventBus.Subscribe<DayChangedEvent>(OnDayChanged);
             EventBus.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
@@ -206,6 +226,7 @@ namespace LastRefuge.UI
             EventBus.Unsubscribe<ResourceChangedEvent>(OnResourceChanged);
             EventBus.Unsubscribe<CharacterChangedEvent>(OnCharacterChanged);
             EventBus.Unsubscribe<BuildingChangedEvent>(OnBuildingChanged);
+            EventBus.Unsubscribe<BuildingConstructedEvent>(OnBuildingConstructed);
             EventBus.Unsubscribe<TimeChangedEvent>(OnTimeChanged);
             EventBus.Unsubscribe<DayChangedEvent>(OnDayChanged);
             EventBus.Unsubscribe<GameStateChangedEvent>(OnGameStateChanged);
@@ -382,6 +403,7 @@ namespace LastRefuge.UI
             else if (panel == buildingPanel) RefreshBuildingPanel();
             else if (panel == resourceDetailPanel) RefreshResourceDetailPanel();
             else if (panel == logPanel) RefreshLogPanel();
+            else if (panel == saveLoadGamePanel) RefreshSaveGamePanel();
         }
         
         /// <summary>
@@ -541,10 +563,48 @@ namespace LastRefuge.UI
             }
         }
 
+        /// <summary>
+        /// Personnel roster: one line per survivor. Work assignment itself stays in the
+        /// character column, this panel is the readable overview.
+        /// </summary>
         private void RefreshPersonnelPanel()
         {
-            // Detailed personnel management
-            RefreshCharacters();
+            if (personnelPanel == null || gameManager == null) return;
+
+            var layout = personnelPanel.GetComponent<VerticalLayoutGroup>();
+            if (layout == null)
+            {
+                layout = personnelPanel.AddComponent<VerticalLayoutGroup>();
+            }
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.spacing = 8;
+            layout.padding = new RectOffset(20, 20, 20, 20);
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            foreach (Transform child in personnelPanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            var characters = gameManager.characterSystem.GetAliveCharacters();
+            int housing = gameManager.buildingSystem.GetTotalHousingCapacity();
+
+            CreateText(personnelPanel.transform, "人员", 28, FontStyles.Bold)
+                .GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+            CreateText(personnelPanel.transform, $"人口 {characters.Length} · 住房容量 {housing}", 18)
+                .GetComponent<RectTransform>().sizeDelta = new Vector2(300, 30);
+
+            foreach (var character in characters)
+            {
+                var row = CreateText(personnelPanel.transform,
+                    $"{character.name} ({character.profession}) · {character.currentWork.GetDisplayName()} · " +
+                    $"HP {character.health}/{character.maxHealth} · 饥饿 {character.hunger:F0} · 压力 {character.stress:F0} · 疲劳 {character.fatigue:F0}",
+                    16);
+                row.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 28);
+            }
         }
         
         private void RefreshBuildingPanel()
@@ -723,11 +783,100 @@ namespace LastRefuge.UI
             }
         }
         
+        /// <summary>
+        /// In-game event log. Entries are captured from the same EventBus events the UI
+        /// already listens to, so the panel shows what actually happened.
+        /// </summary>
         private void RefreshLogPanel()
         {
-            // Event log
+            if (logPanel == null) return;
+
+            var layout = logPanel.GetComponent<VerticalLayoutGroup>();
+            if (layout == null)
+            {
+                layout = logPanel.AddComponent<VerticalLayoutGroup>();
+            }
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.spacing = 6;
+            layout.padding = new RectOffset(20, 20, 20, 20);
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            foreach (Transform child in logPanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            CreateText(logPanel.transform, "日志", 28, FontStyles.Bold);
+
+            if (logLines.Count == 0)
+            {
+                CreateText(logPanel.transform, "暂无记录", 20)
+                    .GetComponent<RectTransform>().sizeDelta = new Vector2(300, 34);
+                return;
+            }
+
+            // Newest first so the panel never needs scrolling to be useful.
+            for (int i = logLines.Count - 1; i >= 0; i--)
+            {
+                CreateText(logPanel.transform, logLines[i], 18)
+                    .GetComponent<RectTransform>().sizeDelta = new Vector2(400, 30);
+            }
         }
-        
+
+        private void AppendLog(string line)
+        {
+            logLines.Add(line);
+            if (logLines.Count > MaxLogLines)
+            {
+                logLines.RemoveAt(0);
+            }
+        }
+
+        /// <summary>
+        /// In-game save panel: a manual save button plus a way back, so the 存档 button
+        /// opens something that actually works instead of a blank overlay.
+        /// </summary>
+        private void RefreshSaveGamePanel()
+        {
+            if (saveLoadGamePanel == null || gameManager == null) return;
+
+            var layout = saveLoadGamePanel.GetComponent<VerticalLayoutGroup>();
+            if (layout == null)
+            {
+                layout = saveLoadGamePanel.AddComponent<VerticalLayoutGroup>();
+            }
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 20;
+            layout.padding = new RectOffset(40, 40, 40, 40);
+            layout.childControlWidth = false;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = false;
+
+            foreach (Transform child in saveLoadGamePanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            CreateText(saveLoadGamePanel.transform, "存档", 28, FontStyles.Bold)
+                .GetComponent<RectTransform>().sizeDelta = new Vector2(200, 40);
+
+            var saveBtn = CreateButton(saveLoadGamePanel.transform, "保存游戏", () =>
+            {
+                gameManager.SaveGame(false);
+            }, 200, 50);
+            saveBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 50);
+
+            var backBtn = CreateButton(saveLoadGamePanel.transform, "返回", () =>
+            {
+                saveLoadGamePanel.SetActive(false);
+            }, 200, 50);
+            backBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 50);
+        }
+
         private void RefreshButtons()
         {
             if (nextTimeSlotButton != null)
@@ -763,6 +912,13 @@ namespace LastRefuge.UI
         {
             RefreshDayTime();
             RefreshButtons();
+            AppendLog($"第 {e.day} 天 · {e.newTimeSlot.GetDisplayName()}");
+        }
+
+        private void OnBuildingConstructed(BuildingConstructedEvent e)
+        {
+            var def = gameManager != null ? gameManager.buildingSystem.GetBuildingDefinition(e.definitionId) : null;
+            AppendLog($"建成 {def?.name ?? e.definitionId}");
         }
         
         private void OnDayChanged(DayChangedEvent e)
@@ -779,10 +935,12 @@ namespace LastRefuge.UI
         private void OnGameSaved(GameSavedEvent e)
         {
             UnityEngine.Debug.Log($"Game saved: {e.savePath}");
+            AppendLog($"已存档 · {Path.GetFileName(e.savePath)}");
         }
-        
+
         private void OnGameLoaded(GameLoadedEvent e)
         {
+            AppendLog("读取存档");
             ShowGame();
         }
         
