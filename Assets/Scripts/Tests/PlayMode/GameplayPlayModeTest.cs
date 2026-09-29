@@ -107,6 +107,16 @@ namespace LastRefuge.Tests
         {
             uiManagerType.GetMethod(methodName).Invoke(uiManager, null);
         }
+
+        private void InvokeUI(string methodName, object arg)
+        {
+            uiManagerType.GetMethod(methodName).Invoke(uiManager, new[] { arg });
+        }
+
+        private static bool GetButtonInteractable(object button)
+        {
+            return (bool)button.GetType().GetProperty("interactable").GetValue(button, null);
+        }
         
         private void Click(int times)
         {
@@ -307,6 +317,166 @@ namespace LastRefuge.Tests
             Assert.AreEqual(TimeSlot.Planning, gameManager.GetCurrentTimeSlot(), "Day 2 must be playable after a DayEnd quit + continue");
         }
         
+        /// <summary>
+        /// Doc 41 §9 M4: real scene, forced daily event -> modal -> choice ->
+        /// resource change -> summary -> "next slot" usable again.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator EventModal_ShowsChoicesSettlesSummaryAndUnblocks()
+        {
+            InvokeUI("OnNewGameClicked");
+            yield return null;
+
+            // Due beats the weighted pool, so the rat event starts deterministically.
+            gameManager.eventSystem.ScheduleNow("event_food_storage_01");
+
+            // Walk to Evening without the Click helper: it blocks the daily roll that
+            // processes due events.
+            gameManager.AdvanceTimeSlot();
+            gameManager.AdvanceTimeSlot();
+            gameManager.AdvanceTimeSlot();
+            gameManager.AdvanceTimeSlot();
+            yield return null;
+
+            Assert.AreEqual(GameplayState.Event, gameManager.GetCurrentGameplayState());
+            var eventPanel = GameObject.Find("EventPanel");
+            Assert.IsNotNull(eventPanel, "The event modal must be visible while an event is pending");
+
+            var nextSlotButton = uiManagerType.GetField("nextTimeSlotButton").GetValue(uiManager);
+            Assert.IsFalse(GetButtonInteractable(nextSlotButton),
+                "Next-slot must be gated while the event is pending");
+
+            var pending = gameManager.GetPendingEvent();
+            Assert.IsNotNull(pending);
+            Assert.AreEqual("event_food_storage_01", pending.id);
+
+            string usable = null;
+            foreach (var option in pending.options)
+            {
+                if (gameManager.eventSystem.CanResolveChoice(option.id, out _))
+                {
+                    usable = option.id;
+                    break;
+                }
+            }
+            Assert.AreEqual("trap", usable, "A fresh colony with food >= 21 can always trap the rats");
+
+            int foodBefore = gameManager.resourceSystem.GetAmount(ResourceType.Food);
+            InvokeUI("OnEventOptionClicked", usable);
+            yield return null;
+
+            Assert.AreEqual(foodBefore - 3, gameManager.resourceSystem.GetAmount(ResourceType.Food),
+                "The trap choice costs 3 food");
+            Assert.AreEqual(GameplayState.Evening, gameManager.GetCurrentGameplayState(),
+                "Settling restores the pre-event slot state");
+            Assert.IsNull(gameManager.GetPendingEvent());
+            Assert.AreEqual(1, gameManager.gameState.eventHistory.Length);
+
+            // The modal stays open on the settle summary with an active continue button.
+            eventPanel = GameObject.Find("EventPanel");
+            Assert.IsNotNull(eventPanel, "The settle summary must keep the modal open");
+            var continueButton = uiManagerType.GetField("eventContinueButton").GetValue(uiManager) as Component;
+            Assert.IsNotNull(continueButton);
+            Assert.IsTrue(continueButton.gameObject.activeSelf, "Continue must be visible on the summary");
+            Assert.IsTrue(GetButtonInteractable(nextSlotButton),
+                "Next-slot must be usable again after settling");
+
+            InvokeUI("OnEventContinueClicked");
+            yield return null;
+            Assert.IsNull(GameObject.Find("EventPanel"), "Continue closes the modal");
+
+            gameManager.AdvanceTimeSlot();
+            yield return null;
+            Assert.AreEqual(TimeSlot.Night, gameManager.GetCurrentTimeSlot(),
+                "Time advances normally once the event is settled");
+        }
+
+        /// <summary>
+        /// Doc 41 §9 M4: exploration panel -> pick location and team -> depart ->
+        /// settle (yield, discovery, rations, time cost) -> panel closed, log written.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator ExplorationFlow_DepartsSettlesAndAdvances()
+        {
+            InvokeUI("OnNewGameClicked");
+            yield return null;
+
+            // Deterministic site with an empty pool so no location event interrupts.
+            gameManager.contentDatabase.AddLocation(new LocationDefinition
+            {
+                id = "location_test_wharf",
+                name = "旧码头",
+                tier = 1,
+                unlockDay = 1,
+                distance = 2,
+                danger = 0,
+                baseYield = new[] { new ResourceYield { resource = ResourceType.Wood, min = 5, max = 5 } },
+                eventPool = new string[0],
+                prerequisites = new string[0],
+                tags = new string[0]
+            });
+
+            Click(2); // Morning -> Planning -> Action (also stamps the roll block).
+            yield return null;
+            Assert.AreEqual(TimeSlot.Action, gameManager.GetCurrentTimeSlot(),
+                $"diag day={gameManager.GetCurrentDay()} state={gameManager.GetCurrentGameplayState()} " +
+                $"pending={gameManager.GetPendingEvent()?.id} hasActive={gameManager.hasActiveGame}");
+
+            ExplorationFinishedEvent finished = default;
+            bool finishedFired = false;
+            System.Action<ExplorationFinishedEvent> handler = e =>
+            {
+                finished = e;
+                finishedFired = true;
+            };
+            EventBus.Subscribe(handler);
+
+            InvokeUI("OnExplorationClicked");
+            yield return null;
+            var panel = GameObject.Find("ExplorationPanel");
+            Assert.IsNotNull(panel, "The exploration panel must open");
+
+            InvokeUI("OnSelectLocation", "location_test_wharf");
+            var survivor = gameManager.characterSystem.GetAliveCharacters()[0];
+            InvokeUI("OnToggleTeamMember", survivor.characterId);
+            yield return null;
+
+            int foodBefore = gameManager.resourceSystem.GetAmount(ResourceType.Food);
+            int foodDemand = gameManager.characterSystem.GetTotalFoodConsumption();
+            int woodBefore = gameManager.resourceSystem.GetAmount(ResourceType.Wood);
+
+            InvokeUI("OnDepartExplorationClicked");
+            yield return null;
+
+            // Depart pays rations (1 x 2 / 2 = 1), then the drain runs the Action slot
+            // once: buildings produce (shelter produces nothing) and the colony eats.
+            Assert.AreEqual(foodBefore - 1 - foodDemand,
+                gameManager.resourceSystem.GetAmount(ResourceType.Food),
+                "Departing must pay the ration cost plus the Action-slot daily consumption");
+            Assert.AreEqual(woodBefore + 5, gameManager.resourceSystem.GetAmount(ResourceType.Wood),
+                "The base yield lands on settle");
+            CollectionAssert.Contains(gameManager.gameState.worldState.discoveredLocations,
+                "location_test_wharf", "First arrival discovers the location");
+            Assert.AreEqual(TimeSlot.Night, gameManager.GetCurrentTimeSlot(),
+                "Distance 2 advances exactly two slots from Action");
+            Assert.AreEqual(GameplayState.Night, gameManager.GetCurrentGameplayState());
+            Assert.IsNull(survivor.locationId, "The team member is home after settling");
+            Assert.IsNull(GameObject.Find("ExplorationPanel"), "The panel closes after departing");
+
+            Assert.IsTrue(finishedFired, "ExplorationFinishedEvent must be published");
+            Assert.AreEqual(1, finished.survivors);
+            Assert.AreEqual(0, finished.casualties);
+            Assert.IsTrue(finished.resourceSummary.Contains("Wood"), "The summary carries the yield");
+
+            var logLines = uiManagerType
+                .GetField("logLines", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(uiManager) as System.Collections.Generic.List<string>;
+            Assert.IsNotNull(logLines);
+            Assert.IsTrue(logLines.Exists(l => l.Contains("探索完成")), "The log records the settle");
+
+            EventBus.Unsubscribe(handler);
+        }
+
         [UnityTest]
         public IEnumerator QuitWithoutActiveRun_DoesNotCreateAnAutosave()
         {

@@ -2,6 +2,7 @@
   "event": {
     "id": "event_food_storage_02",
     "name": "发霉的食物",
+    "description": "上次没处理干净，一批食物开始发霉腐坏。",
     "type": "Normal",
     "phase": "Evening",
     "weight": 8,

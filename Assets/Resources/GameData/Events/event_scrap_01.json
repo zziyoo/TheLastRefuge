@@ -2,6 +2,7 @@
   "event": {
     "id": "event_scrap_01",
     "name": "废弃零件",
+    "description": "废墟里散落着还能用的零件。",
     "type": "Exploration",
     "phase": "Action",
     "weight": 10,

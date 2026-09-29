@@ -24,6 +24,7 @@ namespace LastRefuge.Core
         {
             public string id;
             public string name;
+            public string description;
             public string type;
             public string phase;
             public float weight;
@@ -205,6 +206,7 @@ namespace LastRefuge.Core
             {
                 id = raw.id,
                 name = raw.name,
+                description = raw.description,
                 type = type,
                 phase = phase,
                 weight = raw.weight,

@@ -16,6 +16,7 @@ namespace LastRefuge.Core
         void ScheduleNow(string eventId);
         bool ResolveChoice(string optionId);
         bool IsOptionAvailable(string optionId);
+        bool CanResolveChoice(string optionId, out string reason);
         bool EvaluateConditions(EventCondition[] conditions);
         void ClearPending();
     }

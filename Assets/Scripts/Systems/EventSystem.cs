@@ -179,7 +179,7 @@ namespace LastRefuge.Systems
             var effectLog = new string[effects.Length];
             for (int i = 0; i < effects.Length; i++)
             {
-                effectLog[i] = effects[i] != null ? effects[i].type.ToString() : "null";
+                effectLog[i] = DescribeEffectLog(effects[i]);
             }
             AppendHistory(new EventHistoryEntry
             {
@@ -222,6 +222,66 @@ namespace LastRefuge.Systems
             if (PendingEvent == null) return false;
             var option = FindOption(PendingEvent, optionId);
             return option != null && EvaluateConditions(option.conditions);
+        }
+
+        public bool CanResolveChoice(string optionId, out string reason)
+        {
+            if (PendingEvent == null)
+            {
+                reason = "没有待处理的事件";
+                return false;
+            }
+            if (gameState.gameplayState != GameplayState.Event)
+            {
+                reason = "事件尚未开始";
+                return false;
+            }
+            var option = FindOption(PendingEvent, optionId);
+            if (option == null)
+            {
+                reason = "未知选项";
+                return false;
+            }
+            if (option.conditions != null)
+            {
+                foreach (var condition in option.conditions)
+                {
+                    if (condition == null) continue;
+                    if (!Evaluate(condition))
+                    {
+                        reason = DescribeCondition(condition);
+                        return false;
+                    }
+                }
+            }
+            reason = null;
+            return true;
+        }
+
+        private static string DescribeCondition(EventCondition condition)
+        {
+            switch (condition.type)
+            {
+                case ConditionType.ResourceAtLeast:
+                    return $"需要{condition.resource.GetDisplayName()} ≥ {condition.amount}";
+                case ConditionType.ResourceBelow:
+                    return $"{condition.resource.GetDisplayName()}需低于 {condition.amount}";
+                case ConditionType.FlagIs:
+                case ConditionType.FlagNot:
+                    return "前置条件未满足";
+                case ConditionType.HasTrait:
+                    return $"需要特质 {condition.targetId}";
+                case ConditionType.HasProfession:
+                    return $"需要{condition.targetId}职业的角色";
+                case ConditionType.DayBetween:
+                    return $"需要第 {condition.minDay} 天起";
+                case ConditionType.LocationDiscovered:
+                    return $"需要先发现 {condition.targetId}";
+                case ConditionType.BuildingExists:
+                    return $"需要建有 {condition.targetId}";
+                default:
+                    return "前置条件未满足";
+            }
         }
 
         public bool EvaluateConditions(EventCondition[] conditions)
@@ -389,6 +449,39 @@ namespace LastRefuge.Systems
                 if (option != null && option.id == optionId) return option;
             }
             return null;
+        }
+
+        private static string DescribeEffectLog(Effect effect)
+        {
+            if (effect == null) return "null";
+            switch (effect.type)
+            {
+                case EffectType.AddResource:
+                    return $"AddResource {effect.resourceType} +{effect.intValue}";
+                case EffectType.RemoveResource:
+                    return $"RemoveResource {effect.resourceType} -{effect.intValue}";
+                case EffectType.DamageCharacter:
+                case EffectType.HealCharacter:
+                case EffectType.SetHealth:
+                    return $"{effect.type} {effect.targetId} {effect.intValue}";
+                case EffectType.AddStress:
+                case EffectType.RemoveStress:
+                case EffectType.AddFatigue:
+                case EffectType.RemoveFatigue:
+                case EffectType.AddHunger:
+                case EffectType.RemoveHunger:
+                    return $"{effect.type} {effect.targetId} {effect.floatValue}";
+                case EffectType.SetFlag:
+                case EffectType.ClearFlag:
+                    return $"{effect.type} {effect.targetId}={effect.stringValue}";
+                case EffectType.DamageBuilding:
+                case EffectType.RepairBuilding:
+                    return $"{effect.type} {effect.targetId} {effect.intValue}";
+                default:
+                    return effect.targetId != null
+                        ? $"{effect.type} {effect.targetId}"
+                        : effect.type.ToString();
+            }
         }
 
         private string GetFlagValue(string key)

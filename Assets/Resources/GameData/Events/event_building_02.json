@@ -2,6 +2,7 @@
   "event": {
     "id": "event_building_02",
     "name": "发电机异响",
+    "description": "发电机运转时发出不正常的异响，也许里面有零件松了。",
     "type": "Normal",
     "phase": "Evening",
     "weight": 7,

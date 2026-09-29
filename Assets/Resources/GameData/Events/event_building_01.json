@@ -2,6 +2,7 @@
   "event": {
     "id": "event_building_01",
     "name": "农场害虫",
+    "description": "农田里出现了害虫，再不处理这一季的收成会大打折扣。",
     "type": "Normal",
     "phase": "Evening",
     "weight": 8,

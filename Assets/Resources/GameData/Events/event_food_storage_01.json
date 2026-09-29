@@ -2,6 +2,7 @@
   "event": {
     "id": "event_food_storage_01",
     "name": "粮仓里的老鼠",
+    "description": "仓库角落里发现了老鼠的踪迹，再不处理粮食会一天天减少。",
     "type": "Normal",
     "phase": "Evening",
     "weight": 10,

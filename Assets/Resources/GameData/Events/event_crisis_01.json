@@ -2,6 +2,7 @@
   "event": {
     "id": "event_crisis_01",
     "name": "野兽袭击",
+    "description": "夜幕落下，一群野兽循着气味摸到了避难所外围。",
     "type": "Crisis",
     "phase": "Evening",
     "weight": 5,

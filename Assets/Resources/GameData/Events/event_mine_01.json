@@ -2,6 +2,7 @@
   "event": {
     "id": "event_mine_01",
     "name": "浅层铁矿",
+    "description": "矿区浅层露出了矿脉，看起来开采价值不小。",
     "type": "Exploration",
     "phase": "Action",
     "weight": 10,

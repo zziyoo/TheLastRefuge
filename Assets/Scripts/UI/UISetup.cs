@@ -79,6 +79,16 @@ namespace LastRefuge.UI
             uiMgr.logPanel = CreateSubPanel("LogPanel", gamePanel.transform);
             uiMgr.saveLoadGamePanel = CreateSubPanel("SaveLoadGamePanel", gamePanel.transform);
 
+            // Phase 3: full-screen event modal + exploration panel (both hidden until shown).
+            var eventPanel = CreatePanel("EventPanel", gamePanel.transform);
+            eventPanel.SetActive(false);
+            uiMgr.eventPanel = eventPanel;
+            SetupEventPanel(eventPanel, uiMgr);
+
+            var explorationPanel = CreateSubPanel("ExplorationPanel", gamePanel.transform);
+            uiMgr.explorationPanel = explorationPanel;
+            SetupExplorationPanel(explorationPanel, uiMgr);
+
             // Create UI prefabs for resource and character items
             CreateResourceItemPrefab(uiMgr);
             CreateCharacterItemPrefab(uiMgr);
@@ -406,6 +416,7 @@ namespace LastRefuge.UI
             uiManager.buildingButton = CreateButton(bottomBar.transform, "建筑", () => uiManager.TogglePanel(uiManager.buildingPanel), 100, 50);
             uiManager.resourceButton = CreateButton(bottomBar.transform, "资源", () => uiManager.TogglePanel(uiManager.resourceDetailPanel), 100, 50);
             uiManager.logButton = CreateButton(bottomBar.transform, "日志", () => uiManager.TogglePanel(uiManager.logPanel), 100, 50);
+            uiManager.explorationButton = CreateButton(bottomBar.transform, "探索", () => uiManager.OnExplorationClicked(), 100, 50);
             uiManager.nextTimeSlotButton = CreateButton(bottomBar.transform, "下一阶段", () => uiManager.OnNextTimeSlotClicked(), 140, 60);
             uiManager.nextTimeSlotButton.GetComponentInChildren<TextMeshProUGUI>().fontSize = 24;
             uiManager.saveButton = CreateButton(bottomBar.transform, "存档", () => uiManager.TogglePanel(uiManager.saveLoadGamePanel), 100, 50);
@@ -418,6 +429,98 @@ namespace LastRefuge.UI
             go.transform.SetParent(parent, false);
             go.AddComponent<RectTransform>();
             return go;
+        }
+
+        private static void SetupEventPanel(GameObject panel, UIManager uiManager)
+        {
+            var layout = panel.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.UpperCenter;
+            layout.spacing = 18;
+            layout.padding = new RectOffset(80, 80, 70, 50);
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            uiManager.eventTitleText = CreateText(panel.transform, "事件", 34, FontStyles.Bold)
+                .GetComponent<TextMeshProUGUI>();
+
+            var desc = CreateText(panel.transform, "", 20).GetComponent<TextMeshProUGUI>();
+            desc.enableWordWrapping = true;
+            desc.alignment = TextAlignmentOptions.Center;
+            uiManager.eventDescriptionText = desc;
+
+            var optionsContainer = CreateUIObject("Options", panel.transform);
+            var optRT = optionsContainer.GetComponent<RectTransform>();
+            optRT.sizeDelta = new Vector2(0, 200);
+            var optLayout = optionsContainer.AddComponent<VerticalLayoutGroup>();
+            optLayout.childAlignment = TextAnchor.UpperCenter;
+            optLayout.spacing = 12;
+            optLayout.padding = new RectOffset(40, 40, 10, 10);
+            optLayout.childControlWidth = true;
+            optLayout.childControlHeight = false;
+            optLayout.childForceExpandWidth = true;
+            optLayout.childForceExpandHeight = false;
+            uiManager.eventOptionsContainer = optionsContainer.transform;
+
+            var summary = CreateText(panel.transform, "", 18).GetComponent<TextMeshProUGUI>();
+            summary.enableWordWrapping = true;
+            uiManager.eventSummaryText = summary;
+
+            uiManager.eventContinueButton = CreateButton(panel.transform, "继续",
+                () => uiManager.OnEventContinueClicked(), 180, 56);
+            uiManager.eventContinueButton.gameObject.SetActive(false);
+        }
+
+        private static void SetupExplorationPanel(GameObject panel, UIManager uiManager)
+        {
+            var layout = panel.AddComponent<VerticalLayoutGroup>();
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.spacing = 10;
+            layout.padding = new RectOffset(30, 30, 25, 25);
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            CreateText(panel.transform, "探索", 28, FontStyles.Bold);
+
+            var info = CreateText(panel.transform, "选择一个地点和 1~4 名队员。", 18).GetComponent<TextMeshProUGUI>();
+            info.alignment = TextAlignmentOptions.Left;
+            info.enableWordWrapping = true;
+            uiManager.explorationInfoText = info;
+
+            var locations = CreateUIObject("Locations", panel.transform);
+            locations.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 150);
+            var locLayout = locations.AddComponent<VerticalLayoutGroup>();
+            locLayout.childAlignment = TextAnchor.UpperLeft;
+            locLayout.spacing = 6;
+            locLayout.childControlWidth = true;
+            locLayout.childControlHeight = false;
+            locLayout.childForceExpandWidth = true;
+            locLayout.childForceExpandHeight = false;
+            uiManager.explorationLocationsContainer = locations.transform;
+
+            var team = CreateUIObject("Team", panel.transform);
+            team.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 180);
+            var teamLayout = team.AddComponent<VerticalLayoutGroup>();
+            teamLayout.childAlignment = TextAnchor.UpperLeft;
+            teamLayout.spacing = 6;
+            teamLayout.childControlWidth = true;
+            teamLayout.childControlHeight = false;
+            teamLayout.childForceExpandWidth = true;
+            teamLayout.childForceExpandHeight = false;
+            uiManager.explorationTeamContainer = team.transform;
+
+            var buttonRow = CreateUIObject("Buttons", panel.transform);
+            var rowLayout = buttonRow.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.childAlignment = TextAnchor.MiddleCenter;
+            rowLayout.spacing = 20;
+            rowLayout.padding = new RectOffset(10, 10, 10, 10);
+
+            uiManager.explorationDepartButton = CreateButton(buttonRow.transform, "出发",
+                () => uiManager.OnDepartExplorationClicked(), 160, 56);
+            CreateButton(buttonRow.transform, "返回", () => uiManager.OnExplorationCloseClicked(), 120, 50);
         }
         
         private static GameObject CreateText(Transform parent, string text, int fontSize, FontStyles style = FontStyles.Normal)

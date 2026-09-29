@@ -2,6 +2,7 @@
   "event": {
     "id": "event_forest_01",
     "name": "意外丰收",
+    "description": "探索队在林子里发现了一大片野果。",
     "type": "Exploration",
     "phase": "Action",
     "weight": 10,

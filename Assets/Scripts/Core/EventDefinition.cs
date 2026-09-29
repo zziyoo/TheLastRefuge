@@ -56,6 +56,7 @@ namespace LastRefuge.Core
     {
         public string id;
         public string name;
+        public string description;
         public EventType type;
         public TimeSlot phase;
         public float weight;

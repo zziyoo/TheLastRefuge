@@ -2,6 +2,7 @@
   "event": {
     "id": "event_character_02",
     "name": "生日",
+    "description": "今天是队里某个人的生日，食物充足的话值得庆祝一下。",
     "type": "Character",
     "phase": "Evening",
     "weight": 6,

@@ -142,6 +142,20 @@ namespace LastRefuge.UI
         public GameObject resourceDetailPanel;
         public GameObject logPanel;
         public GameObject saveLoadGamePanel;
+
+        [Header("Phase 3 - Event & Exploration")]
+        public GameObject eventPanel;
+        public TextMeshProUGUI eventTitleText;
+        public TextMeshProUGUI eventDescriptionText;
+        public Transform eventOptionsContainer;
+        public TextMeshProUGUI eventSummaryText;
+        public Button eventContinueButton;
+        public GameObject explorationPanel;
+        public TextMeshProUGUI explorationInfoText;
+        public Transform explorationLocationsContainer;
+        public Transform explorationTeamContainer;
+        public Button explorationDepartButton;
+        public Button explorationButton;
         
         private GameManager _gameManager;
         
@@ -162,6 +176,13 @@ namespace LastRefuge.UI
         }
         
         private bool isGamePanelActive = false;
+
+        // Phase 3: event modal summary + exploration selection state.
+        private bool eventAwaitingSummary;
+        private string lastEventSummary = "";
+        private string selectedLocationId;
+        private readonly System.Collections.Generic.HashSet<string> selectedTeamIds =
+            new System.Collections.Generic.HashSet<string>();
 
         /// <summary>Running in-game event log shown by the 日志 panel.</summary>
         private readonly System.Collections.Generic.List<string> logLines = new System.Collections.Generic.List<string>();
@@ -217,7 +238,11 @@ namespace LastRefuge.UI
             EventBus.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
             EventBus.Subscribe<GameSavedEvent>(OnGameSaved);
             EventBus.Subscribe<GameLoadedEvent>(OnGameLoaded);
-            
+            EventBus.Subscribe<EventStartedEvent>(OnEventStarted);
+            EventBus.Subscribe<EventFinishedEvent>(OnEventFinished);
+            EventBus.Subscribe<ExplorationStartedEvent>(OnExplorationStarted);
+            EventBus.Subscribe<ExplorationFinishedEvent>(OnExplorationFinished);
+
             ShowMainMenu();
         }
         
@@ -232,6 +257,10 @@ namespace LastRefuge.UI
             EventBus.Unsubscribe<GameStateChangedEvent>(OnGameStateChanged);
             EventBus.Unsubscribe<GameSavedEvent>(OnGameSaved);
             EventBus.Unsubscribe<GameLoadedEvent>(OnGameLoaded);
+            EventBus.Unsubscribe<EventStartedEvent>(OnEventStarted);
+            EventBus.Unsubscribe<EventFinishedEvent>(OnEventFinished);
+            EventBus.Unsubscribe<ExplorationStartedEvent>(OnExplorationStarted);
+            EventBus.Unsubscribe<ExplorationFinishedEvent>(OnExplorationFinished);
         }
         
         public void ShowMainMenu()
@@ -880,17 +909,275 @@ namespace LastRefuge.UI
 
         private void RefreshButtons()
         {
+            if (gameManager == null) return;
+
+            var state = gameManager.GetCurrentGameplayState();
+            bool blocked = state == GameplayState.Event || state == GameplayState.Resolution;
+
             if (nextTimeSlotButton != null)
             {
                 // DayEnd is included: the only way out of the settlement state is to
                 // roll over to the next Morning, so the button must stay usable there.
-                nextTimeSlotButton.interactable = gameManager.GetCurrentGameplayState() == GameplayState.Morning ||
-                                                  gameManager.GetCurrentGameplayState() == GameplayState.Planning ||
-                                                  gameManager.GetCurrentGameplayState() == GameplayState.Action ||
-                                                  gameManager.GetCurrentGameplayState() == GameplayState.Evening ||
-                                                  gameManager.GetCurrentGameplayState() == GameplayState.Night ||
-                                                  gameManager.GetCurrentGameplayState() == GameplayState.DayEnd;
+                bool slotAllowsAdvance = state == GameplayState.Morning ||
+                                         state == GameplayState.Planning ||
+                                         state == GameplayState.Action ||
+                                         state == GameplayState.Evening ||
+                                         state == GameplayState.Night ||
+                                         state == GameplayState.DayEnd;
+                nextTimeSlotButton.interactable = !blocked && slotAllowsAdvance;
             }
+
+            // Doc 41 §6: while an event is pending none of the command buttons may act.
+            if (personnelButton != null) personnelButton.interactable = !blocked;
+            if (buildingButton != null) buildingButton.interactable = !blocked;
+            if (resourceButton != null) resourceButton.interactable = !blocked;
+            if (explorationButton != null) explorationButton.interactable = !blocked;
+            if (saveButton != null) saveButton.interactable = !blocked;
+
+            RefreshEventPanel();
+        }
+
+        /// <summary>
+        /// Event modal: shows the pending event with its choices, or the settle summary
+        /// right after a choice resolved, or hides itself. State-driven, never mutates
+        /// the GameState (doc 41 §6).
+        /// </summary>
+        private void RefreshEventPanel()
+        {
+            if (eventPanel == null || gameManager == null) return;
+
+            var state = gameManager.GetCurrentGameplayState();
+            var pending = gameManager.GetPendingEvent();
+
+            if (state == GameplayState.Event && pending != null)
+            {
+                eventAwaitingSummary = false;
+                eventPanel.SetActive(true);
+                eventPanel.transform.SetAsLastSibling();
+
+                eventTitleText.text = pending.name;
+                eventDescriptionText.text = pending.description ?? "";
+
+                foreach (Transform child in eventOptionsContainer)
+                {
+                    Destroy(child.gameObject);
+                }
+
+                if (pending.options != null)
+                {
+                    foreach (var option in pending.options)
+                    {
+                        if (option == null) continue;
+                        var captured = option;
+                        bool available = gameManager.eventSystem.CanResolveChoice(option.id, out string reason);
+                        var btn = CreateButton(eventOptionsContainer, option.text,
+                            () => OnEventOptionClicked(captured.id), 560, 52);
+                        btn.interactable = available;
+                        if (!available && !string.IsNullOrEmpty(reason))
+                        {
+                            btn.GetComponentInChildren<TextMeshProUGUI>().text =
+                                $"{option.text}\n({reason})";
+                        }
+                    }
+                }
+
+                eventSummaryText.text = "";
+                eventContinueButton.gameObject.SetActive(false);
+            }
+            else if (eventAwaitingSummary)
+            {
+                eventPanel.SetActive(true);
+                eventPanel.transform.SetAsLastSibling();
+                eventTitleText.text = "事件结果";
+                eventDescriptionText.text = "";
+                foreach (Transform child in eventOptionsContainer)
+                {
+                    Destroy(child.gameObject);
+                }
+                eventSummaryText.text = lastEventSummary;
+                eventContinueButton.gameObject.SetActive(true);
+            }
+            else if (eventPanel.activeSelf)
+            {
+                eventPanel.SetActive(false);
+            }
+        }
+
+        /// <summary>Rebuilds the exploration panel: locations, team picks, cost preview.</summary>
+        private void RefreshExplorationPanel()
+        {
+            if (explorationPanel == null || gameManager == null ||
+                explorationLocationsContainer == null || explorationTeamContainer == null) return;
+
+            foreach (Transform child in explorationLocationsContainer) Destroy(child.gameObject);
+            foreach (Transform child in explorationTeamContainer) Destroy(child.gameObject);
+
+            var discovered = gameManager.gameState.worldState != null
+                ? gameManager.gameState.worldState.discoveredLocations
+                : null;
+
+            foreach (var location in gameManager.contentDatabase.Locations)
+            {
+                if (location == null) continue;
+                bool unlocked = gameManager.GetCurrentDay() >= location.unlockDay;
+                bool isDiscovered = discovered != null &&
+                                    System.Array.IndexOf(discovered, location.id) >= 0;
+                string status = !unlocked
+                    ? $"第 {location.unlockDay} 天解锁"
+                    : isDiscovered ? "已发现" : "未探索";
+                string stars = new string('★', location.danger);
+                bool isSelected = selectedLocationId == location.id;
+
+                var row = CreateUIObject($"Loc_{location.id}", explorationLocationsContainer);
+                var rowRT = row.GetComponent<RectTransform>();
+                rowRT.sizeDelta = new Vector2(0, 44);
+                var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+                rowLayout.childAlignment = TextAnchor.MiddleLeft;
+                rowLayout.spacing = 10;
+                rowLayout.padding = new RectOffset(8, 8, 4, 4);
+                rowLayout.childControlWidth = true;
+                rowLayout.childControlHeight = false;
+                rowLayout.childForceExpandWidth = true;
+                rowLayout.childForceExpandHeight = false;
+                var bg = row.AddComponent<Image>();
+                bg.color = isSelected
+                    ? new Color(0.2f, 0.35f, 0.25f, 0.9f)
+                    : new Color(0.18f, 0.18f, 0.22f, 0.85f);
+
+                var info = CreateText(row.transform,
+                    $"{location.name}  {stars}  距离 {location.distance}  {status}", 18);
+                info.GetComponent<RectTransform>().sizeDelta = new Vector2(380, 34);
+
+                bool locked = !unlocked;
+                var selectBtn = CreateButton(row.transform, isSelected ? "取消" : "选择",
+                    () => OnSelectLocation(location.id), 90, 34);
+                selectBtn.interactable = !locked || isSelected;
+            }
+
+            foreach (var character in gameManager.characterSystem.GetAliveCharacters())
+            {
+                if (character == null) continue;
+                bool away = !string.IsNullOrEmpty(character.locationId);
+                bool isSelected = selectedTeamIds.Contains(character.characterId);
+
+                var row = CreateUIObject($"Team_{character.characterId}", explorationTeamContainer);
+                var rowRT = row.GetComponent<RectTransform>();
+                rowRT.sizeDelta = new Vector2(0, 40);
+                var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+                rowLayout.childAlignment = TextAnchor.MiddleLeft;
+                rowLayout.spacing = 10;
+                rowLayout.padding = new RectOffset(8, 8, 4, 4);
+                rowLayout.childControlWidth = true;
+                rowLayout.childControlHeight = false;
+                rowLayout.childForceExpandWidth = true;
+                rowLayout.childForceExpandHeight = false;
+                var bg = row.AddComponent<Image>();
+                bg.color = isSelected
+                    ? new Color(0.2f, 0.35f, 0.25f, 0.9f)
+                    : new Color(0.18f, 0.18f, 0.22f, 0.85f);
+
+                string label = away
+                    ? $"{character.name} · 外出中"
+                    : $"{(isSelected ? "[✓] " : "[ ] ")}{character.name}";
+                var info = CreateText(row.transform, label, 18);
+                info.GetComponent<RectTransform>().sizeDelta = new Vector2(380, 32);
+
+                var toggleBtn = CreateButton(row.transform, away ? "不可用" : (isSelected ? "取消" : "选择"),
+                    () => OnToggleTeamMember(character.characterId), 90, 34);
+                toggleBtn.interactable = !away;
+            }
+
+            if (selectedLocationId == null)
+            {
+                explorationInfoText.text = "选择一个地点和 1~4 名队员。";
+                explorationDepartButton.interactable = false;
+                return;
+            }
+
+            bool canExplore = gameManager.CanExplore(selectedLocationId,
+                new System.Collections.Generic.List<string>(selectedTeamIds).ToArray(),
+                out string reason);
+
+            int rations = 0;
+            if (gameManager.contentDatabase.TryGetLocation(selectedLocationId, out var loc))
+            {
+                rations = selectedTeamIds.Count * loc.distance / 2;
+            }
+
+            explorationInfoText.text = canExplore
+                ? $"口粮消耗：{rations} 食物 · 队伍 {selectedTeamIds.Count} 人"
+                : $"口粮 {rations} 食物 · {reason}";
+            explorationDepartButton.interactable = canExplore;
+        }
+
+        // Phase 3 event handlers (EventBus)
+        private void OnEventStarted(EventStartedEvent e)
+        {
+            if (gameManager != null && gameManager.contentDatabase != null &&
+                gameManager.contentDatabase.TryGetEvent(e.eventId, out var definition))
+            {
+                AppendLog($"事件：{definition.name}");
+            }
+            RefreshButtons();
+        }
+
+        private void OnEventFinished(EventFinishedEvent e)
+        {
+            if (gameManager == null) return;
+
+            EventDefinition definition = null;
+            if (gameManager.contentDatabase != null)
+            {
+                gameManager.contentDatabase.TryGetEvent(e.eventId, out definition);
+            }
+            string eventName = definition != null ? definition.name : e.eventId;
+
+            string choiceText = e.choiceId;
+            if (definition != null && definition.options != null)
+            {
+                foreach (var option in definition.options)
+                {
+                    if (option != null && option.id == e.choiceId)
+                    {
+                        choiceText = option.text;
+                        break;
+                    }
+                }
+            }
+
+            string effectsText = "";
+            var history = gameManager.gameState.eventHistory;
+            if (history != null && history.Length > 0)
+            {
+                var last = history[history.Length - 1];
+                if (last != null && last.eventId == e.eventId && last.effects != null)
+                {
+                    effectsText = string.Join("\n", last.effects);
+                }
+            }
+
+            lastEventSummary = $"{eventName}\n选择：{choiceText}\n{effectsText}";
+            eventAwaitingSummary = gameManager.GetPendingEvent() == null;
+
+            AppendLog($"事件 {eventName} · {choiceText}");
+            RefreshButtons();
+        }
+
+        private void OnExplorationStarted(ExplorationStartedEvent e)
+        {
+            AppendLog($"探索队出发（{e.teamSize} 人）");
+        }
+
+        private void OnExplorationFinished(ExplorationFinishedEvent e)
+        {
+            string locationName = e.locationId;
+            if (gameManager != null && gameManager.contentDatabase != null &&
+                gameManager.contentDatabase.TryGetLocation(e.locationId, out var location))
+            {
+                locationName = location.name;
+            }
+            AppendLog($"探索完成：{locationName} · 幸存 {e.survivors} 伤亡 {e.casualties} · {e.resourceSummary}");
+            RefreshAll();
         }
         
         // Event Handlers
@@ -950,7 +1237,74 @@ namespace LastRefuge.UI
         {
             gameManager.AdvanceTimeSlot();
         }
-        
+
+        // Phase 3 - event modal
+        public void OnEventOptionClicked(string optionId)
+        {
+            if (gameManager == null) return;
+            gameManager.ResolveEventChoice(optionId);
+            RefreshButtons();
+            RefreshAll();
+        }
+
+        public void OnEventContinueClicked()
+        {
+            eventAwaitingSummary = false;
+            if (eventPanel != null) eventPanel.SetActive(false);
+            RefreshButtons();
+        }
+
+        // Phase 3 - exploration panel
+        public void OnExplorationClicked()
+        {
+            if (explorationPanel == null) return;
+            bool open = !explorationPanel.activeSelf;
+            explorationPanel.SetActive(open);
+            if (open)
+            {
+                RefreshExplorationPanel();
+                explorationPanel.transform.SetAsLastSibling();
+            }
+        }
+
+        public void OnExplorationCloseClicked()
+        {
+            if (explorationPanel != null) explorationPanel.SetActive(false);
+        }
+
+        public void OnSelectLocation(string locationId)
+        {
+            selectedLocationId = selectedLocationId == locationId ? null : locationId;
+            RefreshExplorationPanel();
+        }
+
+        public void OnToggleTeamMember(string characterId)
+        {
+            if (!selectedTeamIds.Remove(characterId))
+            {
+                selectedTeamIds.Add(characterId);
+            }
+            RefreshExplorationPanel();
+        }
+
+        public void OnDepartExplorationClicked()
+        {
+            if (gameManager == null || selectedLocationId == null) return;
+
+            var team = new System.Collections.Generic.List<string>(selectedTeamIds).ToArray();
+            if (gameManager.ExploreLocation(selectedLocationId, team, out string reason))
+            {
+                selectedLocationId = null;
+                selectedTeamIds.Clear();
+                explorationPanel.SetActive(false);
+                RefreshAll();
+            }
+            else
+            {
+                explorationInfoText.text = reason;
+            }
+        }
+
         public void OnMenuClicked()
         {
             ShowMainMenu();
