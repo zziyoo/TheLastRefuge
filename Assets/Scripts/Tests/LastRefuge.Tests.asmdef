@@ -1,6 +1,6 @@
 {
     "name": "LastRefuge.Tests",
-    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Save", "LastRefuge.Data", "LastRefuge.Gameplay", "UnityEngine.TestRunner"],
+    "references": ["LastRefuge.Core", "LastRefuge.Systems", "LastRefuge.Save", "LastRefuge.Data", "LastRefuge.Gameplay", "LastRefuge.UI", "UnityEngine.TestRunner", "Unity.TextMeshPro"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

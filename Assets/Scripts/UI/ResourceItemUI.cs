@@ -19,7 +19,11 @@ namespace LastRefuge.UI
             if (amountText) amountText.text = $"{amount} / {capacity}";
             if (changeText) changeText.text = netChange >= 0 ? $"+{netChange}/天" : $"{netChange}/天";
             if (changeText) changeText.color = netChange >= 0 ? Color.green : Color.red;
-            if (daysRemainingText) daysRemainingText.text = daysRemaining >= 0 ? (daysRemaining == -1 ? "∞" : $"{daysRemaining}天") : "--";
+            // ResourceSystem.GetEstimatedDaysRemaining: netChange >= 0 -> -1 (infinite),
+            // empty stock with netChange < 0 -> 0. Pure display; no recalculation here.
+            if (daysRemainingText) daysRemainingText.text = daysRemaining < 0
+                ? "∞"
+                : (daysRemaining == 0 ? "不足1天" : $"{daysRemaining}天");
             if (iconImage && icon) iconImage.sprite = icon;
             if (capacitySlider)
             {

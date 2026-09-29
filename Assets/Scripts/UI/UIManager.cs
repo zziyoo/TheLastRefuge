@@ -469,10 +469,6 @@ namespace LastRefuge.UI
                     int netChange = gameManager.resourceSystem.GetNetDailyChange(kvp.Key);
                     int daysRemaining = gameManager.resourceSystem.GetEstimatedDaysRemaining(kvp.Key);
 
-                    // GetEstimatedDaysRemaining reports netChange >= 0 as -1, so a
-                    // "daysRemaining == -1" check nested inside ">= 0" could never fire.
-                    string daysStr = daysRemaining < 0 ? "∞" : (daysRemaining == 0 ? "不足1天" : $"{daysRemaining}天");
-                    
                     itemUI.Setup(kvp.Key.GetDisplayName(), amount, capacity, netChange, daysRemaining);
                 }
             }
