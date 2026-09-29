@@ -121,7 +121,7 @@ Effect 与 Condition 都用"单类 + type 枚举 + 通用字段"模式（与现�
         "text": "捕杀",
         "conditions": [],
         "effects": [
-          { "type": "RemoveResource", "resource": "Food", "amount": 3 }
+          { "type": "RemoveResource", "resourceType": "Food", "intValue": 3 }
         ]
       },
       {
@@ -129,7 +129,7 @@ Effect 与 Condition 都用"单类 + type 枚举 + 通用字段"模式（与现�
         "text": "下毒（消耗药品）",
         "conditions": [ { "type": "ResourceAtLeast", "resource": "Medicine", "amount": 1 } ],
         "effects": [
-          { "type": "RemoveResource", "resource": "Medicine", "amount": 1 },
+          { "type": "RemoveResource", "resourceType": "Medicine", "intValue": 1 },
           { "type": "SetFlag", "targetId": "spared_rats", "stringValue": "true" }
         ]
       },
@@ -137,7 +137,7 @@ Effect 与 Condition 都用"单类 + type 枚举 + 通用字段"模式（与现�
         "id": "ignore",
         "text": "不管",
         "conditions": [],
-        "effects": [ { "type": "RemoveResource", "resource": "Food", "amount": 10 } ]
+        "effects": [ { "type": "RemoveResource", "resourceType": "Food", "intValue": 10 } ]
       }
     ],
     "followUpEvents": [ { "id": "event_food_storage_02", "delayDays": 4 } ],
@@ -204,11 +204,15 @@ Effect 与 Condition 都用"单类 + type 枚举 + 通用字段"模式（与现�
   6. 循环引用：followUpEvents 不得成环
 - `contentVersion` 写入 SaveData（现有字段），由校验报告给出
 
-### 3.5 待验证项（M1 第一件事）
+### 3.5 已解决：枚举解析（M1 探针结论）
 
-JsonUtility 对**枚举字符串**（`"type": "Normal"`）的解析行为未验证；
-M1 首个探针测试确认，若不支持则改为枚举整数或加载后字符串二次转换（在 ContentLoader 内解决，
-不影响 JSON 的可读性目标）。
+探针测试证实：**JsonUtility 不解析枚举字符串**（`"type": "Crisis"` 会落回默认值），
+包装对象字段 `{"event": {...}}` 映射正常。
+
+实现结论：ContentLoader 用私有 Raw DTO（枚举字段全部是 string）承载线格式，
+严格 `Enum.TryParse` + `IsDefined` 转换后生成带枚举的 Definition 类；
+**线格式规则：JSON 键名 = C# 字段名，枚举值 = 枚举名**（如 `resourceType`/`intValue`）。
+未知枚举值在校验期报错，不会静默变成 0 号成员。
 
 ---
 
