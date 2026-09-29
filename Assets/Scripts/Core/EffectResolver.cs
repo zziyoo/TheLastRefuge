@@ -12,6 +12,7 @@ namespace LastRefuge.Core
         private IResourceSystem resourceSystem;
         private ICharacterSystem characterSystem;
         private IBuildingSystem buildingSystem;
+        private Action<string> eventStarter;
         
         public void Initialize(GameState state, IResourceSystem resSys, ICharacterSystem charSys, IBuildingSystem buildSys)
         {
@@ -19,6 +20,11 @@ namespace LastRefuge.Core
             resourceSystem = resSys;
             characterSystem = charSys;
             buildingSystem = buildSys;
+        }
+
+        public void SetEventStarter(Action<string> starter)
+        {
+            eventStarter = starter;
         }
         
         public bool Resolve(Effect effect)
@@ -117,6 +123,18 @@ namespace LastRefuge.Core
                 
                 case EffectType.ChangeWork:
                     return characterSystem.AssignWork(effect.targetId, (WorkType)effect.intValue, effect.stringValue);
+                
+                case EffectType.StartEvent:
+                    if (eventStarter == null)
+                    {
+                        UnityEngine.Debug.LogWarning("StartEvent: no event starter wired");
+                        return false;
+                    }
+                    eventStarter(effect.targetId);
+                    return true;
+                
+                case EffectType.UnlockLocation:
+                    return UnlockLocation(effect.targetId);
                 
                 default:
                     UnityEngine.Debug.LogWarning($"Unknown effect type: {effect.type}");
@@ -296,6 +314,25 @@ namespace LastRefuge.Core
             gameState.gameFlags.intFlags.Remove(flagName);
             gameState.gameFlags.floatFlags.Remove(flagName);
             gameState.gameFlags.stringFlags.Remove(flagName);
+            return true;
+        }
+        
+        private bool UnlockLocation(string locationId)
+        {
+            if (string.IsNullOrEmpty(locationId)) return false;
+            
+            if (gameState.worldState == null)
+            {
+                gameState.worldState = new WorldState();
+            }
+            var discovered = gameState.worldState.discoveredLocations ?? Array.Empty<string>();
+            
+            if (Array.IndexOf(discovered, locationId) >= 0) return true;
+            
+            var next = new string[discovered.Length + 1];
+            Array.Copy(discovered, next, discovered.Length);
+            next[discovered.Length] = locationId;
+            gameState.worldState.discoveredLocations = next;
             return true;
         }
     }

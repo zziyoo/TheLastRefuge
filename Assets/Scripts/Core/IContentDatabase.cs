@@ -10,6 +10,9 @@ namespace LastRefuge.Core
 
         bool TryGetEvent(string id, out EventDefinition definition);
         bool TryGetLocation(string id, out LocationDefinition definition);
+        bool AddEvent(EventDefinition definition);
+        bool AddLocation(LocationDefinition definition);
         EventDefinition[] GetEventPool(string locationId);
+        List<string> Validate();
     }
 }

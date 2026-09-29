@@ -38,6 +38,8 @@ namespace LastRefuge.Gameplay
         public IBuildingSystem buildingSystem;
         public EffectResolver effectResolver;
         public ISaveSystem saveSystem;
+        public IEventSystem eventSystem;
+        public IContentDatabase contentDatabase;
         
         [Header("Settings")]
         public string gameVersion = "0.1.0";
@@ -105,12 +107,28 @@ namespace LastRefuge.Gameplay
             effectResolver = new EffectResolver();
             saveSystem = new SaveSystem();
             
+            contentDatabase = ContentLoader.LoadAll();
+            foreach (var diagnostic in contentDatabase.Diagnostics)
+            {
+                UnityEngine.Debug.LogError($"Content diagnostic: {diagnostic}");
+            }
+            foreach (var problem in contentDatabase.Validate())
+            {
+                UnityEngine.Debug.LogError($"Content validation: {problem}");
+            }
+            
+            eventSystem = new EventSystem();
+            
             timeSystem.Initialize(gameState, randomSystem);
             resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
             characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
             buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
             effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
             saveSystem.Initialize(gameState, gameVersion);
+            eventSystem.Initialize(gameState, timeSystem, randomSystem, contentDatabase, effectResolver,
+                                   resourceSystem, characterSystem);
+            
+            effectResolver.SetEventStarter(eventSystem.ScheduleNow);
             
             timeSystem.OnDayEnd += OnDayEnd;
             
@@ -170,6 +188,8 @@ namespace LastRefuge.Gameplay
             buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
             effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
             saveSystem.Initialize(gameState, gameVersion);
+            eventSystem.Initialize(gameState, timeSystem, randomSystem, contentDatabase, effectResolver,
+                                   resourceSystem, characterSystem);
 
             timeSystem.OnDayEnd -= OnDayEnd;
             timeSystem.OnDayEnd += OnDayEnd;
@@ -260,6 +280,12 @@ namespace LastRefuge.Gameplay
 
                 RebindSystemsToState();
 
+                if (IsEventStateBlocked())
+                {
+                    eventSystem.ClearPending();
+                    UpdateGameplayState();
+                }
+
                 hasActiveGame = true;
 
                 LogGameStateSnapshot("LoadGame");
@@ -269,6 +295,7 @@ namespace LastRefuge.Gameplay
         public void AdvanceTimeSlot()
         {
             if (!isInitialized) return;
+            if (IsEventStateBlocked()) return;
             
             TimeSlot currentSlot = timeSystem.CurrentTimeSlot;
             GameplayState currentState = timeSystem.GetGameplayState();
@@ -279,6 +306,11 @@ namespace LastRefuge.Gameplay
             
             UpdateGameplayState();
             
+            if (currentSlot == TimeSlot.Action)
+            {
+                eventSystem.TryRollDailyEvent();
+            }
+            
             // The day has been settled (DayEnd) and rolled over to the next Morning:
             // autosave from this stable point so a load never resumes at an un-settled
             // DayEnd. This is the only transition that lands on Morning.
@@ -286,6 +318,12 @@ namespace LastRefuge.Gameplay
             {
                 saveSystem.SaveGame(true);
             }
+        }
+        
+        private bool IsEventStateBlocked()
+        {
+            return gameState.gameplayState == GameplayState.Event ||
+                   gameState.gameplayState == GameplayState.Resolution;
         }
         
         private void ProcessTimeSlot(TimeSlot slot)
@@ -398,22 +436,25 @@ namespace LastRefuge.Gameplay
         
         public bool AssignWork(string characterId, WorkType workType, string buildingId = null)
         {
+            if (IsEventStateBlocked()) return false;
             return characterSystem.AssignWork(characterId, workType, buildingId);
         }
         
         public bool BuildBuilding(string definitionId)
         {
+            if (IsEventStateBlocked()) return false;
             return buildingSystem.Build(definitionId) != null;
         }
         
         public bool UpgradeBuilding(string buildingId)
         {
+            if (IsEventStateBlocked()) return false;
             return buildingSystem.UpgradeBuilding(buildingId);
         }
         
-        public void SaveGame(bool autoSave = false)
+        public void SaveGame(bool autoSave = false, string customName = null)
         {
-            saveSystem.SaveGame(autoSave);
+            saveSystem.SaveGame(autoSave, customName);
         }
         
         public string GetGameSeed()
@@ -457,6 +498,12 @@ namespace LastRefuge.Gameplay
         /// </summary>
         private void CommitAutosaveBeforeExit()
         {
+            if (IsEventStateBlocked())
+            {
+                eventSystem.ClearPending();
+                UpdateGameplayState();
+            }
+
             if (timeSystem.CurrentTimeSlot == TimeSlot.DayEnd)
             {
                 AdvanceTimeSlot();
@@ -465,6 +512,16 @@ namespace LastRefuge.Gameplay
             {
                 saveSystem.SaveGame(true);
             }
+        }
+
+        public bool ResolveEventChoice(string optionId)
+        {
+            return eventSystem.ResolveChoice(optionId);
+        }
+
+        public EventDefinition GetPendingEvent()
+        {
+            return eventSystem.PendingEvent;
         }
     }
 }
