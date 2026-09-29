@@ -256,12 +256,15 @@ namespace LastRefuge.UI
             // Rebind explicitly: the game panel must always be repainted from the live
             // GameManager state, never left showing whatever Start() happened to render.
             RefreshUI();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             UnityEngine.Debug.Log($"UIManager.ShowGame: resources={gameManager?.resourceSystem?.GetAllResources().Count ?? 0} " +
                                   $"characters={gameManager?.characterSystem?.GetAliveCharacters().Length ?? 0} " +
                                   $"buildings={gameManager?.buildingSystem?.GetAllBuildings().Length ?? 0}");
             StartCoroutine(LogLayoutAfterLayout());
+#endif
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         /// <summary>
         /// One-shot geometry report: prints the real size of every column, its viewport
         /// and its content container after the layout pass has run. This is the fastest
@@ -300,6 +303,7 @@ namespace LastRefuge.UI
                    $"viewport={(viewport != null ? viewport.rect.height.ToString("F0") : "?")} " +
                    $"content={content.rect.height:F0} children={container.childCount}{items}";
         }
+#endif
         
         public void ShowSaveLoad(bool isSave)
         {
@@ -464,9 +468,10 @@ namespace LastRefuge.UI
                     int capacity = gameManager.resourceSystem.GetCapacity(kvp.Key);
                     int netChange = gameManager.resourceSystem.GetNetDailyChange(kvp.Key);
                     int daysRemaining = gameManager.resourceSystem.GetEstimatedDaysRemaining(kvp.Key);
-                    
-                    string changeStr = netChange >= 0 ? $"+{netChange}" : netChange.ToString();
-                    string daysStr = daysRemaining >= 0 ? (daysRemaining == -1 ? "∞" : $"{daysRemaining}天") : "N/A";
+
+                    // GetEstimatedDaysRemaining reports netChange >= 0 as -1, so a
+                    // "daysRemaining == -1" check nested inside ">= 0" could never fire.
+                    string daysStr = daysRemaining < 0 ? "∞" : (daysRemaining == 0 ? "不足1天" : $"{daysRemaining}天");
                     
                     itemUI.Setup(kvp.Key.GetDisplayName(), amount, capacity, netChange, daysRemaining);
                 }

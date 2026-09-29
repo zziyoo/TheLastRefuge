@@ -408,8 +408,15 @@ namespace LastRefuge.Systems
                 float foodConsumption = GetCharacterFoodConsumption(character);
                 float waterConsumption = GetCharacterWaterConsumption(character);
 
-                // Full supply keeps characters fed; every missing unit feeds the hunger.
-                character.hunger += foodConsumption * 2f * foodShortfall;
+                // Full supply slowly satisfies hunger; every missing unit feeds it instead.
+                if (foodShortfall > 0f)
+                {
+                    character.hunger += foodConsumption * 2f * foodShortfall;
+                }
+                else
+                {
+                    character.hunger = Math.Max(0f, character.hunger - 5f);
+                }
 
                 // Work costs energy during the day.
                 if (character.currentWork != WorkType.Idle)
