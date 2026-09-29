@@ -215,10 +215,11 @@ namespace LastRefuge.UI
             vpRT.anchorMax = Vector2.one;
             vpRT.offsetMin = Vector2.zero;
             vpRT.offsetMax = Vector2.zero;
-            var vpMask = resViewport.AddComponent<UnityEngine.UI.Mask>();
-            vpMask.showMaskGraphic = false;
-            var vpImage = resViewport.AddComponent<Image>();
-            vpImage.color = Color.clear;
+            // RectMask2D clips by rect and needs no graphic. Unity's Mask writes a
+            // stencil through the viewport Image; with alpha = 0 (Color.clear) that
+            // stencil stays empty and EVERY child is clipped away, which is exactly
+            // why the lists rendered nothing despite having items.
+            resViewport.AddComponent<UnityEngine.UI.RectMask2D>();
 
             // The panel's VerticalLayoutGroup drives child heights. Without a flexible
             // height the viewport is sized to its preferred height (0) and the whole
@@ -284,10 +285,8 @@ namespace LastRefuge.UI
             charVpRT.anchorMax = Vector2.one;
             charVpRT.offsetMin = Vector2.zero;
             charVpRT.offsetMax = Vector2.zero;
-            var charVpMask = charViewport.AddComponent<UnityEngine.UI.Mask>();
-            charVpMask.showMaskGraphic = false;
-            var charVpImage = charViewport.AddComponent<Image>();
-            charVpImage.color = Color.clear;
+            // Same as the resource viewport: RectMask2D instead of Mask + clear Image.
+            charViewport.AddComponent<UnityEngine.UI.RectMask2D>();
 
             // Same reason as the resource viewport: without a flexible height the
             // parent VerticalLayoutGroup collapses it and the survivor list disappears.
@@ -354,10 +353,8 @@ namespace LastRefuge.UI
             detVpRT.anchorMax = Vector2.one;
             detVpRT.offsetMin = Vector2.zero;
             detVpRT.offsetMax = Vector2.zero;
-            var detVpMask = detViewport.AddComponent<UnityEngine.UI.Mask>();
-            detVpMask.showMaskGraphic = false;
-            var detVpImage = detViewport.AddComponent<Image>();
-            detVpImage.color = Color.clear;
+            // Same as the other two viewports: RectMask2D instead of Mask + clear Image.
+            detViewport.AddComponent<UnityEngine.UI.RectMask2D>();
 
             var detVpLayoutElement = detViewport.AddComponent<LayoutElement>();
             detVpLayoutElement.minHeight = 0f;

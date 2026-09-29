@@ -518,6 +518,9 @@ namespace LastRefuge.UI
                 int slots = def?.workerSlots ?? 0;
 
                 var row = CreateUIObject("Detail_" + building.buildingId, detailContainer);
+                // The column layout group has childControlHeight disabled, so the row
+                // keeps its own sizeDelta; without this it would be 0 px tall.
+                row.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 40);
                 var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
                 rowLayout.childAlignment = TextAnchor.MiddleLeft;
                 rowLayout.spacing = 10;
