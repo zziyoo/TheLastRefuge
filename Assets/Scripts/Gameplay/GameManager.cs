@@ -245,8 +245,8 @@ namespace LastRefuge.Gameplay
                 int amount = resourceSystem != null ? resourceSystem.GetAmount(type) : 0;
                 sb.AppendLine($"  {type.ToString().ToLowerInvariant()}={amount}");
             }
-            sb.AppendLine($"Character count={characterSystem != null ? characterSystem.GetAliveCharacters().Length : 0}");
-            sb.AppendLine($"Building count={buildingSystem != null ? buildingSystem.GetAllBuildings().Length : 0}");
+            sb.AppendLine($"Character count={(characterSystem != null ? characterSystem.GetAliveCharacters().Length : 0)}");
+            sb.AppendLine($"Building count={(buildingSystem != null ? buildingSystem.GetAllBuildings().Length : 0)}");
             UnityEngine.Debug.Log(sb.ToString());
         }
         
