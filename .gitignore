@@ -30,3 +30,11 @@ sysinfo.txt
 
 # ===================== Local test / log output =====================
 unity_*.log
+diag_*.txt
+diag_*.log
+diag_*.xml
+plain_run.log
+_*_proc.txt
+*_proc.txt
+_*.txt
+_compilecheck/

@@ -455,6 +455,47 @@ namespace LastRefuge.Systems
             return building;
         }
         
+        /// <summary>
+        /// Last-resort build that skips cost and count checks. Only used when a new game
+        /// ended up with no shelter at all, so the colony always starts with a core.
+        /// </summary>
+        public BuildingState ForceBuildFree(string definitionId)
+        {
+            var def = GetBuildingDefinition(definitionId);
+            if (def == null) return null;
+
+            string buildingId = $"{definitionId}_{gameState.currentDay}_{GetAllBuildings().Length}";
+
+            var building = new BuildingState
+            {
+                buildingId = buildingId,
+                definitionId = definitionId,
+                level = 1,
+                durability = 100,
+                enabled = true,
+                assignedWorkers = new string[0],
+                currentProduction = 0,
+                dayBuilt = gameState.currentDay
+            };
+
+            var list = new List<BuildingState>(gameState.buildings ?? new BuildingState[0]);
+            list.Add(building);
+            gameState.buildings = list.ToArray();
+
+            RecalculateAllBuildingEffects();
+
+            OnBuildingConstructed?.Invoke(buildingId);
+            OnBuildingChanged?.Invoke(buildingId);
+
+            EventBus.Publish(new BuildingConstructedEvent
+            {
+                buildingId = buildingId,
+                definitionId = definitionId
+            });
+
+            return building;
+        }
+
         public bool UpgradeBuilding(string buildingId)
         {
             var building = GetBuilding(buildingId);

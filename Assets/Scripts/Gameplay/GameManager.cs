@@ -10,7 +10,23 @@ namespace LastRefuge.Gameplay
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
-        
+
+        /// <summary>
+        /// Instance is self-healing: a caller that runs before any Awake (or after a
+        /// domain reload) still gets the singleton instead of null.
+        /// </summary>
+        public static GameManager GetOrCreate()
+        {
+            if (Instance != null) return Instance;
+
+            Instance = UnityEngine.Object.FindObjectOfType<GameManager>();
+            if (Instance != null) return Instance;
+
+            var go = new GameObject("GameManager");
+            Instance = go.AddComponent<GameManager>();
+            return Instance;
+        }
+
         [Header("Game State")]
         public GameState gameState;
         
@@ -39,18 +55,44 @@ namespace LastRefuge.Gameplay
         
         private void Awake()
         {
+            // Only one GameManager may live. A second copy (duplicate scene object, or
+            // one left over from a previous scene) must never steal the singleton.
             if (Instance != null && Instance != this)
             {
+                UnityEngine.Debug.LogWarning($"GameManager: duplicate instance on '{name}' destroyed, keeping the existing one.");
                 Destroy(gameObject);
                 return;
             }
-            
+
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            
+
+            EnsureCoreSystems();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+
+            if (timeSystem != null)
+            {
+                timeSystem.OnDayEnd -= OnDayEnd;
+            }
+        }
+
+        /// <summary>
+        /// Builds every system exactly once. Safe to call from Awake and from any later
+        /// entry point that needs a guaranteed-ready manager.
+        /// </summary>
+        public void EnsureCoreSystems()
+        {
+            if (isInitialized) return;
             InitializeCoreSystems();
         }
-        
+
         private void InitializeCoreSystems()
         {
             gameState = new GameState();
@@ -90,25 +132,49 @@ namespace LastRefuge.Gameplay
         
         public void NewGame(string seed = null)
         {
+            EnsureCoreSystems();
+
             saveSystem.CreateNewGame(seed);
-            
-            // CreateNewGame resets gameState.resources to an empty array, but the real
-            // amounts live in ResourceSystem's map. Re-initialize so the array is rebuilt
-            // from the map again, otherwise the first autosave would serialize nothing.
-            resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
-            
+
+            // CreateNewGame wipes the arrays on gameState, but the live amounts live
+            // inside the systems. Re-bind every system so all of them point at the fresh
+            // state, otherwise one of them keeps serving the previous run's data.
+            RebindSystemsToState();
+
             randomSystem.Initialize(gameState.gameSeed);
-            
+
             GenerateInitialState();
-            
+
+            // A new game must never be empty: repair anything the generators failed to
+            // produce so the UI always has real data to bind.
+            ValidateAndRepairInitialState();
+
             timeSystem.SetTime(1, TimeSlot.Morning);
             timeSystem.SetGameplayState(GameplayState.Morning);
-            
+
             hasActiveGame = true;
-            
+
             UnityEngine.Debug.Log($"New game started with seed: {gameState.gameSeed}");
+            LogGameStateSnapshot("NewGame");
         }
-        
+
+        /// <summary>
+        /// Points every system at the current GameState. Used by NewGame and LoadGame so
+        /// the whole UI -> GameManager -> GameState -> Systems chain is always consistent.
+        /// </summary>
+        private void RebindSystemsToState()
+        {
+            timeSystem.Initialize(gameState, randomSystem);
+            resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
+            characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
+            buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
+            effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
+            saveSystem.Initialize(gameState, gameVersion);
+
+            timeSystem.OnDayEnd -= OnDayEnd;
+            timeSystem.OnDayEnd += OnDayEnd;
+        }
+
         private void GenerateInitialState()
         {
             // Starting stock is sized so the first shelter plus one farm can be built
@@ -118,29 +184,85 @@ namespace LastRefuge.Gameplay
             resourceSystem.Add(ResourceType.Wood, 60, "Initial");
             resourceSystem.Add(ResourceType.Stone, 30, "Initial");
             resourceSystem.Add(ResourceType.Iron, 10, "Initial");
-            
+
             characterSystem.GenerateInitialCharacters(4);
-            
+
             buildingSystem.Build("shelter_temp");
-            
+
             gameState.gameplayState = GameplayState.Morning;
+        }
+
+        /// <summary>
+        /// Hard guarantee for a new game: non-zero starting resources, at least one
+        /// survivor and at least one shelter core. Anything missing is created here
+        /// instead of letting the player land on an empty colony.
+        /// </summary>
+        private void ValidateAndRepairInitialState()
+        {
+            if (resourceSystem.GetAmount(ResourceType.Food) <= 0)
+            {
+                resourceSystem.Add(ResourceType.Food, 30, "InitialRepair");
+            }
+            if (resourceSystem.GetAmount(ResourceType.Water) <= 0)
+            {
+                resourceSystem.Add(ResourceType.Water, 30, "InitialRepair");
+            }
+            if (resourceSystem.GetAmount(ResourceType.Wood) <= 0)
+            {
+                resourceSystem.Add(ResourceType.Wood, 60, "InitialRepair");
+            }
+
+            if (characterSystem.GetAliveCharacters().Length <= 0)
+            {
+                UnityEngine.Debug.LogWarning("GameManager: no survivors generated, creating the starting character.");
+                characterSystem.GenerateInitialCharacters(1);
+            }
+
+            if (buildingSystem.GetAllBuildings().Length <= 0)
+            {
+                UnityEngine.Debug.LogWarning("GameManager: no shelter built, falling back to a free shelter core.");
+                buildingSystem.ForceBuildFree("shelter_temp");
+            }
+        }
+
+        /// <summary>
+        /// Requirement: entering a game must print the real state so an empty colony is
+        /// immediately visible in the log instead of only in the UI.
+        /// </summary>
+        public void LogGameStateSnapshot(string context)
+        {
+            if (gameState == null)
+            {
+                UnityEngine.Debug.LogError($"[{context}] GameState is null");
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"[{context}] GameState created");
+            sb.AppendLine("Resource:");
+            foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
+            {
+                int amount = resourceSystem != null ? resourceSystem.GetAmount(type) : 0;
+                sb.AppendLine($"  {type.ToString().ToLowerInvariant()}={amount}");
+            }
+            sb.AppendLine($"Character count={characterSystem != null ? characterSystem.GetAliveCharacters().Length : 0}");
+            sb.AppendLine($"Building count={buildingSystem != null ? buildingSystem.GetAllBuildings().Length : 0}");
+            UnityEngine.Debug.Log(sb.ToString());
         }
         
         public void LoadGame(string fileName)
         {
+            EnsureCoreSystems();
+
             if (saveSystem.LoadGame(fileName))
             {
                 randomSystem.Initialize(gameState.gameSeed);
-                timeSystem.Initialize(gameState, randomSystem);
-                resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
-                characterSystem.Initialize(gameState, resourceSystem, randomSystem, buildingSystem);
-                buildingSystem.Initialize(gameState, resourceSystem, characterSystem);
-                effectResolver.Initialize(gameState, resourceSystem, characterSystem, buildingSystem);
-                
-                timeSystem.OnDayEnd -= OnDayEnd;
-                timeSystem.OnDayEnd += OnDayEnd;
-                
+
+                RebindSystemsToState();
+
                 hasActiveGame = true;
+
+                LogGameStateSnapshot("LoadGame");
             }
         }
         

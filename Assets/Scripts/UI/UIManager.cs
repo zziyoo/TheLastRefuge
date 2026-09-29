@@ -117,6 +117,9 @@ namespace LastRefuge.UI
         [Header("Game Panel - Characters")]
         public Transform characterContainer;
         public GameObject characterItemPrefab;
+
+        [Header("Game Panel - Detail / Buildings")]
+        public Transform detailContainer;
         
         [Header("Game Panel - Bottom Buttons")]
         public Button nextTimeSlotButton;
@@ -222,8 +225,13 @@ namespace LastRefuge.UI
             settingsPanel.SetActive(false);
             CloseAllSubPanels();
             isGamePanelActive = true;
-            
-            RefreshAll();
+
+            // Rebind explicitly: the game panel must always be repainted from the live
+            // GameManager state, never left showing whatever Start() happened to render.
+            RefreshUI();
+            UnityEngine.Debug.Log($"UIManager.ShowGame: resources={gameManager?.resourceSystem?.GetAllResources().Count ?? 0} " +
+                                  $"characters={gameManager?.characterSystem?.GetAliveCharacters().Length ?? 0} " +
+                                  $"buildings={gameManager?.buildingSystem?.GetAllBuildings().Length ?? 0}");
         }
         
         public void ShowSaveLoad(bool isSave)
@@ -330,11 +338,23 @@ namespace LastRefuge.UI
             else if (panel == logPanel) RefreshLogPanel();
         }
         
+        /// <summary>
+        /// Single entry point for "the game state changed, repaint everything".
+        /// Called by GameManager-driven paths (new game, load, time advance) instead of
+        /// relying on Start() having run at the right moment.
+        /// UI -> GameManager -> GameState -> Systems: the UI never stores game data.
+        /// </summary>
+        public void RefreshUI()
+        {
+            RefreshAll();
+        }
+
         public void RefreshAll()
         {
             RefreshDayTime();
             RefreshResources();
             RefreshCharacters();
+            RefreshDetailPanel();
             RefreshButtons();
         }
         
@@ -416,6 +436,56 @@ namespace LastRefuge.UI
             }
         }
         
+        /// <summary>
+        /// The right-hand "详情 / 建筑" column. Data comes from BuildingSystem only;
+        /// the UI holds no building state of its own.
+        /// </summary>
+        private void RefreshDetailPanel()
+        {
+            if (detailContainer == null || gameManager == null) return;
+
+            foreach (Transform child in detailContainer)
+            {
+                Destroy(child.gameObject);
+            }
+
+            var buildings = gameManager.buildingSystem.GetAllBuildings();
+            if (buildings.Length == 0)
+            {
+                var emptyText = CreateText(detailContainer, "暂无建筑", 18);
+                emptyText.GetComponent<RectTransform>().sizeDelta = new Vector2(250, 30);
+                return;
+            }
+
+            foreach (var building in buildings)
+            {
+                var def = gameManager.buildingSystem.GetBuildingDefinition(building.definitionId);
+                string buildingName = def != null ? def.name : building.definitionId;
+                string status = GetBuildingStatusText(building);
+                int workers = building.assignedWorkers?.Length ?? 0;
+                int slots = def?.workerSlots ?? 0;
+
+                var row = CreateUIObject("Detail_" + building.buildingId, detailContainer);
+                var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+                rowLayout.childAlignment = TextAnchor.MiddleLeft;
+                rowLayout.spacing = 10;
+                rowLayout.padding = new RectOffset(10, 5, 5, 5);
+                rowLayout.childControlWidth = true;
+                rowLayout.childControlHeight = false;
+                rowLayout.childForceExpandWidth = false;
+                rowLayout.childForceExpandHeight = false;
+
+                var nameText = CreateText(row.transform, $"{buildingName} (Lv.{building.level})", 18, FontStyles.Bold);
+                nameText.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 30);
+
+                var workerText = CreateText(row.transform, $"工人 {workers}/{slots}", 14);
+                workerText.GetComponent<RectTransform>().sizeDelta = new Vector2(90, 30);
+
+                var statusText = CreateText(row.transform, status, 14);
+                statusText.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 30);
+            }
+        }
+
         private void RefreshPersonnelPanel()
         {
             // Detailed personnel management
@@ -639,6 +709,8 @@ namespace LastRefuge.UI
             }
             gameManager.NewGame();
             ShowGame();
+            // The state was just created: repaint from it rather than waiting for an event.
+            RefreshUI();
         }
         
         public void OnContinueClicked()

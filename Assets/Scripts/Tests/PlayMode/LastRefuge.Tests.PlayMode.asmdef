@@ -8,7 +8,8 @@
         "LastRefuge.Data",
         "LastRefuge.Gameplay",
         "LastRefuge.Save",
-        "LastRefuge.Systems"
+        "LastRefuge.Systems",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

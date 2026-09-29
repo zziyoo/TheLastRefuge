@@ -65,14 +65,24 @@ namespace LastRefuge.Gameplay
             
             UnityEngine.Debug.Log("GameLauncher found UIManager.Instance");
             
+            // The game must be fully wired before anything is shown: GameState plus
+            // Resource / Character / Building systems all come from GameManager.
+            var gameManager = GameManager.GetOrCreate();
+            if (gameManager == null)
+            {
+                UnityEngine.Debug.LogError("GameLauncher: could not obtain a GameManager instance.");
+                yield break;
+            }
+            gameManager.EnsureCoreSystems();
+
             // By default, show main menu. Auto-start only for debug.
             if (autoStartNewGame)
             {
-                var gameManager = GameManager.Instance;
-                if (gameManager != null)
-                {
-                    gameManager.NewGame(string.IsNullOrEmpty(fixedSeed) ? null : fixedSeed);
-                }
+                gameManager.NewGame(string.IsNullOrEmpty(fixedSeed) ? null : fixedSeed);
+
+                var showGameMethod = uiManagerType.GetMethod("ShowGame");
+                showGameMethod?.Invoke(uiManager, null);
+                uiManagerType.GetMethod("RefreshUI")?.Invoke(uiManager, null);
             }
             else
             {

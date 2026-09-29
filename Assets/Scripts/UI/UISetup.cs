@@ -213,6 +213,14 @@ namespace LastRefuge.UI
             vpMask.showMaskGraphic = false;
             var vpImage = resViewport.AddComponent<Image>();
             vpImage.color = Color.clear;
+
+            // The panel's VerticalLayoutGroup drives child heights. Without a flexible
+            // height the viewport is sized to its preferred height (0) and the whole
+            // resource list is clipped away, leaving the panel looking empty.
+            var vpLayoutElement = resViewport.AddComponent<LayoutElement>();
+            vpLayoutElement.minHeight = 0f;
+            vpLayoutElement.preferredHeight = 0f;
+            vpLayoutElement.flexibleHeight = 1f;
             
             var resContent = CreateUIObject("ResourceContainer", resViewport.transform);
             uiManager.resourceContainer = resContent.transform;
@@ -269,6 +277,13 @@ namespace LastRefuge.UI
             charVpMask.showMaskGraphic = false;
             var charVpImage = charViewport.AddComponent<Image>();
             charVpImage.color = Color.clear;
+
+            // Same reason as the resource viewport: without a flexible height the
+            // parent VerticalLayoutGroup collapses it and the survivor list disappears.
+            var charVpLayoutElement = charViewport.AddComponent<LayoutElement>();
+            charVpLayoutElement.minHeight = 0f;
+            charVpLayoutElement.preferredHeight = 0f;
+            charVpLayoutElement.flexibleHeight = 1f;
             
             var charContent = CreateUIObject("CharacterContainer", charViewport.transform);
             uiManager.characterContainer = charContent.transform;
@@ -312,6 +327,53 @@ namespace LastRefuge.UI
             detLayout.padding = new RectOffset(10, 10, 10, 10);
             
             CreateText(detailPanel.transform, "详情 / 建筑", 24, FontStyles.Bold);
+
+            // The detail panel is the "building" column: it lists the shelters and
+            // facilities the colony actually owns. Same scroll pattern as the other two
+            // columns so the content is clipped inside the panel.
+            var detScrollRect = detailPanel.AddComponent<ScrollRect>();
+            var detViewport = CreateUIObject("Viewport", detailPanel.transform);
+            var detVpRT = detViewport.GetComponent<RectTransform>();
+            detVpRT.anchorMin = Vector2.zero;
+            detVpRT.anchorMax = Vector2.one;
+            detVpRT.offsetMin = Vector2.zero;
+            detVpRT.offsetMax = Vector2.zero;
+            var detVpMask = detViewport.AddComponent<UnityEngine.UI.Mask>();
+            detVpMask.showMaskGraphic = false;
+            var detVpImage = detViewport.AddComponent<Image>();
+            detVpImage.color = Color.clear;
+
+            var detVpLayoutElement = detViewport.AddComponent<LayoutElement>();
+            detVpLayoutElement.minHeight = 0f;
+            detVpLayoutElement.preferredHeight = 0f;
+            detVpLayoutElement.flexibleHeight = 1f;
+
+            var detContent = CreateUIObject("DetailContainer", detViewport.transform);
+            uiManager.detailContainer = detContent.transform;
+            var detContentRT = detContent.GetComponent<RectTransform>();
+            detContentRT.anchorMin = new Vector2(0, 1);
+            detContentRT.anchorMax = new Vector2(1, 1);
+            detContentRT.pivot = new Vector2(0.5f, 1);
+            detContentRT.sizeDelta = new Vector2(0, 300);
+            detContentRT.anchoredPosition = Vector2.zero;
+
+            var detContentLayout = detContent.AddComponent<VerticalLayoutGroup>();
+            detContentLayout.childAlignment = TextAnchor.UpperLeft;
+            detContentLayout.spacing = 5;
+            detContentLayout.padding = new RectOffset(10, 10, 10, 10);
+            detContentLayout.childControlWidth = true;
+            detContentLayout.childControlHeight = false;
+            detContentLayout.childForceExpandWidth = true;
+            detContentLayout.childForceExpandHeight = false;
+
+            var detContentSizeFitter = detContent.AddComponent<ContentSizeFitter>();
+            detContentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            detScrollRect.viewport = detVpRT;
+            detScrollRect.content = detContentRT;
+            detScrollRect.vertical = true;
+            detScrollRect.horizontal = false;
+            detScrollRect.movementType = ScrollRect.MovementType.Clamped;
             
             // Bottom bar - Action buttons
             var bottomBar = CreateUIObject("BottomBar", panel.transform);
@@ -399,8 +461,10 @@ namespace LastRefuge.UI
         private static void CreateResourceItemPrefab(UIManager uiManager)
         {
             var go = new GameObject("ResourceItemPrefab");
-            // Don't deactivate prefab - we'll activate instances after instantiation
             go.transform.SetParent(uiManager.transform);
+            // Keep the template hidden: it must never render as a stray row. UIManager
+            // activates every instance it clones.
+            go.SetActive(false);
             
             var rt = go.AddComponent<RectTransform>();
             rt.sizeDelta = new Vector2(0, 40);
@@ -475,7 +539,10 @@ private static void CreateCharacterItemPrefab(UIManager uiManager)
         {
             var go = new GameObject("CharacterItemPrefab");
             go.transform.SetParent(uiManager.transform);
-            
+            // Keep the template hidden: it must never render as a stray row. UIManager
+            // activates every instance it clones.
+            go.SetActive(false);
+
             var rt = go.AddComponent<RectTransform>();
             rt.sizeDelta = new Vector2(0, 120);
             
