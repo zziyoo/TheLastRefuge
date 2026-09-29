@@ -417,8 +417,12 @@ GameManager.AdvanceTimeSlot() × distance   ← 时间成本 = 地点距离（2/
 
 ### M4（切片内容 + UI 验收）
 - PlayMode 真场景：触发事件 → 模态 → 选项 → 资源变化 → "下一阶段"恢复可用
+  （`EventModal_ShowsChoicesSettlesSummaryAndUnblocks`，due 强制 `event_food_storage_01`）
 - PlayMode 真场景：探索面板 → 出发 → 结算 → 日志与资源/时间推进正确
-- 全量回归：EditMode + PlayMode 双平台
+  （`ExplorationFlow_DepartsSettlesAndAdvances`，自建空池地点保证确定性；
+  断言含 Action 槽每日消耗：口粮 -1 + 消耗 -demand）
+- 切片内容：`Content_SliceAllFilesParseAndValidate`（9 事件 / 3 地点 / 0 诊断 / 引用可达）
+- 全量回归：EditMode 89 + PlayMode 7 双平台全绿（M4b 交付时实测）
 
 ---
 
@@ -463,6 +467,17 @@ GameManager.AdvanceTimeSlot() × distance   ← 时间成本 = 地点距离（2/
    其余 3 个明确延后（第 8 节）
 4. **JsonUtility 枚举字符串解析行为未验证**：M1 首个探针（3.5）
 5. **强制退出期间的未决事件会丢失**：归一写档处理，行为已知且可接受（4.4）
+6. **`Effect.AddResource/RemoveResource` 测试工厂漏设 `resourceType`**（M4a 发现）：
+   工厂方法只填 `intValue`，不补类型则效果落账为未知资源 —— 生产路径
+   （JSON → ContentLoader）正常，仅测试代码受影响；未修，留作测试工具债务
+7. **PlayMode `AcceptanceFlow_RunsInsidePlayMode` 食物断言 flaky**（M3 起偶发）：
+   `NewGame()` seed=null → 随机内容导致产出波动，复现过一次失败；未修，
+   需固定 seed 或改写断言，独立任务处理
+8. **探索拒绝原因为英文**：`ExplorationSystem.Validate` 的 reason 全英文
+   （"team must contain..."），直接显示在中文 `explorationInfoText`，语言不一致；
+   功能正确，留到 UI 文案整理
+9. **UI 队伍选择曾可多选超 4 人**（M4c 已修）：系统层 `Validate` 本就拒绝
+   >4 人，UI 现已在 `OnToggleTeamMember` 截断上限
 
 ---
 

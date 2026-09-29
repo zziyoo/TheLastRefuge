@@ -1280,7 +1280,11 @@ namespace LastRefuge.UI
 
         public void OnToggleTeamMember(string characterId)
         {
-            if (!selectedTeamIds.Remove(characterId))
+            if (selectedTeamIds.Contains(characterId))
+            {
+                selectedTeamIds.Remove(characterId);
+            }
+            else if (selectedTeamIds.Count < 4)
             {
                 selectedTeamIds.Add(characterId);
             }
