@@ -40,6 +40,7 @@ namespace LastRefuge.Gameplay
         public ISaveSystem saveSystem;
         public IEventSystem eventSystem;
         public IContentDatabase contentDatabase;
+        public IExplorationSystem explorationSystem;
         
         [Header("Settings")]
         public string gameVersion = "0.1.0";
@@ -118,6 +119,7 @@ namespace LastRefuge.Gameplay
             }
             
             eventSystem = new EventSystem();
+            explorationSystem = new ExplorationSystem();
             
             timeSystem.Initialize(gameState, randomSystem);
             resourceSystem.Initialize(gameState, buildingSystem, characterSystem);
@@ -127,8 +129,11 @@ namespace LastRefuge.Gameplay
             saveSystem.Initialize(gameState, gameVersion);
             eventSystem.Initialize(gameState, timeSystem, randomSystem, contentDatabase, effectResolver,
                                    resourceSystem, characterSystem);
+            explorationSystem.Initialize(gameState, randomSystem, contentDatabase, eventSystem,
+                                         resourceSystem, characterSystem);
             
             effectResolver.SetEventStarter(eventSystem.ScheduleNow);
+            explorationSystem.SetTimeAdvance(() => AdvanceTimeSlot());
             
             timeSystem.OnDayEnd += OnDayEnd;
             
@@ -158,6 +163,8 @@ namespace LastRefuge.Gameplay
             // inside the systems. Re-bind every system so all of them point at the fresh
             // state, otherwise one of them keeps serving the previous run's data.
             RebindSystemsToState();
+
+            explorationSystem.Reset();
 
             randomSystem.Initialize(gameState.gameSeed);
 
@@ -190,6 +197,8 @@ namespace LastRefuge.Gameplay
             saveSystem.Initialize(gameState, gameVersion);
             eventSystem.Initialize(gameState, timeSystem, randomSystem, contentDatabase, effectResolver,
                                    resourceSystem, characterSystem);
+            explorationSystem.Initialize(gameState, randomSystem, contentDatabase, eventSystem,
+                                         resourceSystem, characterSystem);
 
             timeSystem.OnDayEnd -= OnDayEnd;
             timeSystem.OnDayEnd += OnDayEnd;
@@ -279,6 +288,8 @@ namespace LastRefuge.Gameplay
                 randomSystem.Initialize(gameState.gameSeed);
 
                 RebindSystemsToState();
+
+                explorationSystem.Reset();
 
                 if (IsEventStateBlocked())
                 {
@@ -522,6 +533,16 @@ namespace LastRefuge.Gameplay
         public EventDefinition GetPendingEvent()
         {
             return eventSystem.PendingEvent;
+        }
+
+        public bool ExploreLocation(string locationId, string[] teamMemberIds, out string rejectReason)
+        {
+            return explorationSystem.ExploreLocation(locationId, teamMemberIds, out rejectReason);
+        }
+
+        public bool CanExplore(string locationId, string[] teamMemberIds, out string reason)
+        {
+            return explorationSystem.CanExplore(locationId, teamMemberIds, out reason);
         }
     }
 }

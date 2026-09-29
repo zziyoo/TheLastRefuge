@@ -129,6 +129,23 @@ namespace LastRefuge.Core
     }
 
     [System.Serializable]
+    public struct ExplorationStartedEvent
+    {
+        public string locationId;
+        public int teamSize;
+    }
+
+    [System.Serializable]
+    public struct ExplorationFinishedEvent
+    {
+        public string locationId;
+        public int teamSize;
+        public int survivors;
+        public int casualties;
+        public string resourceSummary;
+    }
+
+    [System.Serializable]
     public struct CharacterDiedEvent
     {
         public string characterId;

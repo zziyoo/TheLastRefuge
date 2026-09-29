@@ -12,6 +12,7 @@ namespace LastRefuge.Core
 
         bool TryRollDailyEvent();
         bool TryStartEvent(string eventId);
+        bool TryStartLocationEvent(string locationId);
         void ScheduleNow(string eventId);
         bool ResolveChoice(string optionId);
         bool IsOptionAvailable(string optionId);

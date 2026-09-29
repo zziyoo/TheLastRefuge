@@ -11,6 +11,7 @@ namespace LastRefuge.Systems
         private const string CooldownPrefix = "event_cd_";
         private const string DuePrefix = "event_due_";
         private const string DailyRollContext = "DailyEventRoll";
+        private const string LocationRollContext = "LocationEventRoll";
 
         private GameState gameState;
         private ITimeSystem timeSystem;
@@ -72,23 +73,46 @@ namespace LastRefuge.Systems
             }
             if (candidates.Count == 0) return false;
 
+            int pickedIndex = PickWeightedIndex(candidates, weights, DailyRollContext);
+            return TryStartEvent(candidates[pickedIndex].id);
+        }
+
+        public bool TryStartLocationEvent(string locationId)
+        {
+            if (gameState.gameplayState == GameplayState.Event ||
+                gameState.gameplayState == GameplayState.Resolution)
+            {
+                return false;
+            }
+
+            int day = gameState.currentDay;
+            var candidates = new List<EventDefinition>();
+            var weights = new List<float>();
+            foreach (var evt in contentDatabase.GetEventPool(locationId))
+            {
+                if (!IsEligible(evt, day)) continue;
+                candidates.Add(evt);
+                weights.Add(evt.weight);
+            }
+            if (candidates.Count == 0) return false;
+
+            int pickedIndex = PickWeightedIndex(candidates, weights, LocationRollContext);
+            return TryStartEvent(candidates[pickedIndex].id);
+        }
+
+        private int PickWeightedIndex(List<EventDefinition> candidates, List<float> weights, string context)
+        {
             float total = 0f;
             foreach (var w in weights) total += w;
 
-            float roll = randomSystem.NextFloat(DailyRollContext) * total;
+            float roll = randomSystem.NextFloat(context) * total;
             float accumulated = 0f;
-            int pickedIndex = candidates.Count - 1;
             for (int i = 0; i < candidates.Count; i++)
             {
                 accumulated += weights[i];
-                if (roll <= accumulated)
-                {
-                    pickedIndex = i;
-                    break;
-                }
+                if (roll <= accumulated) return i;
             }
-
-            return TryStartEvent(candidates[pickedIndex].id);
+            return candidates.Count - 1;
         }
 
         public bool TryStartEvent(string eventId)
@@ -171,10 +195,9 @@ namespace LastRefuge.Systems
             }
 
             PendingEvent = null;
-            EventBus.Publish(new EventFinishedEvent { eventId = resolvedEvent.id, choiceId = option.id });
-
             RestoreSlotState();
             StartDueChain();
+            EventBus.Publish(new EventFinishedEvent { eventId = resolvedEvent.id, choiceId = option.id });
             return true;
         }
 
@@ -265,8 +288,13 @@ namespace LastRefuge.Systems
 
         private bool IsDailyRollable(EventDefinition definition, int day)
         {
+            if (definition != null && definition.type == EventType.Exploration) return false;
+            return IsEligible(definition, day);
+        }
+
+        private bool IsEligible(EventDefinition definition, int day)
+        {
             if (definition == null || string.IsNullOrEmpty(definition.id)) return false;
-            if (definition.type == EventType.Exploration) return false;
             if (definition.weight <= 0f) return false;
             if (definition.minDay > 0 && day < definition.minDay) return false;
             if (definition.maxDay > 0 && day > definition.maxDay) return false;
