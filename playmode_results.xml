@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.6133331">
-  <test-suite type="TestSuite" id="1000" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.613333" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:15Z" duration="1.5876972">
+  <test-suite type="TestSuite" id="1000" name="最后避难所" fullname="最后避难所" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:15Z" duration="1.587697" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
     <properties />
-    <test-suite type="Assembly" id="1008" name="LastRefuge.Tests.PlayMode.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.PlayMode.dll" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.607492" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="Assembly" id="1008" name="LastRefuge.Tests.PlayMode.dll" fullname="C:/Users/32360/Desktop/最后避难所/Library/ScriptAssemblies/LastRefuge.Tests.PlayMode.dll" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:15Z" duration="1.579776" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
       <properties>
-        <property name="_PID" value="25464" />
+        <property name="_PID" value="26664" />
         <property name="_APPDOMAIN" value="Unity Child Domain" />
         <property name="platform" value="PlayMode" />
       </properties>
-      <test-suite type="TestSuite" id="1009" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.594125" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestSuite" id="1009" name="LastRefuge" fullname="LastRefuge" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:15Z" duration="1.567810" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
         <properties />
-        <test-suite type="TestSuite" id="1010" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:27Z" duration="1.577401" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <test-suite type="TestSuite" id="1010" name="Tests" fullname="LastRefuge.Tests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:15Z" duration="1.551084" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
           <properties />
-          <test-suite type="TestFixture" id="1001" name="GameplayPlayModeTest" fullname="LastRefuge.Tests.GameplayPlayModeTest" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:26Z" duration="1.358144" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestFixture" id="1001" name="GameplayPlayModeTest" fullname="LastRefuge.Tests.GameplayPlayModeTest" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:15Z" duration="1.331206" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-case id="1002" name="AcceptanceFlow_RunsInsidePlayMode" fullname="LastRefuge.Tests.GameplayPlayModeTest.AcceptanceFlow_RunsInsidePlayMode" methodname="AcceptanceFlow_RunsInsidePlayMode" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="844510273" result="Passed" start-time="2026-09-29 10:42:25Z" end-time="2026-09-29 10:42:26Z" duration="0.590081" asserts="0">
+            <test-case id="1002" name="AcceptanceFlow_RunsInsidePlayMode" fullname="LastRefuge.Tests.GameplayPlayModeTest.AcceptanceFlow_RunsInsidePlayMode" methodname="AcceptanceFlow_RunsInsidePlayMode" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1839751672" result="Passed" start-time="2026-09-29 11:19:13Z" end-time="2026-09-29 11:19:14Z" duration="0.566773" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
@@ -26,7 +26,7 @@ GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262753456313539_63617
+New game started with seed: 639262775538820515_30492
 [NewGame] GameState created
 Resource:
   food=30
@@ -76,10 +76,10 @@ Building count=2
 [UILayout] Resource: column=320 viewport=266 content=465 children=10 [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] [ResourceItemPrefab(Clone) active=True h=40] ...
 [UILayout] Character: column=320 viewport=266 content=515 children=4 [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] [CharacterItemPrefab(Clone) active=True h=120] ...
 [UILayout] Detail: column=320 viewport=266 content=105 children=2 [Detail_shelter_temp_1_0 active=True h=40] [Detail_farm_basic_1_1 active=True h=40]
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_104225.json
-Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_104225.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_111914.json
+Game saved: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_111914.json
 UIManager.ShowGame: resources=10 characters=4 buildings=2
-Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_104225.json
+Game loaded: C:/Users/32360/AppData/LocalLow/DefaultCompany/最后避难所\PlayModeTest_Saves\save_20260929_111914.json
 [LoadGame] GameState created
 Resource:
   food=32
@@ -100,7 +100,7 @@ Building count=2
 [UILayout] Detail: column=320 viewport=266 content=105 children=2 [Detail_shelter_temp_1_0 active=True h=40] [Detail_farm_basic_1_1 active=True h=40]
 ]]></output>
             </test-case>
-            <test-case id="1003" name="DayEndQuit_AutosavesAtMorningAndContinues" fullname="LastRefuge.Tests.GameplayPlayModeTest.DayEndQuit_AutosavesAtMorningAndContinues" methodname="DayEndQuit_AutosavesAtMorningAndContinues" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="2139239765" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:26Z" duration="0.277530" asserts="0">
+            <test-case id="1003" name="DayEndQuit_AutosavesAtMorningAndContinues" fullname="LastRefuge.Tests.GameplayPlayModeTest.DayEndQuit_AutosavesAtMorningAndContinues" methodname="DayEndQuit_AutosavesAtMorningAndContinues" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1256209952" result="Passed" start-time="2026-09-29 11:19:14Z" end-time="2026-09-29 11:19:14Z" duration="0.274609" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
@@ -112,7 +112,7 @@ GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262753462123017_80968
+New game started with seed: 639262775544388694_84693
 [NewGame] GameState created
 Resource:
   food=30
@@ -163,7 +163,7 @@ Building count=1
 [UILayout] Detail: column=320 viewport=266 content=60 children=1 [Detail_shelter_temp_1_0 active=True h=40]
 ]]></output>
             </test-case>
-            <test-case id="1004" name="QuitWithoutActiveRun_DoesNotCreateAnAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotCreateAnAutosave" methodname="QuitWithoutActiveRun_DoesNotCreateAnAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1512131327" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:26Z" duration="0.183219" asserts="0">
+            <test-case id="1004" name="QuitWithoutActiveRun_DoesNotCreateAnAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotCreateAnAutosave" methodname="QuitWithoutActiveRun_DoesNotCreateAnAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1815157524" result="Passed" start-time="2026-09-29 11:19:14Z" end-time="2026-09-29 11:19:14Z" duration="0.183171" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
@@ -176,7 +176,7 @@ GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 ]]></output>
             </test-case>
-            <test-case id="1005" name="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" methodname="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1579329413" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:26Z" duration="0.286680" asserts="0">
+            <test-case id="1005" name="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" fullname="LastRefuge.Tests.GameplayPlayModeTest.QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" methodname="QuitWithoutActiveRun_DoesNotOverwriteExistingAutosave" classname="LastRefuge.Tests.GameplayPlayModeTest" runstate="Runnable" seed="1175969575" result="Passed" start-time="2026-09-29 11:19:14Z" end-time="2026-09-29 11:19:15Z" duration="0.286420" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
@@ -188,7 +188,7 @@ GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262753466761975_81796
+New game started with seed: 639262775548996082_76147
 [NewGame] GameState created
 Resource:
   food=30
@@ -215,9 +215,9 @@ GameManager initialized
 ]]></output>
             </test-case>
           </test-suite>
-          <test-suite type="TestFixture" id="1006" name="UIDiagnosticTest" fullname="LastRefuge.Tests.UIDiagnosticTest" classname="LastRefuge.Tests.UIDiagnosticTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:27Z" duration="0.201526" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestFixture" id="1006" name="UIDiagnosticTest" fullname="LastRefuge.Tests.UIDiagnosticTest" classname="LastRefuge.Tests.UIDiagnosticTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-29 11:19:15Z" end-time="2026-09-29 11:19:15Z" duration="0.201535" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-case id="1007" name="DumpUiAfterNewGame" fullname="LastRefuge.Tests.UIDiagnosticTest.DumpUiAfterNewGame" methodname="DumpUiAfterNewGame" classname="LastRefuge.Tests.UIDiagnosticTest" runstate="Runnable" seed="2021879139" result="Passed" start-time="2026-09-29 10:42:26Z" end-time="2026-09-29 10:42:27Z" duration="0.185742" asserts="0">
+            <test-case id="1007" name="DumpUiAfterNewGame" fullname="LastRefuge.Tests.UIDiagnosticTest.DumpUiAfterNewGame" methodname="DumpUiAfterNewGame" classname="LastRefuge.Tests.UIDiagnosticTest" runstate="Runnable" seed="1573803065" result="Passed" start-time="2026-09-29 11:19:15Z" end-time="2026-09-29 11:19:15Z" duration="0.185908" asserts="0">
               <properties>
                 <property name="_JOINTYPE" value="UnityCombinatorial" />
               </properties>
@@ -229,7 +229,7 @@ GameManager.Instance: found
 GameLauncher found UIManager.Instance
 GameLauncher calling UIManager.ShowMainMenu() via reflection
 OnNewGameClicked called
-New game started with seed: 639262753469459489_15672
+New game started with seed: 639262775551692425_12366
 [NewGame] GameState created
 Resource:
   food=30
@@ -401,7 +401,7 @@ MainCanvas [w=800 h=600]
         CharacterContainer [w=250 h=515]
           CharacterItemPrefab(Clone) [w=230 h=120]
             NameRow [w=210 h=100]
-              Text [w=110 h=25] "刘1 (Hunter)"
+              Text [w=109 h=25] "张1 (Doctor)"
             StatusRow [w=210 h=100]
               Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
               HealthBar [w=0 h=16]
@@ -425,7 +425,7 @@ MainCanvas [w=800 h=600]
                   Text [w=50 h=20] "工程"
           CharacterItemPrefab(Clone) [w=230 h=120]
             NameRow [w=210 h=100]
-              Text [w=127 h=25] "王2 (Engineer)"
+              Text [w=148 h=25] "陈2 (Researcher)"
             StatusRow [w=210 h=100]
               Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
               HealthBar [w=0 h=16]
@@ -449,7 +449,7 @@ MainCanvas [w=800 h=600]
                   Text [w=50 h=20] "工程"
           CharacterItemPrefab(Clone) [w=230 h=120]
             NameRow [w=210 h=100]
-              Text [w=98 h=25] "李3 (Miner)"
+              Text [w=110 h=25] "杨3 (Hunter)"
             StatusRow [w=210 h=100]
               Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
               HealthBar [w=0 h=16]
@@ -473,7 +473,7 @@ MainCanvas [w=800 h=600]
                   Text [w=50 h=20] "工程"
           CharacterItemPrefab(Clone) [w=230 h=120]
             NameRow [w=210 h=100]
-              Text [w=127 h=25] "张4 (Engineer)"
+              Text [w=111 h=25] "王4 (Farmer)"
             StatusRow [w=210 h=100]
               Text [w=168 h=20] "HP:100 饥饿:0 压力:0 疲劳:0"
               HealthBar [w=0 h=16]

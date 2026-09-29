@@ -183,6 +183,34 @@ namespace LastRefuge.Tests
         }
 
         /// <summary>
+        /// All four flag dictionaries must survive a save/load round trip: event
+        /// cooldowns, chains and world memory are stored in gameFlags.
+        /// </summary>
+        [Test]
+        public void SaveLoad_PreservesGameFlags()
+        {
+            var gm = StartNewGame();
+
+            gm.gameState.gameFlags.boolFlags["met_stranger"] = true;
+            gm.gameState.gameFlags.intFlags["event_cd_rat"] = 3;
+            gm.gameState.gameFlags.floatFlags["danger_level"] = 0.5f;
+            gm.gameState.gameFlags.stringFlags["last_choice"] = "poison";
+
+            Assert.IsTrue(gm.saveSystem.SaveGame(false, "flag_roundtrip"));
+
+            gm.NewGame("wipe");
+            Assert.AreEqual(0, gm.gameState.gameFlags.intFlags.Count, "NewGame must start with empty flags.");
+            Assert.AreEqual(0, gm.gameState.gameFlags.stringFlags.Count, "NewGame must start with empty flags.");
+
+            gm.LoadGame("flag_roundtrip.json");
+
+            Assert.IsTrue(gm.gameState.gameFlags.boolFlags["met_stranger"], "boolFlags must survive the save.");
+            Assert.AreEqual(3, gm.gameState.gameFlags.intFlags["event_cd_rat"], "intFlags must survive the save.");
+            Assert.AreEqual(0.5f, gm.gameState.gameFlags.floatFlags["danger_level"], "floatFlags must survive the save.");
+            Assert.AreEqual("poison", gm.gameState.gameFlags.stringFlags["last_choice"], "stringFlags must survive the save.");
+        }
+
+        /// <summary>
         /// A dead character must be detached from the building roster, drop out of the
         /// demand forecast and be skipped by the daily settlement.
         /// </summary>
