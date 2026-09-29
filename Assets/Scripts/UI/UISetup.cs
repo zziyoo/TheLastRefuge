@@ -198,6 +198,12 @@ namespace LastRefuge.UI
             resLayout.childAlignment = TextAnchor.UpperLeft;
             resLayout.spacing = 5;
             resLayout.padding = new RectOffset(10, 10, 10, 10);
+            // Must be explicit: with control disabled the layout group sizes children
+            // from their own sizeDelta, so the viewport stays 0 and the list is clipped.
+            resLayout.childControlWidth = true;
+            resLayout.childControlHeight = true;
+            resLayout.childForceExpandWidth = true;
+            resLayout.childForceExpandHeight = false;
             
             var resTitle = CreateText(resourcePanel.transform, "资源", 24, FontStyles.Bold);
             
@@ -262,6 +268,11 @@ namespace LastRefuge.UI
             charLayout.childAlignment = TextAnchor.UpperLeft;
             charLayout.spacing = 5;
             charLayout.padding = new RectOffset(10, 10, 10, 10);
+            // Same reason as the resource column: without control the viewport collapses.
+            charLayout.childControlWidth = true;
+            charLayout.childControlHeight = true;
+            charLayout.childForceExpandWidth = true;
+            charLayout.childForceExpandHeight = false;
             
             CreateText(charPanel.transform, "人员", 24, FontStyles.Bold);
             
@@ -325,6 +336,11 @@ namespace LastRefuge.UI
             detLayout.childAlignment = TextAnchor.UpperLeft;
             detLayout.spacing = 5;
             detLayout.padding = new RectOffset(10, 10, 10, 10);
+            // Same reason as the other two columns.
+            detLayout.childControlWidth = true;
+            detLayout.childControlHeight = true;
+            detLayout.childForceExpandWidth = true;
+            detLayout.childForceExpandHeight = false;
             
             CreateText(detailPanel.transform, "详情 / 建筑", 24, FontStyles.Bold);
 

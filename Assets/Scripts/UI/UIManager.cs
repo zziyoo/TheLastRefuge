@@ -32,6 +32,12 @@ namespace LastRefuge.UI
             tmp.fontStyle = style;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;
+            // Runtime-generated text must use the CJK asset too, otherwise Chinese
+            // strings render as missing-glyph boxes.
+            if (TMP_Settings.defaultFontAsset != null)
+            {
+                tmp.font = TMP_Settings.defaultFontAsset;
+            }
             return go;
         }
         
@@ -232,6 +238,46 @@ namespace LastRefuge.UI
             UnityEngine.Debug.Log($"UIManager.ShowGame: resources={gameManager?.resourceSystem?.GetAllResources().Count ?? 0} " +
                                   $"characters={gameManager?.characterSystem?.GetAliveCharacters().Length ?? 0} " +
                                   $"buildings={gameManager?.buildingSystem?.GetAllBuildings().Length ?? 0}");
+            StartCoroutine(LogLayoutAfterLayout());
+        }
+
+        /// <summary>
+        /// One-shot geometry report: prints the real size of every column, its viewport
+        /// and its content container after the layout pass has run. This is the fastest
+        /// way to see whether the lists are empty or merely clipped.
+        /// </summary>
+        private System.Collections.IEnumerator LogLayoutAfterLayout()
+        {
+            yield return null;
+            yield return null;
+
+            UnityEngine.Debug.Log(
+                "[UILayout] " + DescribeColumn("Resource", resourceContainer) + "\n" +
+                "[UILayout] " + DescribeColumn("Character", characterContainer) + "\n" +
+                "[UILayout] " + DescribeColumn("Detail", detailContainer));
+        }
+
+        private static string DescribeColumn(string tag, Transform container)
+        {
+            if (container == null) return $"{tag}: container NULL";
+            var content = (RectTransform)container;
+            var viewport = container.parent as RectTransform;
+            var column = container.parent != null && container.parent.parent != null
+                ? container.parent.parent as RectTransform
+                : null;
+
+            string items = "";
+            int shown = 0;
+            foreach (Transform child in container)
+            {
+                if (shown++ >= 3) { items += " ..."; break; }
+                var crt = child as RectTransform;
+                items += $" [{child.name} active={child.gameObject.activeSelf} h={(crt != null ? crt.rect.height : -1):F0}]";
+            }
+
+            return $"{tag}: column={(column != null ? column.rect.height.ToString("F0") : "?")} " +
+                   $"viewport={(viewport != null ? viewport.rect.height.ToString("F0") : "?")} " +
+                   $"content={content.rect.height:F0} children={container.childCount}{items}";
         }
         
         public void ShowSaveLoad(bool isSave)
@@ -356,6 +402,12 @@ namespace LastRefuge.UI
             RefreshCharacters();
             RefreshDetailPanel();
             RefreshButtons();
+
+            // Keep the open detail panel live instead of serving stale numbers.
+            if (resourceDetailPanel != null && resourceDetailPanel.activeSelf)
+            {
+                RefreshResourceDetailPanel();
+            }
         }
         
         private void RefreshDayTime()
@@ -619,9 +671,53 @@ namespace LastRefuge.UI
             return "运行中";
         }
         
+        /// <summary>
+        /// Full resource ledger opened by the 资源 button: amount, capacity, daily net
+        /// change and days remaining, all read live from ResourceSystem.
+        /// </summary>
         private void RefreshResourceDetailPanel()
         {
-            // Detailed resource view
+            if (resourceDetailPanel == null || gameManager == null) return;
+
+            // The sub-panel is created empty, so its layout is built here on first use.
+            var layout = resourceDetailPanel.GetComponent<VerticalLayoutGroup>();
+            if (layout == null)
+            {
+                layout = resourceDetailPanel.AddComponent<VerticalLayoutGroup>();
+            }
+            layout.childAlignment = TextAnchor.UpperLeft;
+            layout.spacing = 8;
+            layout.padding = new RectOffset(20, 20, 20, 20);
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            foreach (Transform child in resourceDetailPanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            CreateText(resourceDetailPanel.transform, "资源详情", 28, FontStyles.Bold);
+
+            var resources = gameManager.resourceSystem.GetAllResources();
+            foreach (var kvp in resources)
+            {
+                int amount = kvp.Value;
+                int capacity = gameManager.resourceSystem.GetCapacity(kvp.Key);
+                int netChange = gameManager.resourceSystem.GetNetDailyChange(kvp.Key);
+                int daysRemaining = gameManager.resourceSystem.GetEstimatedDaysRemaining(kvp.Key);
+
+                string daysStr = daysRemaining < 0
+                    ? "∞"
+                    : (daysRemaining == 0 ? "不足1天" : $"{daysRemaining}天");
+
+                string changeStr = netChange >= 0 ? $"+{netChange}" : netChange.ToString();
+
+                var row = CreateText(resourceDetailPanel.transform,
+                    $"{kvp.Key.GetDisplayName()}  {amount}/{capacity}   ({changeStr}/天)   剩余 {daysStr}", 20);
+                row.GetComponent<RectTransform>().sizeDelta = new Vector2(300, 34);
+            }
         }
         
         private void RefreshLogPanel()
